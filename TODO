@@ -31,3 +31,7 @@ Goal #1 ...
 
 
 	Should our Moo extensions & filters be moved into another library so we can use them with NVS?  I think so?
+
+We NEED nvs to be able to add a reference to source files from wherever (eg. a package!) ... that's our primary thing that we need for now!
+
+SCM integration!  git and svn ...
