@@ -1,5 +1,5 @@
 using System;
-namespace NVS.Specs
+namespace CsharpLibrary
 {
 	public class MyClass
 	{

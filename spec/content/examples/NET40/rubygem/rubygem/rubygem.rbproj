@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{f699ac26-7632-4753-97b6-ed12d123397c}</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <DisableDebugging>true</DisableDebugging>
+    <RubyApplicationType>RSpec</RubyApplicationType>
+    <Launcher>Spec</Launcher>
+    <AssemblyName>rubygem</AssemblyName>
+    <Name>rubygem</Name>
+    <RootNamespace>rubygem</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="CHANGELOG" />
+    <Content Include="LICENSE" />
+    <Content Include="README" />
+    <Content Include="rubygem.gemspec" />
+    <Content Include="test\rubygem_spec.rb" />
+    <Content Include="lib\rubygem.rb" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\rtaylor\projects\remi\nvs\NET40\rubygem\rubygem\lib" />
+    <None Include="C:\Users\rtaylor\projects\remi\nvs\NET40\rubygem\rubygem\test" />
+    <None Include="CHANGELOG" />
+    <None Include="lib\rubygem.rb" />
+    <None Include="LICENSE" />
+    <None Include="README" />
+    <None Include="rubygem.gemspec" />
+    <None Include="test\rubygem_spec.rb" />
+  </ItemGroup>
+</Project>
