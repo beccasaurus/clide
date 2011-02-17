@@ -1,1 +1,5 @@
 *.sw?
+*.pidb
+*.suo
+bin
+obj
