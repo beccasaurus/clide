@@ -1,0 +1,33 @@
+NVS TODO ...
+
+	Move FrameworkName from MooGet --> NVS.  Any project/framework related stuff can live in NVS
+
+	PP generation will be in here too, which Moo can make good use of ...
+
+	Also move Moo's CLI extension framework out so we can use it with NVS ...
+
+Goal #1 ...
+
+	# note, check out `rails help new`
+
+	nvs new FooBar --template=X
+
+		or use some build in templates ..
+
+			nvs new FooBar -c|--console -w|--windows -l|--library
+
+
+	so ...
+
+		nvs new FooBar --console
+		cd FooBar
+		nvs build
+		./bin/Debug/FooBar
+
+
+		nvs test|spec ? ... ideal ... yes ... 
+
+		SpecFlow plugin.
+
+
+	Should our Moo extensions & filters be moved into another library so we can use them with NVS?  I think so?
