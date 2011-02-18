@@ -1,0 +1,3 @@
+[submodule "lib/IFile"]
+	path = lib/IFile
+	url = git://github.com/remi/IFile.git
