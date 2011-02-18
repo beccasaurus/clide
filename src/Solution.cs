@@ -2,13 +2,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using IO.Interfaces;
 
 namespace NVS {
 
-	// TODO implmenet IFile?  Need to make a project and pull in IFile and IDirectory
-
 	/// <summary>Represents a .sln solution file</summary>
-	public class Solution {
+	public class Solution : IFile {
 
 		public Solution() {}
 		public Solution(string path) {
@@ -48,8 +47,8 @@ namespace NVS {
 		void Parse() {
 			if (this.DoesNotExist()) return;
 
-			Sections = new List<Section>();
-			Projects = new List<Project>();
+			_sections = new List<Section>();
+			_projects = new List<Project>();
 
 			foreach (var line in this.Lines())
 				if (line.StartsWith("Project("))
@@ -67,7 +66,7 @@ namespace NVS {
 
 		// GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		Section SectionFromLine(string line) {
-
+			return new Section();
 		}
 	}
 }
