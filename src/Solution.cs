@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using IO.Interfaces;
 
 namespace NVS {
@@ -17,6 +18,9 @@ namespace NVS {
 		string _path;
 		List<Project> _projects;
 		List<Section> _sections;
+
+		readonly Regex _getSectionName   = new Regex(@"GlobalSection\(([^\)]+)\)");
+		readonly Regex _getStuffInQuotes = new Regex("\"([^\"]*)\"");
 
 		/// <summary>The file system path to this .sln file</summary>
 		public virtual string Path {
@@ -55,18 +59,37 @@ namespace NVS {
 					Projects.Add(ProjectFromLine(line));
 				else if (line.TrimStart().StartsWith("GlobalSection("))
 					Sections.Add(SectionFromLine(line));
-				else if (Sections.Count > 0 && ! line.TrimStart().StartsWith("EndGlobal"))
-					Sections.Last().Text += "\n" + line;
+				else if (Sections.Count > 0 && ! string.IsNullOrEmpty(line) && ! line.TrimStart().StartsWith("EndGlobal")) {
+					var clean     = line.TrimStart('\t').TrimEnd('\r').TrimEnd('\n'); //Replace("\r", "").Replace("\n", "");
+					var section   = Sections.Last();
+					section.Text += string.IsNullOrEmpty(section.Text) ? clean : "\n" + clean;
+				}
 		}
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
 		Project ProjectFromLine(string line) {
-			return new Project();
+			var stuffInQuotes = GetStuffInQuotes(line);
+			var name          = stuffInQuotes[1];
+			var path          = stuffInQuotes[2];
+			var guid          = new Guid(stuffInQuotes[3].TrimStart('{').TrimEnd('}'));
+
+			return new Project { Name = name, Path = path, Id = guid };
 		}
 
 		// GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		Section SectionFromLine(string line) {
-			return new Section();
+			var name = _getSectionName.Match(line).Groups[1].ToString();
+			var pre  = line.Contains("= preSolution");
+
+			return new Section { Name = name, PreSolution = pre };
+		}
+
+		// Given ... "Foo", "Bar" ... This would return new List<string>{ "Foo", "Bar" }
+		List<string> GetStuffInQuotes(string text) {
+			var stuff = new List<string>();
+			foreach (Match match in _getStuffInQuotes.Matches(text))
+				stuff.Add(match.Groups[1].ToString()); // get the Regex capture for this match
+			return stuff;	
 		}
 	}
 }
