@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using IO.Interfaces;
+using NVS.Extensions;
 
 namespace NVS {
 
@@ -19,8 +20,10 @@ namespace NVS {
 		List<Project> _projects;
 		List<Section> _sections;
 
-		readonly Regex _getSectionName   = new Regex(@"GlobalSection\(([^\)]+)\)");
-		readonly Regex _getStuffInQuotes = new Regex("\"([^\"]*)\"");
+		static readonly Regex _getSectionName         = new Regex(@"GlobalSection\(([^\)]+)\)");
+		static readonly Regex _getStuffInQuotes       = new Regex("\"([^\"]*)\"");
+		static readonly Regex _getFormatVersion       = new Regex(@"Microsoft Visual Studio Solution File, Format Version ([\d\.]+)");
+		static readonly Regex _getVisualStudioVersion = new Regex(@"# Visual Studio (\d+)");
 
 		/// <summary>The file system path to this .sln file</summary>
 		public virtual string Path {
@@ -29,8 +32,20 @@ namespace NVS {
 				_projects = null;
 				_sections = null;
 				_path     = value;
+				Parse();
 			}
 		}
+
+		/// <summary>Sets the Path without resetting Projects/Sections and re-parsing the Solution</summary>
+		public virtual void SetPath(string path) {
+			_path = path;
+		}
+
+		/// <summary>The version of this sln's format, eg. 11.00 (for VS 2010)</summary>
+		public virtual string FormatVersion { get; set; }
+
+		/// <summary>The Visual Studio version for this sln, eg. 2010</summary>
+		public virtual string VisualStudioVersion { get; set; }
 
 		/// <summary>All of the Project found in this Solution</summary>
 		public virtual List<Project> Projects {
@@ -48,14 +63,22 @@ namespace NVS {
 			}
 		}
 
-		void Parse() {
-			if (this.DoesNotExist()) return;
+		// 
+		// Microsoft Visual Studio Solution File, Format Version 10.00
+		// # Visual Studio 2008
+		// Project(...
+		public virtual Solution Parse() {
+			if (this.DoesNotExist()) return this;
 
 			_sections = new List<Section>();
 			_projects = new List<Project>();
 
 			foreach (var line in this.Lines())
-				if (line.StartsWith("Project("))
+				if (line.StartsWith("Microsoft Visual Studio Solution File"))
+					FormatVersion = GetFormatVersionFromLine(line);
+				else if (line.StartsWith("# Visual Studio"))
+					VisualStudioVersion = GetVisualStudioVersionFromLine(line);
+				else if (line.StartsWith("Project("))
 					Projects.Add(ProjectFromLine(line));
 				else if (line.TrimStart().StartsWith("GlobalSection("))
 					Sections.Add(SectionFromLine(line));
@@ -64,16 +87,19 @@ namespace NVS {
 					var section   = Sections.Last();
 					section.Text += string.IsNullOrEmpty(section.Text) ? clean : "\n" + clean;
 				}
+
+			return this;
 		}
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
 		Project ProjectFromLine(string line) {
-			var stuffInQuotes = GetStuffInQuotes(line);
-			var name          = stuffInQuotes[1];
-			var path          = stuffInQuotes[2];
-			var guid          = new Guid(stuffInQuotes[3].TrimStart('{').TrimEnd('}'));
+			var quotedStuff = GetStuffInQuotes(line);
+			var type        = quotedStuff[0].ToGuid();
+			var name        = quotedStuff[1];
+			var path        = quotedStuff[2];
+			var guid        = quotedStuff[3].ToGuid();
 
-			return new Project { Name = name, Path = path, Id = guid };
+			return new Project { Name = name, Path = path, Id = guid, ProjectTypeId = type };
 		}
 
 		// GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -90,6 +116,14 @@ namespace NVS {
 			foreach (Match match in _getStuffInQuotes.Matches(text))
 				stuff.Add(match.Groups[1].ToString()); // get the Regex capture for this match
 			return stuff;	
+		}
+
+		string GetFormatVersionFromLine(string line) {
+			return _getFormatVersion.Match(line).Groups[1].ToString();
+		}
+
+		string GetVisualStudioVersionFromLine(string line) {
+			return _getVisualStudioVersion.Match(line).Groups[1].ToString();
 		}
 	}
 }
