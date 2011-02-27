@@ -25,7 +25,7 @@ namespace NVS.Specs {
 			sln1.Projects.Count.ShouldEqual(1);
 			sln1.Projects.First().ShouldHaveProperties(new {
 				Name          = "WebApplication1",
-				Path          = @"WebApplication1\WebApplication1.csproj",
+				RelativePath  = @"WebApplication1\WebApplication1.csproj",
 				Id            = Guid.Parse("11FC4B99-DB31-4D0C-A472-4F794098F900"),
 				ProjectTypeId = Guid.Parse("FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
 			});
@@ -34,7 +34,7 @@ namespace NVS.Specs {
 			sln2.Projects.Count.ShouldEqual(1);
 			sln2.Projects.First().ShouldHaveProperties(new {
 				Name          = "CsharpConsoleProject",
-				Path          = @"CsharpConsoleProject\CsharpConsoleProject.csproj",
+				RelativePath  = @"CsharpConsoleProject\CsharpConsoleProject.csproj",
 				Id            = Guid.Parse("DE8DC42E-C399-4367-8E34-735B7F9AA54C"),
 				ProjectTypeId = Guid.Parse("FAE04EC0-301F-11D3-BF4B-00C04F79EFBC")
 			});

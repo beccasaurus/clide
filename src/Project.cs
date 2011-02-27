@@ -3,7 +3,9 @@ using System.IO;
 using System.Xml;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using IO.Interfaces;
+using FluentXml;
 
 namespace NVS {
 
@@ -32,7 +34,7 @@ namespace NVS {
 			Parse();
 		}
 
-		string _path;
+		string _relativePath;
 		XmlDocument _doc;
 		List<Configuration> _configurations;
 
@@ -42,8 +44,20 @@ namespace NVS {
 		/// <summary>The project's ProjectType Guid (nearly always the same)</summary>
 		public virtual Guid? ProjectTypeId { get; set; }
 
-		/// <summary>The file system path to this project file.  May be relative (typically to a Solution)</summary>
-		public virtual string Path { get { return _path; } set { _path = NormalizePath(value); } }
+		/// <summary>The file system path to this project file, relative to the Solution.</summary>
+		public virtual string RelativePath {
+			get { return _relativePath; }
+			set { 
+				if (File.Exists(value)) Path = value;
+				_relativePath = NormalizePath(value);
+			}
+		}
+
+		/// <summary>The real file system path to this project file.</summary>
+		/// <remarks>
+		/// May be relative (typically to a Solution) but this is a *real* system path.  It is not normalized.
+		/// </remarks>
+		public virtual string Path { get; set; }
 
 		/// <summary>This project's "Name."  If this project has a Solution, this is set by that.  Else we use the project's AssemblyName.</summary>
 		public virtual string Name { get; set; }
@@ -61,15 +75,29 @@ namespace NVS {
 			get { if (_configurations == null) Parse(); return _configurations; }
 		}
 
+		static readonly Regex _getConfigurationNameAndPlatform = new Regex(@"==\s*'(\w+)\|(\w+)'");
+
 		public virtual Project Parse() {
 			_doc            = new XmlDocument();
 			_configurations = new List<Configuration>();
-			
+
 			if (this.DoesNotExist()) return this;
 
 			Doc.Load(Path);
 
-			// ... i want to pull in my XmlNode and XmlDocument extensions ...
+			// Each "Configuration" is defined by a PropertyGroup with a Condition, eg:
+			// <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+			foreach (var group in Doc.Nodes("PropertyGroup")) {
+				var condition = group.Attr("Condition");
+				if (condition == null) continue;
+
+				var match = _getConfigurationNameAndPlatform.Match(condition);
+				if (match.Success)
+					Configurations.Add(new Configuration {
+						Name     = match.Groups[1].ToString(),
+						Platform = match.Groups[2].ToString()
+					});
+			}
 
 			return this;
 		}

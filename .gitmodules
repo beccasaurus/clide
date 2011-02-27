@@ -1,3 +1,6 @@
 [submodule "lib/IO.Interfaces"]
 	path = lib/IO.Interfaces
 	url = git://github.com/remi/IO.Interfaces.git
+[submodule "lib/FluentXml"]
+	path = lib/FluentXml
+	url = git://github.com/remi/FluentXml.git

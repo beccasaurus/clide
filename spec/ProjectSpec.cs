@@ -20,7 +20,7 @@ namespace NVS.Specs {
 		}
 
 		[Test]
-		public void Path_is_normalized_to_use_backslashes_instead_of_forward_slashes() {
+		public void RelativePath_is_normalized_to_use_backslashes_instead_of_forward_slashes() {
 			var paths = new Dictionary<string,string> {
 				{ "foo",          "foo"           },
 				{ "foo/bar",      "foo\\bar"      },
@@ -31,7 +31,7 @@ namespace NVS.Specs {
 			};
 
 			foreach (var path in paths)
-				new Project { Path = path.Key }.Path.ShouldEqual(path.Value);
+				new Project { RelativePath = path.Key }.RelativePath.ShouldEqual(path.Value);
 		}
 
 		[Test][Ignore]

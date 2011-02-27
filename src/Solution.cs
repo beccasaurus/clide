@@ -127,7 +127,7 @@ namespace NVS {
 			var path        = quotedStuff[2];
 			var guid        = quotedStuff[3].ToGuid();
 
-			return new Project { Name = name, Path = path, Id = guid, ProjectTypeId = type };
+			return new Project { Name = name, RelativePath = path, Id = guid, ProjectTypeId = type };
 		}
 
 		// GlobalSection(ProjectConfigurationPlatforms) = postSolution

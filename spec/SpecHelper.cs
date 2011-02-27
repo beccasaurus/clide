@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace NVS.Specs {
 
-	/// <summary>Global Before and After Hooks for all NVC.Specs</summary>
+	/// <summary>Global Before and After Hooks for all NVS.Specs</summary>
 	[SetUpFixture]
 	public class SpecsSetup {
 
