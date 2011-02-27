@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using FluentXml;
 
-namespace NVS.Specs {
+namespace Mack.Specs {
 
 	[TestFixture]
 	public class ProjectSpec : Spec {
@@ -179,7 +179,7 @@ namespace NVS.Specs {
 
 		[Test][Ignore]
 		public void can_read_low_level_global_property_groups() {
-			// For NVS, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
+			// For Mack, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
 			//
 			// Really, we just care about making it really easy to EDIT these project files.  So we need to make it 
 			// easy to modify the "typical" Debug/Release/etc property groups

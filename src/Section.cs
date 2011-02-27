@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace NVS {
+namespace Mack {
 
 	/// <summary>Represents a 'GlobalSection' in a Solution .sln file</summary>
 	public class Section {

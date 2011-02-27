@@ -8,7 +8,7 @@ using IO.Interfaces;
 
 // For now, this is miscellaneous extension methods ... we'll split it out into more files, as needed
 
-namespace NVS.Extensions {
+namespace Mack.Extensions {
 
 	public static class StringExtensions {
 

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
-namespace NVS.Specs {
+namespace Mack.Specs {
 
 	[TestFixture]
 	public class SolutionSpec : Spec {

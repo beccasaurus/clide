@@ -1,6 +1,6 @@
 using System;
 
-namespace NVS {
+namespace Mack {
 
 	/// <summary>Represents a Project's configuration, eg. "Debug|x86"</summary>
 	/// <remarks>

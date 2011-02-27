@@ -5,9 +5,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using IO.Interfaces;
-using NVS.Extensions;
+using Mack.Extensions;
 
-namespace NVS {
+namespace Mack {
 
 	/// <summary>Represents a .sln solution file</summary>
 	public class Solution : IFile {

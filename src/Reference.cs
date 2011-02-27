@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace NVS {
+namespace Mack {
 
 	/// <summary>Represents a reference to an Assembly in a Project's configuration</summary>
 	public class Reference {
