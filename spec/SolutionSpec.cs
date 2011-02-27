@@ -83,6 +83,51 @@ namespace NVS.Specs {
 			sln2.Sections[2].Text.ShouldEqual(@"StartupItem = CsharpConsoleProject\CsharpConsoleProject.csproj");
 		}
 
+		[Test]
+		public void can_print_out_the_sln_text_for_a_blank_solution() {
+			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+			sln.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Global
+				EndGlobal
+				".TrimLeadingTabs(4));
+		}
+
+		[Test]
+		public void can_print_out_the_sln_text_for_a_solution_with_one_section() {
+			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+			sln.Add(new Section { Name = "SolutionProperties", PreSolution = true, Text = "HideSolutionNode = FALSE" });
+			sln.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Global
+					GlobalSection(SolutionProperties) = preSolution
+						HideSolutionNode = FALSE
+					EndGlobalSection
+				EndGlobal
+				".TrimLeadingTabs(4));
+		}
+
+		[Test]
+		public void can_print_out_the_sln_text_for_a_solution_with_one_project() {
+			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+			sln.Add(new Project { Name = "CoolProject", Path = "src\\CoolProject.csproj", Id = new Guid("5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E") });
+			sln.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""CoolProject"", ""src\CoolProject.csproj"", ""{5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E}""
+				EndProject
+				Global
+				EndGlobal
+				".TrimLeadingTabs(4));
+		}
+
+		[Test][Ignore]
+		public void can_print_out_the_sln_text_for_a_solution_with_projects_and_sections() {
+			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+		}
+
 		[Test][Ignore]
 		public void can_save_a_new_solution() {
 			var solution = new Solution(Temp("Foo.sln"));

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -11,9 +12,13 @@ namespace NVS {
 	/// <summary>Represents a .sln solution file</summary>
 	public class Solution : IFile {
 
+		/// <summary>Empty constructor for creating a fresh Solution</summary>
 		public Solution() {}
+
+		/// <summary>Create a Solution with the given Path.  If the file is found, we will parse it.</summary>
 		public Solution(string path) {
 			Path = path;
+			Parse();
 		}
 
 		string _path;
@@ -26,20 +31,7 @@ namespace NVS {
 		static readonly Regex _getVisualStudioVersion = new Regex(@"# Visual Studio (\d+)");
 
 		/// <summary>The file system path to this .sln file</summary>
-		public virtual string Path {
-			get { return _path; }
-			set {
-				_projects = null;
-				_sections = null;
-				_path     = value;
-				Parse();
-			}
-		}
-
-		/// <summary>Sets the Path without resetting Projects/Sections and re-parsing the Solution</summary>
-		public virtual void SetPath(string path) {
-			_path = path;
-		}
+		public virtual string Path { get; set; }
 
 		/// <summary>The version of this sln's format, eg. 11.00 (for VS 2010)</summary>
 		public virtual string FormatVersion { get; set; }
@@ -63,15 +55,26 @@ namespace NVS {
 			}
 		}
 
+		/// <summary>Adds the provided Project and returns this Solution (for a fluent interface)</summary>
+		public virtual Solution Add(Project project) { Projects.Add(project); return this; }
+
+		/// <summary>Adds the provided Section and returns this Solution (for a fluent interface)</summary>
+		public virtual Solution Add(Section section) { Sections.Add(section); return this; }
+
 		// 
 		// Microsoft Visual Studio Solution File, Format Version 10.00
 		// # Visual Studio 2008
 		// Project(...
+		//
+		/// <summary>If this project's Path exists, we read and parse the file</summary>
+		/// <remarks>
+		/// This will reset the project's Sections and Projects.
+		/// </remarks>
 		public virtual Solution Parse() {
-			if (this.DoesNotExist()) return this;
-
 			_sections = new List<Section>();
 			_projects = new List<Project>();
+
+			if (this.DoesNotExist()) return this;
 
 			foreach (var line in this.Lines())
 				if (line.StartsWith("Microsoft Visual Studio Solution File"))
@@ -90,6 +93,37 @@ namespace NVS {
 
 			return this;
 		}
+
+		/// <summary>Returns the text for this solution file.</summary>
+		/// <remarks>
+		/// This is generated.  It does not read from the saved file (nor does it require a saved file).
+		/// </remarks>
+		public virtual string ToText() {
+			var builder = new StringBuilder();
+
+			builder.AppendLine();
+			builder.AppendLine("Microsoft Visual Studio Solution File, Format Version {0}", FormatVersion);
+			builder.AppendLine("# Visual Studio {0}", VisualStudioVersion);
+			foreach (var project in Projects) {
+				builder.AppendLine("Project({0}) = {1}, {2}, {3}", 
+						project.ProjectTypeId.QuotedWithCurlies(),
+						project.Name.Quoted(),
+						project.Path.Quoted(),
+						project.Id.QuotedWithCurlies());
+				builder.AppendLine("EndProject");
+			}
+			builder.AppendLine("Global");
+			foreach (var section in Sections) {
+				builder.AppendLine("\tGlobalSection({0}) = {1}", section.Name, section.PreSolution ? "preSolution" : "postSolution");
+				builder.AppendLine("\t\t{0}", section.Text);
+				builder.AppendLine("\tEndGlobalSection");
+			}
+			builder.AppendLine("EndGlobal");
+
+			return builder.ToString();
+		}
+
+	// private
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
 		Project ProjectFromLine(string line) {
