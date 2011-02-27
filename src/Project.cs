@@ -83,7 +83,7 @@ namespace NVS {
 			get { if (_references == null) Parse(); return _references; }
 		}
 
-		/// <summary>Adds a reference to </summary>
+		/// <summary>Adds reference</summary>
 		public virtual Project AddReference(Reference reference) {
 			// TODO fix!  right now, to make sure this works, we add a new item group for each new reference ...
 
@@ -99,6 +99,31 @@ namespace NVS {
 
 			// add to our local references
 			References.Add(reference);
+
+			return this;
+		}
+
+		/// <summary>Remove a reference</summary>
+		public virtual Project RemoveReference(string name) {
+			var reference = References.FirstOrDefault(r => r.FullName == name);
+			if (reference == null)
+				reference = References.FirstOrDefault(r => r.Name == name); // try short name, if no full match
+			return RemoveReference(reference);
+		}
+
+		/// <summary>Remove a reference</summary>
+		public virtual Project RemoveReference(Reference reference) {
+			if (reference == null) return this;
+
+			// find Reference node where Include= the reference's full path and remove it from the Doc
+			var node = Doc.Nodes("ItemGroup Reference").FirstOrDefault(n => 
+				n.Attr("Include") != null && n.Attr("Include") == reference.FullName
+			);
+
+			if (node != null) {
+				node.ParentNode.RemoveChild(node);
+				References.Remove(reference);
+			}
 
 			return this;
 		}
@@ -155,7 +180,8 @@ namespace NVS {
 	// private
 
 		/// <summary>.sln and .csproj files seem to use the '\' path separator, regardless of platform.  we currently replace ALL '/' with '\'</summary>
-		static string NormalizePath(string path) {
+		public static string NormalizePath(string path) {
+			if (path == null) return null;
 			return path.Replace("/", "\\");
 		}
 	}

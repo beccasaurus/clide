@@ -88,12 +88,50 @@ namespace NVS.Specs {
 			readAgain.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should", "System.Xml" });
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_references_with_HintPath() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.References.Count.ShouldEqual(4);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
+
+			project.AddReference(new Reference { FullName = "Something", HintPath = "../lib/foo/Something.dll" });
+
+			// our References get updated
+			project.References.Count.ShouldEqual(5);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should", "Something" });
+
+			// if we re-parse, from scratch, we can't see it yet ...
+			var readAgain = new Project(Temp("FluentXml.Specs.csproj"));
+			readAgain.References.Count.ShouldEqual(4);
+
+			project.Save(); // <--- explicitly need to Save()
+
+			// but, if we Save(), then re-read ...
+			readAgain = new Project(Temp("FluentXml.Specs.csproj"));
+			readAgain.References.Count.ShouldEqual(5);
+			readAgain.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should", "Something" });
+			readAgain.References.Last().HintPath.ShouldEqual(@"..\lib\foo\Something.dll");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_remove_references() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.References.Count.ShouldEqual(4);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
+
+			project.RemoveReference("System.Core");
+			project.Save();
+
+			project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.References.Count.ShouldEqual(3);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "nunit.framework", "NUnit.Should" });
+
+			project.RemoveReference("nunit.framework");
+			project.Save();
+
+			project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.References.Count.ShouldEqual(2);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "NUnit.Should" });
 		}
 
 		[Test][Ignore]
