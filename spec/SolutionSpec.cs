@@ -123,9 +123,27 @@ namespace NVS.Specs {
 				".TrimLeadingTabs(4));
 		}
 
-		[Test][Ignore]
-		public void can_print_out_the_sln_text_for_a_solution_with_projects_and_sections() {
+		[Test]
+		public void can_print_out_the_sln_text_for_a_solution_with_multiple_projects_and_sections() {
 			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+			sln.Add(new Section { Name = "SolutionConfigurationPlatforms", PreSolution  = true });
+			sln.Add(new Section { Name = "ProjectConfigurationPlatforms",  PostSolution = true });
+			sln.Add(new Project { Name = "CoolProject", Path = "src\\CoolProject.csproj", Id = new Guid("5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E") });
+			sln.Add(new Project { Name = "FooProject", Path = "src\\FooProject.csproj", Id = new Guid("F68046A5-0C57-4765-B6D8-4F1E1140E991") });
+			sln.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""CoolProject"", ""src\CoolProject.csproj"", ""{5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E}""
+				EndProject
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""FooProject"", ""src\FooProject.csproj"", ""{F68046A5-0C57-4765-B6D8-4F1E1140E991}""
+				EndProject
+				Global
+					GlobalSection(SolutionConfigurationPlatforms) = preSolution
+					EndGlobalSection
+					GlobalSection(ProjectConfigurationPlatforms) = postSolution
+					EndGlobalSection
+				EndGlobal
+				".TrimLeadingTabs(4));
 		}
 
 		[Test][Ignore]
@@ -157,19 +175,7 @@ namespace NVS.Specs {
 		}
 
 		[Test][Ignore]
-		public void can_remove_a_project() {
-		}
-
-		[Test][Ignore]
-		public void can_edit_a_project() {
-		}
-
-		[Test][Ignore]
-		public void can_edit_sections() {
-		}
-
-		[Test][Ignore]
-		public void can_reload_incase_changes_were_made_on_the_file_systel() {
+		public void can_reload_incase_changes_were_made_on_the_file_system() {
 		}
 	}
 }

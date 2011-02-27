@@ -41,18 +41,12 @@ namespace NVS {
 
 		/// <summary>All of the Project found in this Solution</summary>
 		public virtual List<Project> Projects {
-			get {
-				if (_projects == null) Parse();
-				return _projects;
-			}
+			get { if (_projects == null) Parse(); return _projects; }
 		}
 
 		/// <summary>All of the GlobalSection sections found in this Solution</summary>
 		public virtual List<Section> Sections {
-			get {
-				if (_sections == null) Parse();
-				return _sections;
-			}
+			get { if (_sections == null) Parse(); return _sections; }
 		}
 
 		/// <summary>Adds the provided Project and returns this Solution (for a fluent interface)</summary>
@@ -115,7 +109,7 @@ namespace NVS {
 			builder.AppendLine("Global");
 			foreach (var section in Sections) {
 				builder.AppendLine("\tGlobalSection({0}) = {1}", section.Name, section.PreSolution ? "preSolution" : "postSolution");
-				builder.AppendLine("\t\t{0}", section.Text);
+				if (! string.IsNullOrEmpty(section.Text)) builder.AppendLine("\t\t{0}", section.Text);
 				builder.AppendLine("\tEndGlobalSection");
 			}
 			builder.AppendLine("EndGlobal");
