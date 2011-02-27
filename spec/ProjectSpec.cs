@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -7,6 +8,12 @@ namespace NVS.Specs {
 
 	[TestFixture]
 	public class ProjectSpec : Spec {
+
+		[SetUp]
+		public void Before() {
+			base.BeforeEach();
+			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
+		}
 
 		[Test]
 		public void new_projects_create_their_own_Id_if_Id_not_set() {
@@ -32,6 +39,40 @@ namespace NVS.Specs {
 
 			foreach (var path in paths)
 				new Project { RelativePath = path.Key }.RelativePath.ShouldEqual(path.Value);
+		}
+
+		[Test]
+		public void can_read_references() {
+			var project    = new Project(Temp("FluentXml.Specs.csproj"));
+			var references = project.References;
+
+			references.Count.ShouldEqual(4);
+
+			references[0].Name.ShouldEqual("System");
+
+			references[1].Name.ShouldEqual("System.Core");
+
+			references[2].Name.ShouldEqual("nunit.framework");
+			references[2].FullName.ShouldEqual("nunit.framework, Version=2.5.8.10295, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77");
+			references[2].SpecificVersion.Should(Be.False);
+			references[2].HintPath.ShouldEqual(@"..\lib\nunit.framework.dll");
+
+			references[3].Name.ShouldEqual("NUnit.Should");
+			references[3].FullName.ShouldEqual("NUnit.Should, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null");
+			references[3].SpecificVersion.Should(Be.False);
+			references[3].HintPath.ShouldEqual(@"..\lib\NUnit.Should.dll");
+		}
+
+		[Test][Ignore]
+		public void can_add_references() {
+		}
+
+		[Test][Ignore]
+		public void can_remove_references() {
+		}
+
+		[Test][Ignore]
+		public void can_read_and_modify_files_to_compile() {
 		}
 
 		[Test][Ignore]

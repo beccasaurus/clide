@@ -19,6 +19,8 @@ namespace NVS {
 
 		public static readonly Guid TypicalProjectTypeGuid = new Guid("FAE04EC0-301F-11D3-BF4B-00C04F79EFBC");
 
+		static readonly Regex _getConfigurationNameAndPlatform = new Regex(@"==\s*'(\w+)\|(\w+)'");
+
 		/// <summary>Empty constructor.</summary>
 		/// <remarks>
 		/// Sets some defaults, eg. Generates a Guid for Id and uses the typical ProjectTypeId
@@ -37,6 +39,7 @@ namespace NVS {
 		string _relativePath;
 		XmlDocument _doc;
 		List<Configuration> _configurations;
+		List<Reference> _references;
 
 		/// <summary>This project's ProjectGuid ID</summary>
 		public virtual Guid? Id { get; set; }
@@ -70,16 +73,24 @@ namespace NVS {
 			get { if (_doc == null) Parse(); return _doc; }
 		}
 
-		/// <summary>All of this project's configurations (eg. "Debug|x86")</summary>
+		/// <summary>All of this project's configurations (eg. "Debug|x86").  This is READ-ONLY.</summary>
 		public virtual List<Configuration> Configurations {
 			get { if (_configurations == null) Parse(); return _configurations; }
 		}
 
-		static readonly Regex _getConfigurationNameAndPlatform = new Regex(@"==\s*'(\w+)\|(\w+)'");
+		/// <summary>All of this project's references.  This is READ-ONLY.</summary>
+		public virtual List<Reference> References {
+			get { if (_references == null) Parse(); return _references; }
+		}
 
+		/// <summary>Parse (or re-Parse) this project file (if it exists).</summary>
+		/// <remarks>
+		/// This re-reads the file and re-parses references, configurations, etc.
+		/// </remarks>
 		public virtual Project Parse() {
 			_doc            = new XmlDocument();
 			_configurations = new List<Configuration>();
+			_references     = new List<Reference>();
 
 			if (this.DoesNotExist()) return this;
 
@@ -97,6 +108,18 @@ namespace NVS {
 						Name     = match.Groups[1].ToString(),
 						Platform = match.Groups[2].ToString()
 					});
+			}
+
+			// Get each <Reference> node under an <ItemGroup>
+			foreach (var node in Doc.Nodes("ItemGroup Reference")) {
+				var version   = node.Node("SpecificVersion").Text();
+				var hintPath  = node.Node("HintPath").Text();
+				var reference = new Reference {
+					FullName        = node.Attr("Include"),
+					HintPath        = hintPath,
+					SpecificVersion = (version == null) ? false : bool.Parse(version)
+				};
+				References.Add(reference);
 			}
 
 			return this;
