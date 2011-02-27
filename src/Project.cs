@@ -83,6 +83,33 @@ namespace NVS {
 			get { if (_references == null) Parse(); return _references; }
 		}
 
+		/// <summary>Adds a reference to </summary>
+		public virtual Project AddReference(Reference reference) {
+			// TODO fix!  right now, to make sure this works, we add a new item group for each new reference ...
+
+			var group = Doc.Node("Project").NewNode("ItemGroup");
+			var node  = group.NewNode("Reference");
+
+			node.Attr("Include", reference.FullName);
+
+			if (reference.HintPath != null) {
+				node.NewNode("SpecificVersion").Text(reference.SpecificVersion.ToString());
+				node.NewNode("HintPath").Text(reference.HintPath);
+			}
+
+			// add to our local references
+			References.Add(reference);
+
+			return this;
+		}
+
+		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>
+		public virtual Project Save() {
+			Doc.SaveToFile(Path);
+
+			return this;
+		}
+
 		/// <summary>Parse (or re-Parse) this project file (if it exists).</summary>
 		/// <remarks>
 		/// This re-reads the file and re-parses references, configurations, etc.

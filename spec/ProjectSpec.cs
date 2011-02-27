@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using NUnit.Framework;
+using FluentXml;
 
 namespace NVS.Specs {
 
@@ -63,8 +64,32 @@ namespace NVS.Specs {
 			references[3].HintPath.ShouldEqual(@"..\lib\NUnit.Should.dll");
 		}
 
+		[Test]
+		public void can_add_references_without_HintPath() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.References.Count.ShouldEqual(4);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
+
+			project.AddReference(new Reference { FullName = "System.Xml" });
+
+			// our References get updated
+			project.References.Count.ShouldEqual(5);
+			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should", "System.Xml" });
+
+			// if we re-parse, from scratch, we can't see it yet ...
+			var readAgain = new Project(Temp("FluentXml.Specs.csproj"));
+			readAgain.References.Count.ShouldEqual(4);
+
+			project.Save(); // <--- explicitly need to Save()
+
+			// but, if we Save(), then re-read ...
+			readAgain = new Project(Temp("FluentXml.Specs.csproj"));
+			readAgain.References.Count.ShouldEqual(5);
+			readAgain.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should", "System.Xml" });
+		}
+
 		[Test][Ignore]
-		public void can_add_references() {
+		public void can_add_references_with_HintPath() {
 		}
 
 		[Test][Ignore]
