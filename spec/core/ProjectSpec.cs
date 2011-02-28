@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using FluentXml;
 
-namespace Mack.Specs {
+namespace Clide.Specs {
 
 	[TestFixture]
 	public class ProjectSpec : Spec {
@@ -194,7 +194,7 @@ namespace Mack.Specs {
 
 		[Test][Ignore]
 		public void can_read_low_level_global_property_groups() {
-			// For Mack, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
+			// For Clide, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
 			//
 			// Really, we just care about making it really easy to EDIT these project files.  So we need to make it 
 			// easy to modify the "typical" Debug/Release/etc property groups

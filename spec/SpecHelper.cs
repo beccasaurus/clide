@@ -3,9 +3,9 @@ using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Mack.Specs {
+namespace Clide.Specs {
 
-	/// <summary>Global Before and After Hooks for all Mack.Specs</summary>
+	/// <summary>Global Before and After Hooks for all Clide.Specs</summary>
 	[SetUpFixture]
 	public class SpecsSetup {
 

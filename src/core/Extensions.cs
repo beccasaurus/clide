@@ -8,7 +8,7 @@ using IO.Interfaces;
 
 // For now, this is miscellaneous extension methods ... we'll split it out into more files, as needed
 
-namespace Mack.Extensions {
+namespace Clide.Extensions {
 
 	public static class StringExtensions {
 

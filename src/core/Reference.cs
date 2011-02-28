@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Mack {
+namespace Clide {
 
 	/// <summary>Represents a reference to an Assembly in a Project's configuration</summary>
 	public class Reference {

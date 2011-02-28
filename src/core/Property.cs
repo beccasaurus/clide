@@ -2,7 +2,7 @@ using System;
 using System.Xml;
 using FluentXml;
 
-namespace Mack {
+namespace Clide {
 
 	/// <summary>Represents a Property of a Project, eg. "OutputPath"</summary>
 	public class Property {
@@ -29,7 +29,7 @@ namespace Mack {
 		/// Properties may use variables in their text to reference environment variables, etc.
 		///
 		/// We don't currently support a way of getting the actual runtime value of properties, 
-		/// because Mack really doesn't care.  Mack helps you create/edit project files, not 
+		/// because Clide really doesn't care.  Clide helps you create/edit project files, not 
 		/// build/execute the project.
 		/// </remarks>
 		public virtual string Text {

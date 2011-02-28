@@ -1,6 +1,6 @@
 using System;
 
-namespace Mack {
+namespace Clide {
 
 	/// <summary>Represents a Project's configuration, eg. "Debug|x86"</summary>
 	/// <remarks>

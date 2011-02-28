@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using IO.Interfaces;
 using FluentXml;
 
-namespace Mack {
+namespace Clide {
 
 	/// <summary>Represents a project file, eg. a csproj file</summary>
 	/// <remarks>

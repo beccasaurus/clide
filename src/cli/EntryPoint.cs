@@ -1,7 +1,7 @@
 using System;
 using ConsoleRack;
 
-namespace Mack {
+namespace Clide {
 
 	/// <summary>Class with the Main() method for mack.exe</summary>
 	public static class EntryPoint {

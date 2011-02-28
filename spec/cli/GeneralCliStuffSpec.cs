@@ -1,9 +1,9 @@
 using System;
 using NUnit.Framework;
 using ConsoleRack;
-using Mack;
+using Clide;
 
-namespace Mack.Specs {
+namespace Clide.Specs {
 
 	// Once we have more CLI tests, we'll start organizing them
 
