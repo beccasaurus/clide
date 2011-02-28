@@ -21,6 +21,8 @@ namespace Mack {
 
 		static readonly Regex _getConfigurationNameAndPlatform = new Regex(@"==\s*'(\w+)\|(\w+)'");
 
+		public readonly Configuration GLOBAL;
+
 		/// <summary>Empty constructor.</summary>
 		/// <remarks>
 		/// Sets some defaults, eg. Generates a Guid for Id and uses the typical ProjectTypeId
@@ -28,10 +30,11 @@ namespace Mack {
 		public Project() {
 			Id            = Guid.NewGuid();
 			ProjectTypeId = Project.TypicalProjectTypeGuid;
+			GLOBAL        = new Configuration { Project = this, Name = "__GLOBAL__", Platform = "AnyCPU" };
 		}
 
 		/// <summary>Creates a Project with the given Path.  If the file is found, we will parse it.</summary>
-		public Project(string path) {
+		public Project(string path) : this() {
 			Path = path;
 			Parse();
 		}
@@ -40,6 +43,7 @@ namespace Mack {
 		XmlDocument _doc;
 		List<Configuration> _configurations;
 		List<Reference> _references;
+		IDictionary<Configuration,List<Property>> _properties;
 
 		/// <summary>This project's ProjectGuid ID</summary>
 		public virtual Guid? Id { get; set; }
@@ -81,6 +85,22 @@ namespace Mack {
 		/// <summary>All of this project's references.  This is READ-ONLY.</summary>
 		public virtual List<Reference> References {
 			get { if (_references == null) Parse(); return _references; }
+		}
+
+		/// <summary>All of this project's properties, grouped by Configuration</summary>
+		/// <remarks>
+		/// All properties with a null configuration are the "GlobalProperties"
+		/// </remarks>
+		public virtual IDictionary<Configuration,List<Property>> Properties {
+			get { if (_properties == null) Parse(); return _properties; }
+		}
+
+		/// <summary>Get all of this project's "Global" properties (gets these from Properties)</summary>
+		public virtual List<Property> GlobalProperties { get { return PropertiesForConfiguration(GLOBAL); } }
+
+		/// <summary>Returns the properties defined for the given Configuration.  If Configuration is null, we return GlobalProperties</summary>
+		public virtual List<Property> PropertiesForConfiguration(Configuration config) {
+			return Properties.ContainsKey(config) ? Properties[config] : new List<Property>();
 		}
 
 		/// <summary>Adds reference</summary>
@@ -140,29 +160,83 @@ namespace Mack {
 		/// This re-reads the file and re-parses references, configurations, etc.
 		/// </remarks>
 		public virtual Project Parse() {
-			_doc            = new XmlDocument();
-			_configurations = new List<Configuration>();
-			_references     = new List<Reference>();
+			Reset();
 
 			if (this.DoesNotExist()) return this;
 
 			Doc.Load(Path);
 
-			// Each "Configuration" is defined by a PropertyGroup with a Condition, eg:
-			// <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+			ParsePropertiesAndConfigurations();
+			ParseReferences();
+
+			return this;
+		}
+
+		/// <summary>.sln and .csproj files seem to use the '\' path separator, regardless of platform.  we currently replace ALL '/' with '\'</summary>
+		public static string NormalizePath(string path) {
+			if (path == null) return null;
+			return path.Replace("/", "\\");
+		}
+
+	// private
+
+		/// <summary>Resets local fields that should be reset whenever we want to re-parse this project</summary>
+		/// <remarks>
+		/// If any changes are pending and Save() has not been called, they will be lost!
+		/// </remarks>
+		void Reset() {
+			_doc            = new XmlDocument();
+			_configurations = new List<Configuration>();
+			_references     = new List<Reference>();
+			_properties     = new Dictionary<Configuration,List<Property>>();
+		}
+
+		// Each "Configuration" is defined by a PropertyGroup with a Condition, eg:
+		// <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+		// 
+		// These groups have properties in them, so we parse the 
+		// configurations and properties at the same time.
+		//
+		void ParsePropertiesAndConfigurations() {
 			foreach (var group in Doc.Nodes("PropertyGroup")) {
 				var condition = group.Attr("Condition");
-				if (condition == null) continue;
+
+				// If there is no Condition, then this group has "global" properties
+				if (condition == null) {
+					ParsePropertiesForConfigurationFromNode(GLOBAL, group);
+					continue;
+				}
 
 				var match = _getConfigurationNameAndPlatform.Match(condition);
-				if (match.Success)
-					Configurations.Add(new Configuration {
+				if (match.Success) {
+					var config = new Configuration {
+						Project  = this,
 						Name     = match.Groups[1].ToString(),
 						Platform = match.Groups[2].ToString()
-					});
+					};
+					Configurations.Add(config);
+					ParsePropertiesForConfigurationFromNode(config, group);
+				}
 			}
+		}
 
-			// Get each <Reference> node under an <ItemGroup>
+		// Given this Configuration and XmlNode (for PropertyGroup), create properties
+		void ParsePropertiesForConfigurationFromNode(Configuration config, XmlNode node) {
+			if (! Properties.ContainsKey(config))
+				Properties[config] = new List<Property>();
+
+			foreach (var propertyNode in node.Nodes())
+				Properties[config].Add(new Property {
+					Project       = this,
+					Configuration = config,
+					Name          = propertyNode.Name,
+					Text          = propertyNode.Text(),
+					Condition     = propertyNode.Attr("Condition")
+				});
+		}
+
+		// Get each <Reference> node under an <ItemGroup>
+		void ParseReferences() {
 			foreach (var node in Doc.Nodes("ItemGroup Reference")) {
 				var version   = node.Node("SpecificVersion").Text();
 				var hintPath  = node.Node("HintPath").Text();
@@ -173,16 +247,6 @@ namespace Mack {
 				};
 				References.Add(reference);
 			}
-
-			return this;
-		}
-
-	// private
-
-		/// <summary>.sln and .csproj files seem to use the '\' path separator, regardless of platform.  we currently replace ALL '/' with '\'</summary>
-		public static string NormalizePath(string path) {
-			if (path == null) return null;
-			return path.Replace("/", "\\");
 		}
 	}
 }

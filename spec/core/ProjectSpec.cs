@@ -173,8 +173,15 @@ namespace Mack.Specs {
 		public void can_read_properties_for_project_configurations() {
 		}
 
-		[Test][Ignore]
-		public void can_read_root_properties() {
+		[Test]
+		public void can_read_global_properties() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.GlobalProperties.Count.ShouldEqual(9);
+			project.GlobalProperties.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ 
+				"Configuration", "Platform", "ProductVersion", "SchemaVersion", "ProjectGuid", 
+				"OutputType", "RootNamespace", "AssemblyName", "TargetFrameworkVersion"
+			});
+			project.GlobalProperties.Last().Text.ShouldEqual("v4.0");
 		}
 
 		[Test][Ignore]
