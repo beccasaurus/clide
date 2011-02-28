@@ -230,8 +230,11 @@ namespace Mack {
 					Project       = this,
 					Configuration = config,
 					Name          = propertyNode.Name,
-					Text          = propertyNode.Text(),
-					Condition     = propertyNode.Attr("Condition")
+					// Text          = propertyNode.Text(),
+					Condition     = propertyNode.Attr("Condition"),
+
+					// if we reference the nodes, everything else can proxy to the node ...
+					Node = propertyNode
 				});
 		}
 

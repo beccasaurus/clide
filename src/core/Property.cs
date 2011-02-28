@@ -1,9 +1,14 @@
 using System;
+using System.Xml;
+using FluentXml;
 
 namespace Mack {
 
 	/// <summary>Represents a Property of a Project, eg. "OutputPath"</summary>
 	public class Property {
+
+		/// <summary>The node in the project XML representing this</summary>
+		public virtual XmlNode Node { get; set; }
 
 		/// <summary>The Project this property is associated with</summary>
 		public virtual Project Project { get; set; }
@@ -27,7 +32,10 @@ namespace Mack {
 		/// because Mack really doesn't care.  Mack helps you create/edit project files, not 
 		/// build/execute the project.
 		/// </remarks>
-		public virtual string Text { get; set; }
+		public virtual string Text {
+			get { return Node.Text(); }
+			set { Node.Text(value); }
+		}
 
 		/// <summary>If this property node has a Condition attribute, this is its text</summary>
 		public virtual string Condition { get; set; }

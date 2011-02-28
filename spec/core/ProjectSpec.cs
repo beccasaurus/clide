@@ -182,6 +182,14 @@ namespace Mack.Specs {
 				"OutputType", "RootNamespace", "AssemblyName", "TargetFrameworkVersion"
 			});
 			project.GlobalProperties.Last().Text.ShouldEqual("v4.0");
+			project.GlobalProperties.Last().Text = "CHANGED";
+
+			new Project(Temp("FluentXml.Specs.csproj")).GlobalProperties.Last().Text.ShouldEqual("v4.0");
+
+			// but if we Save() ...
+			project.Save();
+
+			new Project(Temp("FluentXml.Specs.csproj")).GlobalProperties.Last().Text.ShouldEqual("CHANGED");
 		}
 
 		[Test][Ignore]
