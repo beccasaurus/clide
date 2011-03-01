@@ -38,23 +38,13 @@ namespace Clide {
 		public virtual Reference this[string name] { get { return Get(name); } }
 
 		/// <summary>Actual method to go and get and return References.</summary>
+		/// <remarks>
+		/// Note, this is not cached!  Hence, why it's a method instead of a property.
+		///
+		/// We'll very likely cache this later, but I don't want to add caching before it's truly necessary.
+		/// </remarks>
 		public virtual List<Reference> GetReferences() {
 			return Project.Doc.Nodes("ItemGroup Reference").Select(node => new Reference(this, node)).ToList();
-
-			// var references = new List<Reference>();
-
-			// foreach (var node in Project.Doc.Nodes("ItemGroup Reference")) {
-		 	// 	var version   = node.Node("SpecificVersion").Text();
-		 	// 	var hintPath  = node.Node("HintPath").Text();
-		 	// 	var reference = new Reference {
-		 	// 		FullName        = node.Attr("Include"),
-		 	// 		HintPath        = hintPath,
-		 	// 		SpecificVersion = (version == null) ? false : bool.Parse(version)
-		 	// 	};
-		 	// 	references.Add(reference);
-			// }
-
-			// return references;
 		}
 
 		public virtual Reference AddGacReference(string assemblyName) {

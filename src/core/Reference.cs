@@ -14,11 +14,11 @@ namespace Clide {
 			Node       = node;
 		}
 
-		/// <summary>The ProjectReferences that this Reference is a part of</summary>
-		public ProjectReferences References { get; set; }
-
 		/// <summary>The XmlNode that this Reference is stored in</summary>
 		public XmlNode Node { get; set; }
+
+		/// <summary>The ProjectReferences that this Reference is a part of</summary>
+		public ProjectReferences References { get; set; }
 
 		/// <summary>Returns this references's full assembly name</summary>
 		public virtual string FullName { get { return Node.Attr("Include"); } }

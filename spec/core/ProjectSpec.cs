@@ -146,16 +146,18 @@ namespace Clide.Specs {
 		public void can_read_project_configurations_from_a_typical_csproj_file() {
 			var project = new Project(Example("NET40", "ConsoleApplication1", "ConsoleApplication1", "ConsoleApplication1.csproj"));
 
-			project.Configurations.Count.ShouldEqual(2);
+			project.Configurations.Count.ShouldEqual(3);
 
-			project.Configurations.First().ToString().ShouldEqual("Debug|x86");
-			project.Configurations.First().ShouldHaveProperties(new {
+			project.Configurations[0].ToString().ShouldEqual("Global");
+
+			project.Configurations[1].ToString().ShouldEqual("Debug|x86");
+			project.Configurations[1].ShouldHaveProperties(new {
 				Name     = "Debug",
 				Platform = "x86"
 			});
 
-			project.Configurations.Last().ToString().ShouldEqual("Release|x86");
-			project.Configurations.Last().ShouldHaveProperties(new {
+			project.Configurations[2].ToString().ShouldEqual("Release|x86");
+			project.Configurations[2].ShouldHaveProperties(new {
 				Name     = "Release",
 				Platform = "x86"
 			});

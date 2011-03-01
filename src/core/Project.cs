@@ -15,13 +15,10 @@ namespace Clide {
 	/// implementations of certain things, we'll use this as a base class and move 
 	/// custom stuff into classes like CsProj and VbProj etc.
 	/// </remarks>
-	public class Project : IFile {
+	public class Project : IFile, IXmlNode {
 
+		/// <summary>The "Project Type" GUID that every Visual Studio / MSBuild project seems to use</summary>
 		public static readonly Guid TypicalProjectTypeGuid = new Guid("FAE04EC0-301F-11D3-BF4B-00C04F79EFBC");
-
-		static readonly Regex _getConfigurationNameAndPlatform = new Regex(@"==\s*'(\w+)\|(\w+)'");
-
-		public readonly Configuration GLOBAL;
 
 		/// <summary>Empty constructor.</summary>
 		/// <remarks>
@@ -30,21 +27,17 @@ namespace Clide {
 		public Project() {
 			Id            = Guid.NewGuid();
 			ProjectTypeId = Project.TypicalProjectTypeGuid;
-			GLOBAL        = new Configuration { Project = this, Name = "__GLOBAL__", Platform = "AnyCPU" };
 		}
 
 		/// <summary>Creates a Project with the given Path.  If the file is found, we will parse it.</summary>
 		public Project(string path) : this() {
 			Path = path;
-			Parse();
 		}
 
-		string _relativePath;
-		XmlDocument _doc;
-
-		// TODO get rid of all of these and replace them with XML wrappers!
-		List<Configuration> _configurations;
-		IDictionary<Configuration,List<Property>> _properties;
+		string                _relativePath;
+		XmlDocument           _doc;
+		ProjectReferences     _references;
+		ProjectConfigurations _configurations;
 
 		/// <summary>This project's ProjectGuid ID</summary>
 		public virtual Guid? Id { get; set; }
@@ -75,31 +68,12 @@ namespace Clide {
 
 		/// <summary>This file, represented as an XmlDocument.  If the path does not exist, this will be null;</summary>
 		public virtual XmlDocument Doc {
-			get { if (_doc == null) Parse(); return _doc; }
+			get { if (_doc == null) Reload(); return _doc; }
+			set { _doc = value; }
 		}
 
-		/// <summary>All of this project's configurations (eg. "Debug|x86").  This is READ-ONLY.</summary>
-		public virtual List<Configuration> Configurations {
-			get { if (_configurations == null) Parse(); return _configurations; }
-		}
-
-		/// <summary>All of this project's properties, grouped by Configuration</summary>
-		/// <remarks>
-		/// All properties with a null configuration are the "GlobalProperties"
-		/// </remarks>
-		public virtual IDictionary<Configuration,List<Property>> Properties {
-			get { if (_properties == null) Parse(); return _properties; }
-		}
-
-		/// <summary>Get all of this project's "Global" properties (gets these from Properties)</summary>
-		public virtual List<Property> GlobalProperties { get { return PropertiesForConfiguration(GLOBAL); } }
-
-		/// <summary>Returns the properties defined for the given Configuration.  If Configuration is null, we return GlobalProperties</summary>
-		public virtual List<Property> PropertiesForConfiguration(Configuration config) {
-			return Properties.ContainsKey(config) ? Properties[config] : new List<Property>();
-		}
-
-		ProjectReferences _references;
+		/// <summary>IXmlNode implementation</summary>
+		public virtual XmlNode Node { get { return Doc as XmlNode; } }
 
 		/// <summary>This project's references</summary>
 		public virtual ProjectReferences References {
@@ -107,10 +81,23 @@ namespace Clide {
 			set { _references = value; }
 		}
 
+		/// <summary>This project's configurations</summary>
+		public virtual ProjectConfigurations Configurations {
+			get { return _configurations ?? (_configurations = new ProjectConfigurations(this)); }
+			set { _configurations = value; }
+		}
+
+		/// <summary>Shortcut to getting a configuration's properties</summary>
+		public virtual ConfigurationProperties PropertiesFor(string configurationName) {
+			return Configurations.PropertiesFor(configurationName);
+		}
+
+		/// <summary>Shortcut to getting the "global" configuration's properties</summary>
+		public virtual ConfigurationProperties GlobalProperties { get { return Configurations.Global.Properties; } }
+
 		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>
 		public virtual Project Save() {
 			Doc.SaveToFile(Path);
-
 			return this;
 		}
 
@@ -118,96 +105,16 @@ namespace Clide {
 		/// <remarks>
 		/// This re-reads the file and re-parses references, configurations, etc.
 		/// </remarks>
-		public virtual Project Parse() {
-			Reset();
-
-			if (this.DoesNotExist()) return this;
-
-			Doc.Load(Path);
-
-			ParsePropertiesAndConfigurations();
-			// ParseReferences();
-
+		public virtual Project Reload() {
+			Doc = new XmlDocument();
+			if (this.Exists()) Doc.Load(Path);
 			return this;
 		}
 
-		/// <summary>.sln and .csproj files seem to use the '\' path separator, regardless of platform.  we currently replace ALL '/' with '\'</summary>
+		/// <summary>.sln/.csproj files seem to use the \ path separator, regardless of platform. we currently replace ALL / with \</summary>
 		public static string NormalizePath(string path) {
 			if (path == null) return null;
 			return path.Replace("/", "\\");
 		}
-
-	// private
-
-		/// <summary>Resets local fields that should be reset whenever we want to re-parse this project</summary>
-		/// <remarks>
-		/// If any changes are pending and Save() has not been called, they will be lost!
-		/// </remarks>
-		void Reset() {
-			_doc            = new XmlDocument();
-			_configurations = new List<Configuration>();
-			_properties     = new Dictionary<Configuration,List<Property>>();
-		}
-
-		// Each "Configuration" is defined by a PropertyGroup with a Condition, eg:
-		// <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-		// 
-		// These groups have properties in them, so we parse the 
-		// configurations and properties at the same time.
-		//
-		void ParsePropertiesAndConfigurations() {
-			foreach (var group in Doc.Nodes("PropertyGroup")) {
-				var condition = group.Attr("Condition");
-
-				// If there is no Condition, then this group has "global" properties
-				if (condition == null) {
-					ParsePropertiesForConfigurationFromNode(GLOBAL, group);
-					continue;
-				}
-
-				var match = _getConfigurationNameAndPlatform.Match(condition);
-				if (match.Success) {
-					var config = new Configuration {
-						Project  = this,
-						Name     = match.Groups[1].ToString(),
-						Platform = match.Groups[2].ToString()
-					};
-					Configurations.Add(config);
-					ParsePropertiesForConfigurationFromNode(config, group);
-				}
-			}
-		}
-
-		// Given this Configuration and XmlNode (for PropertyGroup), create properties
-		void ParsePropertiesForConfigurationFromNode(Configuration config, XmlNode node) {
-			if (! Properties.ContainsKey(config))
-				Properties[config] = new List<Property>();
-
-			foreach (var propertyNode in node.Nodes())
-				Properties[config].Add(new Property {
-					Project       = this,
-					Configuration = config,
-					Name          = propertyNode.Name,
-					// Text          = propertyNode.Text(),
-					Condition     = propertyNode.Attr("Condition"),
-
-					// if we reference the nodes, everything else can proxy to the node ...
-					Node = propertyNode
-				});
-		}
-
-		// Get each <Reference> node under an <ItemGroup>
-		// void ParseReferences() {
-		// 	foreach (var node in Doc.Nodes("ItemGroup Reference")) {
-		// 		var version   = node.Node("SpecificVersion").Text();
-		// 		var hintPath  = node.Node("HintPath").Text();
-		// 		var reference = new Reference {
-		// 			FullName        = node.Attr("Include"),
-		// 			HintPath        = hintPath,
-		// 			SpecificVersion = (version == null) ? false : bool.Parse(version)
-		// 		};
-		// 		References.Add(reference);
-		// 	}
-		// }
 	}
 }

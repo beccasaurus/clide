@@ -1,4 +1,9 @@
 using System;
+using System.Xml;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using FluentXml;
 
 namespace Clide {
 
@@ -11,18 +16,65 @@ namespace Clide {
 	///
 	/// This pretty much just wraps that Name and Platform.
 	/// </remarks>
-	public class Configuration {
+	public class Configuration : IXmlNode {
 
-		/// <summary>The Project that this configuration is for</summary>
-		public virtual Project Project { get; set; }
+		static readonly Regex _getNameAndPlatform = new Regex(@"==\s*'([^\|]+)\|([^']+)'");
+
+		/// <summary>Configuration constructor.  A Configuration requires an XmlNode and the ProjectConfigurations object</summary>
+		public Configuration(ProjectConfigurations configurations, XmlNode node) {
+			Configurations = configurations;
+			Node           = node;
+		}
+
+		ConfigurationProperties _properties;
+
+		/// <summary>The XmlNode that this Configuration is stored in</summary>
+		public virtual XmlNode Node { get; set; }
+
+		/// <summary>The ProjectConfigurations that this Configuration is a part of</summary>
+		public virtual ProjectConfigurations Configurations { get; set; }
+
+		/// <summary>Returns all all of this configuration's properties</summary>
+		public virtual ConfigurationProperties Properties {
+			get { return _properties ?? (_properties = new ConfigurationProperties(this)); }
+			set { _properties = value; }
+		}
 
 		/// <summary>This configuration's name, eg. "Debug" or "Release"</summary>
-		public virtual string Name { get; set; }
+		public virtual string Name {
+			get {
+				var nameAndPlatform = GetNameAndPlatform();
+				return (nameAndPlatform == null) ? null : nameAndPlatform.Groups[1].ToString();
+			}
+		}
 
 		/// <summary>This configuration's platform, eg. "x86" or "AnyCPU"</summary>
-		public virtual string Platform { get; set; }
+		public virtual string Platform {
+			get {
+				var nameAndPlatform = GetNameAndPlatform();
+				return (nameAndPlatform == null) ? null : nameAndPlatform.Groups[2].ToString();
+			}
+		}
+
+		/// <summary>Returns whether or not this is the "Global" configuration.  Currently, this is true when the Name is null.</summary>
+		public virtual bool IsGlobal { get { return Name == null; } }
 
 		/// <summary>String representation of this configuration, eg. "Debug|x86"</summary>
-		public override string ToString() { return string.Format("{0}|{1}", Name, Platform); }
+		public override string ToString() { return IsGlobal ? "Global" : string.Format("{0}|{1}", Name, Platform); }
+
+		/// <summary>Remove this configuration from the Project.  Calling Project.Save() will persist this change.</summary>
+		public virtual void Remove() {
+			Node.ParentNode.RemoveChild(Node);
+		}
+
+	// private
+
+		Match GetNameAndPlatform() {
+			var condition = Node.Attr("Condition");
+			if (condition == null)
+				return null;
+			else
+				return _getNameAndPlatform.Match(condition);
+		}
 	}
 }
