@@ -70,7 +70,7 @@ namespace Clide.Specs {
 			project.References.Count.ShouldEqual(4);
 			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
 
-			project.AddReference(new Reference { FullName = "System.Xml" });
+			project.References.AddGacReference("System.Xml");
 
 			// our References get updated
 			project.References.Count.ShouldEqual(5);
@@ -94,7 +94,7 @@ namespace Clide.Specs {
 			project.References.Count.ShouldEqual(4);
 			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
 
-			project.AddReference(new Reference { FullName = "Something", HintPath = "../lib/foo/Something.dll" });
+			project.References.AddDll("Something", "../lib/foo/Something.dll");
 
 			// our References get updated
 			project.References.Count.ShouldEqual(5);
@@ -119,14 +119,14 @@ namespace Clide.Specs {
 			project.References.Count.ShouldEqual(4);
 			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "System.Core", "nunit.framework", "NUnit.Should" });
 
-			project.RemoveReference("System.Core");
+			project.References.Remove("System.Core");
 			project.Save();
 
 			project = new Project(Temp("FluentXml.Specs.csproj"));
 			project.References.Count.ShouldEqual(3);
 			project.References.Select(r => r.Name).ToArray().ShouldEqual(new string[]{ "System", "nunit.framework", "NUnit.Should" });
 
-			project.RemoveReference("nunit.framework");
+			project.References.Remove("nunit.framework");
 			project.Save();
 
 			project = new Project(Temp("FluentXml.Specs.csproj"));

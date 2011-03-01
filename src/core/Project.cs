@@ -41,8 +41,9 @@ namespace Clide {
 
 		string _relativePath;
 		XmlDocument _doc;
+
+		// TODO get rid of all of these and replace them with XML wrappers!
 		List<Configuration> _configurations;
-		List<Reference> _references;
 		IDictionary<Configuration,List<Property>> _properties;
 
 		/// <summary>This project's ProjectGuid ID</summary>
@@ -82,11 +83,6 @@ namespace Clide {
 			get { if (_configurations == null) Parse(); return _configurations; }
 		}
 
-		/// <summary>All of this project's references.  This is READ-ONLY.</summary>
-		public virtual List<Reference> References {
-			get { if (_references == null) Parse(); return _references; }
-		}
-
 		/// <summary>All of this project's properties, grouped by Configuration</summary>
 		/// <remarks>
 		/// All properties with a null configuration are the "GlobalProperties"
@@ -103,49 +99,12 @@ namespace Clide {
 			return Properties.ContainsKey(config) ? Properties[config] : new List<Property>();
 		}
 
-		/// <summary>Adds reference</summary>
-		public virtual Project AddReference(Reference reference) {
-			// TODO fix!  right now, to make sure this works, we add a new item group for each new reference ...
+		ProjectReferences _references;
 
-			var group = Doc.Node("Project").NewNode("ItemGroup");
-			var node  = group.NewNode("Reference");
-
-			node.Attr("Include", reference.FullName);
-
-			if (reference.HintPath != null) {
-				node.NewNode("SpecificVersion").Text(reference.SpecificVersion.ToString());
-				node.NewNode("HintPath").Text(reference.HintPath);
-			}
-
-			// add to our local references
-			References.Add(reference);
-
-			return this;
-		}
-
-		/// <summary>Remove a reference</summary>
-		public virtual Project RemoveReference(string name) {
-			var reference = References.FirstOrDefault(r => r.FullName == name);
-			if (reference == null)
-				reference = References.FirstOrDefault(r => r.Name == name); // try short name, if no full match
-			return RemoveReference(reference);
-		}
-
-		/// <summary>Remove a reference</summary>
-		public virtual Project RemoveReference(Reference reference) {
-			if (reference == null) return this;
-
-			// find Reference node where Include= the reference's full path and remove it from the Doc
-			var node = Doc.Nodes("ItemGroup Reference").FirstOrDefault(n => 
-				n.Attr("Include") != null && n.Attr("Include") == reference.FullName
-			);
-
-			if (node != null) {
-				node.ParentNode.RemoveChild(node);
-				References.Remove(reference);
-			}
-
-			return this;
+		/// <summary>This project's references</summary>
+		public virtual ProjectReferences References {
+			get { return _references ?? (_references = new ProjectReferences(this)); }
+			set { _references = value; }
 		}
 
 		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>
@@ -167,7 +126,7 @@ namespace Clide {
 			Doc.Load(Path);
 
 			ParsePropertiesAndConfigurations();
-			ParseReferences();
+			// ParseReferences();
 
 			return this;
 		}
@@ -187,7 +146,6 @@ namespace Clide {
 		void Reset() {
 			_doc            = new XmlDocument();
 			_configurations = new List<Configuration>();
-			_references     = new List<Reference>();
 			_properties     = new Dictionary<Configuration,List<Property>>();
 		}
 
@@ -239,17 +197,17 @@ namespace Clide {
 		}
 
 		// Get each <Reference> node under an <ItemGroup>
-		void ParseReferences() {
-			foreach (var node in Doc.Nodes("ItemGroup Reference")) {
-				var version   = node.Node("SpecificVersion").Text();
-				var hintPath  = node.Node("HintPath").Text();
-				var reference = new Reference {
-					FullName        = node.Attr("Include"),
-					HintPath        = hintPath,
-					SpecificVersion = (version == null) ? false : bool.Parse(version)
-				};
-				References.Add(reference);
-			}
-		}
+		// void ParseReferences() {
+		// 	foreach (var node in Doc.Nodes("ItemGroup Reference")) {
+		// 		var version   = node.Node("SpecificVersion").Text();
+		// 		var hintPath  = node.Node("HintPath").Text();
+		// 		var reference = new Reference {
+		// 			FullName        = node.Attr("Include"),
+		// 			HintPath        = hintPath,
+		// 			SpecificVersion = (version == null) ? false : bool.Parse(version)
+		// 		};
+		// 		References.Add(reference);
+		// 	}
+		// }
 	}
 }
