@@ -171,8 +171,33 @@ namespace Clide.Specs {
 			// var project = new Project("MonoDevelop", "NET35", "ConsoleProjectWithConfigurations", "ConsoleProjectWithConfigurations", "ConsoleProjectWithConfigurations.csproj");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_read_properties_for_project_configurations() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+
+			project.Config["Debug"]["OutputPath"].ShouldEqual(@"..\bin\Debug");
+			project.Config["Debug"]["DefineConstants"].ShouldEqual("DEBUG");
+			project.Config["Debug"].Properties.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ 
+				"DebugSymbols", "DebugType", "Optimize", "OutputPath", "DefineConstants", "ErrorReport", "WarningLevel", "ConsolePause"
+			});
+
+			project.Config["Release"]["OutputPath"].ShouldEqual(@"..\bin\Release");
+			project.Config["Release"]["DefineConstants"].Should(Be.Null);
+			project.Config["Release"].Properties.Select(p => p.Name).ToArray().ShouldEqual(new string[]{
+				"DebugType", "Optimize", "OutputPath", "ErrorReport", "WarningLevel", "ConsolePause"
+			});
+		}
+
+		[Test][Ignore]
+		public void can_modify_existing_configuration_property() {
+		}
+
+		[Test][Ignore]
+		public void can_create_new_configuration_property() {
+		}
+
+		[Test][Ignore]
+		public void can_remove_existing_configuration_property() {
 		}
 
 		[Test]

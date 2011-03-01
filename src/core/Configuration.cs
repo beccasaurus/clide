@@ -40,6 +40,12 @@ namespace Clide {
 			set { _properties = value; }
 		}
 
+		/// <summary>Set or get the text of the given propertyName</summary>
+		public virtual string this[string propertyName] {
+			get { return Properties.GetText(propertyName); }
+			set { Properties.SetText(propertyName, value); }
+		}
+
 		/// <summary>This configuration's name, eg. "Debug" or "Release"</summary>
 		public virtual string Name {
 			get {

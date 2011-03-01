@@ -34,6 +34,9 @@ namespace Clide {
 		/// <summary>Returns the Configuration at the given index</summary>
 		public virtual Configuration this[int index] { get { return GetConfigurations()[index]; } }
 
+		/// <summary>Returns the Configuration with the given name (or null if it doesn't exist)</summary>
+		public virtual Configuration this[string configurationName] { get { return GetConfiguration(configurationName); } }
+
 		/// <summary>Actual method to go and get and return Configurations.</summary>
 		/// <remarks>
 		/// Note, this is not cached!  Hence, why it's a method instead of a property.

@@ -67,7 +67,8 @@ namespace Clide {
 
 		/// <summary>Returns the text of the property with the given name or null, if it doesn't exist.</summary>
 		public virtual string GetText(string propertyName) {
-			return GetProperty(propertyName).Text;
+			var property = GetProperty(propertyName);
+			return (property == null) ? null : property.Text;
 		}
 
 		/// <summary>Sets the text of property with this name to this value.  Creates a new property if it doesn't exist.</summary>

@@ -87,6 +87,12 @@ namespace Clide {
 			set { _configurations = value; }
 		}
 
+		/// <summary>Shortcut for Configurations</summary>
+		public virtual ProjectConfigurations Config {
+			get { return Configurations; }
+			set { Configurations = value; }
+		}
+
 		/// <summary>Shortcut to getting a configuration's properties</summary>
 		public virtual ConfigurationProperties PropertiesFor(string configurationName) {
 			return Configurations.PropertiesFor(configurationName);
