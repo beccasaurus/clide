@@ -188,16 +188,49 @@ namespace Clide.Specs {
 			});
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_modify_existing_configuration_property() {
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual(@"..\bin\Debug");
+
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.Config["Debug"]["OutputPath"] = "Different Path!";
+
+			// has not changed
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual(@"..\bin\Debug");
+
+			// but, if we save ...
+			project.Save();
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual("Different Path!");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_create_new_configuration_property() {
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["FooBar"].Should(Be.Null);
+
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.Config["Debug"]["FooBar"] = "Value of Foo Bar";
+
+			// has not changed
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["FooBar"].Should(Be.Null);
+
+			// but, if we save ...
+			project.Save();
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["FooBar"].ShouldEqual("Value of Foo Bar");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_remove_existing_configuration_property() {
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual(@"..\bin\Debug");
+
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+			project.Config["Debug"].GetProperty("OutputPath").Remove();
+
+			// has not changed
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual(@"..\bin\Debug");
+
+			// but, if we save ...
+			project.Save();
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].Should(Be.Null);
 		}
 
 		[Test]

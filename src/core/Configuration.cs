@@ -46,6 +46,11 @@ namespace Clide {
 			set { Properties.SetText(propertyName, value); }
 		}
 
+		/// <summary>Returns the Property with this name for this configuration, if it exists, else null</summary>
+		public virtual Property GetProperty(string propertyName) {
+			return Properties.GetProperty(propertyName);
+		}
+
 		/// <summary>This configuration's name, eg. "Debug" or "Release"</summary>
 		public virtual string Name {
 			get {
