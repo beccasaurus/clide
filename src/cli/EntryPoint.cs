@@ -1,4 +1,5 @@
 using System;
+using Mono.Options;
 using ConsoleRack;
 
 namespace Clide {
@@ -21,6 +22,19 @@ namespace Clide {
 
 		[Application]
 		public static Response RunCommands(Request req) {
+			// Global options ...
+			var globalOptions = new OptionSet();
+			foreach (var option in Global.Options) {
+				Console.WriteLine("Adding {0}", option.MonoOptionsString);
+				globalOptions.Add(option.MonoOptionsString, option.InvokedWith);
+			}
+			var extra = globalOptions.Parse(req.Arguments);
+
+			// var options = new OptionSet {
+			// 	{ "V|verbose:", v => Console.WriteLine("the value of v is {0}", v) }
+			// };
+			// options.Parse(req.Arguments);
+
 			return new Response("Hello from mack");
 		}
 	}

@@ -12,7 +12,7 @@ namespace Clide {
 		public GlobalOption(){}
 
 		/// <summary>Constructor used in Global.cs to make it easy to define lots of options in a pretty way</summary>
-		public GlobalOption(char shortArgument, string longArgument, string name, string environmentVariable, string defaultValue, string description) {
+		public GlobalOption(char shortArgument, string longArgument, string name, string environmentVariable, object defaultValue, string description) {
 			ShortArgument       = shortArgument;
 			LongArgument        = longArgument;
 			Name                = name;
@@ -52,13 +52,15 @@ namespace Clide {
 		/// <summary>Long command line argument that this uses, if any, eg. "debug" (--debug)</summary>
 		public virtual string LongArgument { get; set; }
 
-		/// <summary>If this is true, we set this option's value to True when called (and ignore the argument passed)</summary>
-		public bool SetToTrueIfCalled = true;
+		/// <summary>Returns the string to use to register this option with Mono.Options</summary>
+		public virtual string MonoOptionsString {
+			get { return string.Format("{0}|{1}:", ShortArgument, LongArgument); }
+		}
 
-		/// <summary>If this is set to true, we take the command line argument and use it to set Value.  Else we simply SetToTrueIfCalled.</summary>
-		public bool AcceptsArgumentValue {
-			get { return ! SetToTrueIfCalled;  }
-			set { SetToTrueIfCalled = ! value; }
+		/// <summary>This method gets called with the command line argument passed to this option (if any) whenever this option is called</summary>
+		public virtual void InvokedWith(string value) {
+			// if debug, we should print this out ...
+			Console.WriteLine("Invoked {0} with Value: [{1}]", Name, value);
 		}
 	}
 }
