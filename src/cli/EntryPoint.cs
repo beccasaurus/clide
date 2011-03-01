@@ -20,21 +20,25 @@ namespace Clide {
 			return app.Invoke(req);
 		}
 
-		[Application]
-		public static Response RunCommands(Request req) {
-			// Global options ...
+		[Middleware]
+		public static Response ProcessGlobalOptions(Request req, Application app) {
 			var globalOptions = new OptionSet();
-			foreach (var option in Global.Options) {
-				Console.WriteLine("Adding {0}", option.MonoOptionsString);
+
+			// register options
+			foreach (var option in Global.Options)
 				globalOptions.Add(option.MonoOptionsString, option.InvokedWith);
-			}
+
+			// parse.  we get back a List<string> with un-used arguments
 			var extra = globalOptions.Parse(req.Arguments);
 
-			// var options = new OptionSet {
-			// 	{ "V|verbose:", v => Console.WriteLine("the value of v is {0}", v) }
-			// };
-			// options.Parse(req.Arguments);
+			req.Arguments = extra.ToArray();
 
+			return app.Invoke(req);
+		}
+
+		[Application]
+		public static Response RunCommands(Request req) {
+			// Handle commands!
 			return new Response("Hello from mack");
 		}
 	}

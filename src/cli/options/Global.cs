@@ -21,5 +21,7 @@ namespace Clide {
 			new GlobalOption('S', "solution", "Solution",      "SOLUTION", null,    "Path to the .sln solution file"),
 			new GlobalOption('F', "force",    "Force",         "FORCE",    false,   "Some options support --force to override warnings, etc")
 		};
+
+		public static bool Debug { get { return Options["Debug"].ToBool(); } }
 	}
 }

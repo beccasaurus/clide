@@ -59,8 +59,22 @@ namespace Clide {
 
 		/// <summary>This method gets called with the command line argument passed to this option (if any) whenever this option is called</summary>
 		public virtual void InvokedWith(string value) {
-			// if debug, we should print this out ...
-			Console.WriteLine("Invoked {0} with Value: [{1}]", Name, value);
+			if (Global.Debug)
+				Console.WriteLine("Global Option {0}. Value: '{1}'", Name, value);
+		}
+
+		/// <summary>Safely parses the Value to a bool</summary>
+		public virtual bool ToBool() {
+			if (Value == null)
+				return false;
+
+			if (Value.GetType() == typeof(bool))
+				return (bool) Value;
+
+			if (Value.ToString().ToLower().Contains("true"))
+				return true;
+			else
+				return false;
 		}
 	}
 }
