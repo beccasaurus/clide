@@ -8,7 +8,7 @@
     <ProjectGuid>{5D8673F4-0239-4D86-9093-B46A2075E722}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Clide</RootNamespace>
-    <AssemblyName>mack</AssemblyName>
+    <AssemblyName>clide</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
