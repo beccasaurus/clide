@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using Mono.Options;
 using ConsoleRack;
 
@@ -36,10 +38,37 @@ namespace Clide {
 			return app.Invoke(req);
 		}
 
+		[Middleware]
+		public static Response SplashScreen(Request req, Application app) {
+			if (req.Arguments.Length == 0)
+				return new Response("Splash!");
+			else
+				return app.Invoke(req);
+		}
+
+		[Command("foo", "does stuff")]
+		public static Response FooCommand(Request req) {
+			return new Response("You called the Foo command!");
+		}
+
+		[Command("foot", "does stuff")]
+		public static Response FootCommand(Request req) {
+			return new Response("You called the FooT command!");
+		}
+
 		[Application]
 		public static Response RunCommands(Request req) {
-			// Handle commands!
-			return new Response("Hello from mack");
+			var arguments = new List<string>(req.Arguments);
+			var firstArg  = arguments.First(); arguments.RemoveAt(0);
+			var commands  = Crack.Commands.Match(firstArg);
+			req.Arguments = arguments.ToArray();
+
+			if (commands.Count == 0)
+				return new Response("Command not found: {0}", firstArg);
+			else if (commands.Count > 1)
+				return new Response("{0} is ambiguous with commands: {1}", firstArg, string.Join(", ", commands.Select(c => c.Name).ToArray()));
+			else
+				return commands.First().Invoke(req);
 		}
 	}
 }
