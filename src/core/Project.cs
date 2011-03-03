@@ -20,6 +20,10 @@ namespace Clide {
 		/// <summary>The "Project Type" GUID that every Visual Studio / MSBuild project seems to use</summary>
 		public static readonly Guid TypicalProjectTypeGuid = new Guid("FAE04EC0-301F-11D3-BF4B-00C04F79EFBC");
 
+		/// <summary>The code XML that we make new projects with.  Nothing more than an XML declaration and Project node</summary>
+		public static readonly string BlankProjectXML = 
+			"<?xml version=\"1.0\" encoding=\"utf-8\"?><Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"></Project>";
+
 		/// <summary>Empty constructor.</summary>
 		/// <remarks>
 		/// Sets some defaults, eg. Generates a Guid for Id and uses the typical ProjectTypeId
@@ -75,6 +79,21 @@ namespace Clide {
 		/// <summary>IXmlNode implementation</summary>
 		public virtual XmlNode Node { get { return Doc as XmlNode; } }
 
+		/// <summary>The root Project node</summary>
+		public virtual XmlNode ProjectNode { get { return Doc.Node("Project"); } }
+
+		/// <summary>Get or set the DefaultTargets attribute on the code Project node</summary>
+		public virtual string DefaultTargets {
+			get { return ProjectNode.Attr("DefaultTargets"); }
+			set { ProjectNode.Attr("DefaultTargets", value); }
+		}
+
+		/// <summary>Get or set the ToolsVersion attribute on the code Project node</summary>
+		public virtual string ToolsVersion {
+			get { return ProjectNode.Attr("ToolsVersion"); }
+			set { ProjectNode.Attr("ToolsVersion", value); }
+		}
+
 		/// <summary>This project's references</summary>
 		public virtual ProjectReferences References {
 			get { return _references ?? (_references = new ProjectReferences(this)); }
@@ -107,13 +126,17 @@ namespace Clide {
 			return this;
 		}
 
+		/// <summary>Returns the XML representation of this Project's XmlDocument (which is persists itself to)</summary>
+		public virtual string ToXml() {
+			return Doc.ToXml();
+		}
+
 		/// <summary>Parse (or re-Parse) this project file (if it exists).</summary>
 		/// <remarks>
 		/// This re-reads the file and re-parses references, configurations, etc.
 		/// </remarks>
 		public virtual Project Reload() {
-			Doc = new XmlDocument();
-			if (this.Exists()) Doc.Load(Path);
+			Doc = this.Exists() ? FluentXmlDocument.FromFile(Path) : FluentXmlDocument.FromString(BlankProjectXML);
 			return this;
 		}
 

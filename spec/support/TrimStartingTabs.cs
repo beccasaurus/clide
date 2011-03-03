@@ -5,6 +5,11 @@ using System.Text.RegularExpressions;
 namespace NUnit.Framework {
 	public static class TrimLeadingTabsExtension {
 
+		/// <summary>Fixes XML by Chomp()-ing the leading newline, trimming tabs, and replacing single quotes with double quotes</summary>
+		public static string FixXml(this string str) {
+			return str.TrimStart('\n').TrimLeadingTabs(4).Replace("'", "\"");
+		}
+
 		/// <summary>Let's us easily remove the leading tabs from a string ... useful when we define lots of inline text in our tests</summary>
 		public static string TrimLeadingTabs(this string str, int numberOfTabsToTrim) {
 			var tabs = GetTabs(numberOfTabsToTrim);

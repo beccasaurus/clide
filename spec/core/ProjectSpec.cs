@@ -252,6 +252,49 @@ namespace Clide.Specs {
 			new Project(Temp("FluentXml.Specs.csproj")).GlobalProperties.Last().Text.ShouldEqual("CHANGED");
 		}
 
+		[Test]
+		public void can_create_a_blank_project() {
+			new Project().ToXml().ShouldEqual(@"
+				<?xml version='1.0' encoding='utf-8'?>
+				<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+				</Project>".FixXml());
+		}
+
+		[Test]
+		public void can_modify_base_project_properties() {
+			var project = new Project();
+
+			project.DefaultTargets.Should(Be.Null);
+			project.DefaultTargets = "Build";
+			project.DefaultTargets.ShouldEqual("Build");
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version='1.0' encoding='utf-8'?>
+				<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' DefaultTargets='Build'>
+				</Project>".FixXml());
+
+			project.ToolsVersion.Should(Be.Null);
+			project.ToolsVersion = "4.0";
+			project.ToolsVersion.ShouldEqual("4.0");
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version='1.0' encoding='utf-8'?>
+				<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' DefaultTargets='Build' ToolsVersion='4.0'>
+				</Project>".FixXml());
+		}
+
+		[Test][Ignore]
+		public void can_add_global_configuration() {
+		}
+
+		[Test][Ignore]
+		public void can_add_configurations() {
+		}
+
+		[Test][Ignore]
+		public void can_make_a_standard_default_project_with_one_method_call() {
+		}
+
 		[Test][Ignore]
 		public void can_read_low_level_global_property_groups() {
 			// For Clide, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
