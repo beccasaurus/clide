@@ -358,6 +358,35 @@ namespace Clide.Specs {
 		}
 
 		[Test][Ignore]
+		public void can_add_references_to_blank_project() {
+		}
+
+		[Test][Ignore]
+		public void can_add_project_references() {
+		}
+
+		[Test][Ignore]
+		public void can_add_include_paths_to_compile() {
+		}
+
+		/*
+		   <ItemGroup>
+			   <Compile Include="*.cs" Exclude="a.cs;b.cs"/>
+		   </ItemGroup>
+		 */
+		[Test][Ignore]
+		public void can_add_and_edit_compile_paths_to_exclude() {
+		}
+
+		[Test][Ignore]
+		public void can_add_include_paths_to_include_as_content() {
+		}
+
+		[Test][Ignore]
+		public void can_add_msbuild_target_imports() {
+		}
+
+		[Test][Ignore]
 		public void can_make_a_standard_default_project_with_one_method_call() {
 		}
 
