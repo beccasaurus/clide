@@ -117,6 +117,9 @@ namespace Clide {
 			return Configurations.PropertiesFor(configurationName);
 		}
 
+		/// <summary>Shortcut to getting the "global" configuration</summary>
+		public virtual Configuration Global { get { return Configurations.Global; } }
+
 		/// <summary>Shortcut to getting the "global" configuration's properties</summary>
 		public virtual ConfigurationProperties GlobalProperties { get { return Configurations.Global.Properties; } }
 

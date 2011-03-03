@@ -52,6 +52,16 @@ namespace Clide {
 			return GetConfigurations().FirstOrDefault(config => config.Name == configurationName);
 		}
 
+		/// <summary>Finds or creates the "Global" configuration node</summary>
+		public virtual Configuration AddGlobalConfiguration() {
+			return FindOrCreateConfiguration(null);
+		}
+
+		/// <summary>Finds or creates a configuration with the given name</summary>
+		public virtual Configuration Add(string configurationName) {
+			return FindOrCreateConfiguration(configurationName);	
+		}
+
 		/// <summary>If a configuration with the given name exists, we return it, else we make a new one and return it.</summary>
 		public virtual Configuration FindOrCreateConfiguration(string configurationName) {
 			return GetConfiguration(configurationName) ?? NewConfiguration(configurationName);
@@ -60,7 +70,8 @@ namespace Clide {
 		/// <summary>Make a new configuration with the given name.</summary>
 		public virtual Configuration NewConfiguration(string configurationName) {
 			var node = Project.Doc.Node("Project").NewNode("PropertyGroup");
-			node.Attr("Condition", string.Format(" '$(Configuration)|$(Platform)' == '{0}|AnyCPU' ", configurationName));
+			if (configurationName != null)
+				node.Attr("Condition", string.Format(" '$(Configuration)|$(Platform)' == '{0}|AnyCPU' ", configurationName));
 			return GetConfiguration(configurationName);
 		}
 

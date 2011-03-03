@@ -283,12 +283,78 @@ namespace Clide.Specs {
 				</Project>".FixXml());
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_global_configuration() {
+			var project = new Project();
+
+			project.Configurations.Should(Be.Empty);
+			project.Configurations.AddGlobalConfiguration(); // <--- add configuration
+			project.Configurations.Count.ShouldEqual(1);
+			project.Configurations.First().Name.Should(Be.Null);
+			project.Configurations.First().IsGlobal.Should(Be.True);
+			project.Configurations.First().Properties.Should(Be.Empty);
+			project.ToXml().ShouldEqual(@"
+				<?xml version='1.0' encoding='utf-8'?>
+				<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+				  <PropertyGroup />
+				</Project>".FixXml());
+
+			project.Global.Properties.Should(Be.Empty);
+			project.Global["Foo"] = "Bar!";					// <--- add property
+			project.Global.Properties.Count.ShouldEqual(1);
+			project.ToXml().ShouldEqual(@"
+				<?xml version='1.0' encoding='utf-8'?>
+				<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+				  <PropertyGroup>
+				    <Foo>Bar!</Foo>
+				  </PropertyGroup>
+				</Project>".FixXml());
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_configurations() {
+			var project = new Project();
+
+			project.Configurations.Should(Be.Empty);
+
+			project.Configurations.Add("Foo");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "" />
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+
+			project.Configurations.Add("Bar");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "" />
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Bar|AnyCPU' "" />
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+
+			project.Config["Foo"]["Hello"] = "there";
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "">
+				    <Hello>there</Hello>
+				  </PropertyGroup>
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Bar|AnyCPU' "" />
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+
+			project.Configurations.AddGlobalConfiguration();
+			project.Global["Hello"] = "Default Hello";
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "">
+				    <Hello>there</Hello>
+				  </PropertyGroup>
+				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Bar|AnyCPU' "" />
+				  <PropertyGroup>
+				    <Hello>Default Hello</Hello>
+				  </PropertyGroup>
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
 		}
 
 		[Test][Ignore]
