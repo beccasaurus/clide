@@ -47,27 +47,36 @@ namespace Clide {
 			return Project.Doc.Nodes("ItemGroup Reference").Select(node => new Reference(this, node)).ToList();
 		}
 
+		/// <summary>Finds or creates an ItemGroup node to hold our Reference nodes</summary>
+		/// <remarks>
+		/// Tries to find an existing Reference.  If there is one, we use its parent ItemGroup.
+		/// </remarks>
+		public virtual XmlNode ReferencesItemGroup {
+			get {
+				var firstReference = Project.Doc.Node("ItemGroup Reference");
+				if (firstReference != null)
+					return firstReference.ParentNode;
+				else
+					return Project.Doc.Node("Project").NewNode("ItemGroup");
+			}
+		}
+
 		public virtual Reference AddGacReference(string assemblyName) {
-			// TODO check for dupes
-			// TODO don't make a new ItemGroup
-
-			var group = Project.Doc.Node("Project").NewNode("ItemGroup");
-			var node  = group.NewNode("Reference");
-			node.Attr("Include", assemblyName);
-
-			return null; // TODO fix
+			var reference      = new Reference(this, ReferencesItemGroup.NewNode("Reference"));
+			reference.FullName = assemblyName;
+			return reference;
 		}
 
 		public virtual Reference AddDll(string fullName, string hintPath) {
 			return AddDll(fullName, hintPath, false);
 		}
+
 		public virtual Reference AddDll(string fullName, string hintPath, bool specificVersion) {
-			var group = Project.Doc.Node("Project").NewNode("ItemGroup");
-			var node  = group.NewNode("Reference");
-			node.Attr("Include", fullName);
-			node.NewNode("HintPath").Text(Project.NormalizePath(hintPath));
-			node.NewNode("SpecificVersion").Text(specificVersion.ToString());
-			return Get(fullName);
+			var reference             = new Reference(this, ReferencesItemGroup.NewNode("Reference"));
+			reference.FullName        = fullName;
+			reference.HintPath        = Project.NormalizePath(hintPath);
+			reference.SpecificVersion = specificVersion;
+			return reference;
 		}
 
 		/// <summary>Get a Reference by name (FullName or just Name)</summary>

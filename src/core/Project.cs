@@ -38,10 +38,11 @@ namespace Clide {
 			Path = path;
 		}
 
-		string                _relativePath;
-		XmlDocument           _doc;
-		ProjectReferences     _references;
-		ProjectConfigurations _configurations;
+		string                   _relativePath;
+		XmlDocument              _doc;
+		ProjectReferences        _references;
+		ProjectProjectReferences _projectReferences;
+		ProjectConfigurations    _configurations;
 
 		/// <summary>This project's ProjectGuid ID</summary>
 		public virtual Guid? Id { get; set; }
@@ -98,6 +99,12 @@ namespace Clide {
 		public virtual ProjectReferences References {
 			get { return _references ?? (_references = new ProjectReferences(this)); }
 			set { _references = value; }
+		}
+
+		/// <summary>This project's references to other projects</summary>
+		public virtual ProjectProjectReferences ProjectReferences {
+			get { return _projectReferences ?? (_projectReferences = new ProjectProjectReferences(this)); }
+			set { _projectReferences = value; }
 		}
 
 		/// <summary>This project's configurations</summary>

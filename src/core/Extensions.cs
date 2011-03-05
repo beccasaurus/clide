@@ -21,6 +21,12 @@ namespace Clide.Extensions {
 
 		/// <summary>Simply returns the string surrounded by double quotes</summary>
 		public static string Quoted(this string str) { return "\"" + str + "\""; }
+
+		/// <summary>Simple returns the string surrounded by curly braces</summary>
+		public static string WithCurlies(this string str) { return "{" + str + "}"; }
+
+		/// <summary>Simple returns the string surrounded by curly braces, surrounded by double quotes</summary>
+		public static string QuotedWithCurlies(this string str) { return str.WithCurlies().Quoted(); }
 	}
 
 	public static class StringBuilderExtensions {
@@ -45,6 +51,9 @@ namespace Clide.Extensions {
 		/// <remarks>
 		/// eg. "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
 		/// </remarks>
-		public static string QuotedWithCurlies(this Guid? guid) { return "\"{" + guid.ToString().ToUpper() + "}\""; }
+		public static string QuotedWithCurlies(this Guid? guid) { return guid.ToString().ToUpper().QuotedWithCurlies(); }
+
+		/// <summary>Simply returns an uppercase Guid surrounded by curly braces</summary>
+		public static string WithCurlies(this Guid? guid) { return guid.ToString().ToUpper().WithCurlies(); }
 	}
 }

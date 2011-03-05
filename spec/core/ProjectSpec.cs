@@ -64,6 +64,27 @@ namespace Clide.Specs {
 			references[3].HintPath.ShouldEqual(@"..\lib\NUnit.Should.dll");
 		}
 
+		/*
+		  <ItemGroup>
+			<ProjectReference Include="..\src\FluentXml.csproj">
+			  <Project>{5D8673F4-0239-4D86-9093-B46A2075E722}</Project>
+			  <Name>FluentXml</Name>
+			</ProjectReference>
+		  </ItemGroup>
+		*/
+		[Test]
+		public void can_read_project_references() {
+			var project = new Project(Temp("FluentXml.Specs.csproj"));
+
+			project.ProjectReferences.Count.ShouldEqual(1);
+
+			project.ProjectReferences.First().ShouldHaveProperties(new {
+				Name        = "FluentXml",
+				ProjectId   = new Guid("5D8673F4-0239-4D86-9093-B46A2075E722"),
+				ProjectFile = @"..\src\FluentXml.csproj",
+			});
+		}
+
 		[Test]
 		public void can_add_references_without_HintPath() {
 			var project = new Project(Temp("FluentXml.Specs.csproj"));
@@ -357,12 +378,49 @@ namespace Clide.Specs {
 				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_references_to_blank_project() {
+			var project = new Project();
+
+			project.References.AddGacReference("System");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Reference Include=""System"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+
+			project.References.AddDll("Something", "../lib/foo/Something.dll");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Reference Include=""System"" />
+				    <Reference Include=""Something"">
+				      <HintPath>..\lib\foo\Something.dll</HintPath>
+				      <SpecificVersion>False</SpecificVersion>
+				    </Reference>
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_project_references() {
+			var project = new Project();
+
+			project.ProjectReferences.Add("CoolProject", @"..\src\CoolProject.csproj", new Guid("5D8673F4-0239-4D86-9093-B46A2075E722"));
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <ProjectReference Include=""..\src\CoolProject.csproj"">
+				      <Project>{5D8673F4-0239-4D86-9093-B46A2075E722}</Project>
+				      <Name>CoolProject</Name>
+				    </ProjectReference>
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
 		}
 
 		[Test][Ignore]

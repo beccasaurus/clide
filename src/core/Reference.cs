@@ -15,16 +15,22 @@ namespace Clide {
 		}
 
 		/// <summary>The XmlNode that this Reference is stored in</summary>
-		public XmlNode Node { get; set; }
+		public virtual XmlNode Node { get; set; }
 
 		/// <summary>The ProjectReferences that this Reference is a part of</summary>
-		public ProjectReferences References { get; set; }
+		public virtual ProjectReferences References { get; set; }
 
 		/// <summary>Returns this references's full assembly name</summary>
-		public virtual string FullName { get { return Node.Attr("Include"); } }
+		public virtual string FullName {
+			get { return Node.Attr("Include"); }
+			set { Node.Attr("Include", value); }
+		}
 
 		/// <summary>Returns the path, typically relative to the Project file, where this DLL can be found</summary>
-		public virtual string HintPath { get { return Node.Node("HintPath").Text(); } }
+		public virtual string HintPath {
+			get { return Node.Node("HintPath").Text(); }
+			set { Node.NodeOrNew("HintPath").Text(value);   }
+		}
 
 		/// <summary>Returns whether or not this project requires this SpecificVersion of this assembly (I think?)</summary>
 		public virtual bool SpecificVersion {
@@ -32,6 +38,7 @@ namespace Clide {
 				var version = Node.Node("SpecificVersion").Text();
 				return (version == null) ? false : bool.Parse(version);
 			}
+			set { Node.NodeOrNew("SpecificVersion").Text(value.ToString()); }
 		}
 
 		/// <summary>This reference's short name, eg. "System" or "MyAssembly."  This reads from FullName.</summary>
