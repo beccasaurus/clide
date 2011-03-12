@@ -38,11 +38,8 @@ namespace Clide {
 			Path = path;
 		}
 
-		string                   _relativePath;
-		XmlDocument              _doc;
-		ProjectReferences        _references;
-		ProjectProjectReferences _projectReferences;
-		ProjectConfigurations    _configurations;
+		string      _relativePath;
+		XmlDocument _doc;
 
 		/// <summary>This project's ProjectGuid ID</summary>
 		public virtual Guid? Id { get; set; }
@@ -95,29 +92,37 @@ namespace Clide {
 			set { ProjectNode.Attr("ToolsVersion", value); }
 		}
 
-		/// <summary>This project's references</summary>
-		public virtual ProjectReferences References {
-			get { return _references ?? (_references = new ProjectReferences(this)); }
-			set { _references = value; }
-		}
+		/// <summary>Assembly references (from the GAC or a path to a specific DLL)</summary>
+		public virtual ProjectReferences References { get { return new ProjectReferences(this); } }
 
-		/// <summary>This project's references to other projects</summary>
-		public virtual ProjectProjectReferences ProjectReferences {
-			get { return _projectReferences ?? (_projectReferences = new ProjectProjectReferences(this)); }
-			set { _projectReferences = value; }
-		}
+		/// <summary>References to other projects (eg. csproj's)</summary>
+		public virtual ProjectProjectReferences ProjectReferences { get { return new ProjectProjectReferences(this); } }
+
+		/*
+		/// <summary>Explicitly included folders</summary>
+		public virtual ProjectFolders Folders { get { return new ProjectFolders(this); } }
+
+		/// <summary>Source files to compile</summary>
+		public virtual ProjectCompilePaths CompilePaths { get { return new ProjectCompilePaths(this); } }
+
+		/// <summary>Content (to include but not compile)</summary>
+		public virtual ProjectContent Content { get { return new ProjectContent(this); } }
+
+		/// <summary>MSBuild targets (this does NOT look at any imports)</summary>
+		public virtual ProjectTargets Targets { get { return new ProjectTargets(this); } }
+
+		/// <summary>Imports of MSBuild targets</summary>
+		public virtual ProjectTargetImports TargetImports { get { return new ProjectTargetImports(this); } }
+
+		/// <summary>Resources to embed into this project when compiled</summary>
+		public virtual ProjectEmbeddedResources EmbeddedResources { get { return new ProjectEmbeddedResources(this); } }
+		*/
 
 		/// <summary>This project's configurations</summary>
-		public virtual ProjectConfigurations Configurations {
-			get { return _configurations ?? (_configurations = new ProjectConfigurations(this)); }
-			set { _configurations = value; }
-		}
+		public virtual ProjectConfigurations Configurations { get { return new ProjectConfigurations(this); } }
 
 		/// <summary>Shortcut for Configurations</summary>
-		public virtual ProjectConfigurations Config {
-			get { return Configurations; }
-			set { Configurations = value; }
-		}
+		public virtual ProjectConfigurations Config { get { return Configurations; } }
 
 		/// <summary>Shortcut to getting a configuration's properties</summary>
 		public virtual ConfigurationProperties PropertiesFor(string configurationName) {

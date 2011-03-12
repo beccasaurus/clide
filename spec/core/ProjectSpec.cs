@@ -10,6 +10,9 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class ProjectSpec : Spec {
 
+		// NET40/Mvc3Application1/Mvc3Application1/Mvc3Application1.csproj
+		// FluentXml.Specs.csproj
+
 		[SetUp]
 		public void Before() {
 			base.BeforeEach();
@@ -83,6 +86,25 @@ namespace Clide.Specs {
 				ProjectId   = new Guid("5D8673F4-0239-4D86-9093-B46A2075E722"),
 				ProjectFile = @"..\src\FluentXml.csproj",
 			});
+		}
+
+		[Test][Ignore]
+		public void can_read_compile_paths() {
+			// var project = new Project(Temp("FluentXml.Specs.csproj"));
+
+			// project.CompilePaths.Count.ShouldEqual(3);
+
+			// project.CompilePaths.Select(path => path.Include).ToArray().ShouldEqual(new string[]{
+			// 		
+			// });
+		}
+
+		[Test][Ignore]
+		public void can_read_content() {
+		}
+
+		[Test][Ignore]
+		public void can_read_folders() {
 		}
 
 		[Test]

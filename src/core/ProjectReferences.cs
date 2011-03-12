@@ -61,16 +61,19 @@ namespace Clide {
 			}
 		}
 
+		/// <summary>Adds a simple reference from the GAC, eg. "System.Xml"</summary>
 		public virtual Reference AddGacReference(string assemblyName) {
 			var reference      = new Reference(this, ReferencesItemGroup.NewNode("Reference"));
 			reference.FullName = assemblyName;
 			return reference;
 		}
 
+		/// <summary>Adds a reference to a dll, providing the full assembly name and a hintpath</summary>
 		public virtual Reference AddDll(string fullName, string hintPath) {
 			return AddDll(fullName, hintPath, false);
 		}
 
+		/// <summary>Adds a reference to a dll with full assembly name, hintpath, and whether to require specific version</summary>
 		public virtual Reference AddDll(string fullName, string hintPath, bool specificVersion) {
 			var reference             = new Reference(this, ReferencesItemGroup.NewNode("Reference"));
 			reference.FullName        = fullName;
