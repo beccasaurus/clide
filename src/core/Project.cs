@@ -38,11 +38,25 @@ namespace Clide {
 			Path = path;
 		}
 
-		string      _relativePath;
+		Guid?       _id;
+		string      _relativePath, _name;
 		XmlDocument _doc;
 
 		/// <summary>This project's ProjectGuid ID</summary>
-		public virtual Guid? Id { get; set; }
+		public virtual Guid? Id {
+			get {
+				if (this.Exists() && ProjectGuid != null)
+					return new Guid(ProjectGuid);
+				else
+					return _id;
+			}
+			set {
+				if (this.Exists())
+					ProjectGuid = value.ToString();
+				else
+					_id = value;
+			}
+		}
 
 		/// <summary>The project's ProjectType Guid (nearly always the same)</summary>
 		public virtual Guid? ProjectTypeId { get; set; }
@@ -63,7 +77,20 @@ namespace Clide {
 		public virtual string Path { get; set; }
 
 		/// <summary>This project's "Name."  If this project has a Solution, this is set by that.  Else we use the project's AssemblyName.</summary>
-		public virtual string Name { get; set; }
+		public virtual string Name {
+			get {
+				if (this.Exists())
+					return AssemblyName;
+				else
+					return _name;
+			}
+			set {
+				if (this.Exists())
+					AssemblyName = value;
+				else
+					_name = value;
+			}
+		}
 
 		/// <summary>If this Project was loaded by a Solution, this is a reference to that Solution.  May be null.</summary>
 		public virtual Solution Solution { get; set; }
@@ -157,6 +184,12 @@ namespace Clide {
 		public virtual string TargetFrameworkVersion {
 			get { return Global["TargetFrameworkVersion"];  }
 			set { Global["TargetFrameworkVersion"] = value; }
+		}
+
+		/// <summary>Shortcut to Global property "ProjectGuid"</summary>
+		public virtual string ProjectGuid {
+			get { return Global["ProjectGuid"];  }
+			set { Global["ProjectGuid"] = value; }
 		}
 
 		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>

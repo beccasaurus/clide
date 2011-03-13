@@ -41,7 +41,11 @@ namespace Clide {
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)
 			if (! bare) {
-				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties()["OutputType"] = outputType;
+				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties(
+					root:     projectName,
+					assembly: projectName,
+					type:     outputType		
+				);
 				project.Configurations.Add("Debug").AddDefaultDebugProperties();
 				project.Configurations.Add("Release").AddDefaultReleaseProperties();
 			}
