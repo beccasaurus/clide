@@ -50,12 +50,27 @@ namespace Clide.Specs {
 			global.ShouldContain("OutputType: Library");
 		}
 
-		[Test][Description("clide properties OutputPath")][Ignore]
+		[Test][Description("clide properties OutputPath")]
 		public void clide_properties_get_property() {
+			Clide("properties", "OutputPath").Text.ShouldEqual("..\\bin\\Debug\n");
 		}
 
-		[Test][Description("clide properties OutputPath=bin")][Ignore]
+		[Test][Description("clide properties OutputPath=bin")]
 		public void clide_properties_set_property() {
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual("..\\bin\\Debug");
+
+			Clide("properties", "OutputPath=bin").Text.ShouldEqual("Setting OutputPath to bin\n");
+
+			new Project(Temp("FluentXml.Specs.csproj")).Config["Debug"]["OutputPath"].ShouldEqual("bin");
+		}
+
+		[Test][Description("clide properties OutputType=Library --global")]
+		public void clide_properties_set_property_for_global() {
+			new Project(Temp("FluentXml.Specs.csproj")).Global["OutputType"].ShouldEqual("Library");
+
+			Clide("properties", "OutputType=Exe", "--global").Text.ShouldEqual("Setting OutputType to Exe\n");
+
+			new Project(Temp("FluentXml.Specs.csproj")).Global["OutputType"].ShouldEqual("Exe");
 		}
 
 		[Test][Description("clide properties OutputPath=bin Different=\"Hi\" This=\"that\" --config Release")][Ignore]
