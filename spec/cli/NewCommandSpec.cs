@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 using ConsoleRack;
 using Clide;
@@ -21,7 +22,10 @@ namespace Clide.Specs {
 		/// <summary>Does the same thing as -d|--default</summary>
 		[Test][Description("clide new MyProject")]
 		public void clide_new_Name() {
-			Clide("new", "MyProject").Text.ShouldEqual("... fixing current directory ...");
+			Clide("new", "MyProject").Text.ShouldEqual("Created new project: MyProject\n");
+			var project = new Project(Temp("MyProject.csproj"));
+			Console.WriteLine(project.ToXml());
+			project.Configurations.Select(config => config.Name).ToArray().ShouldEqual(new string[]{ null, "Debug", "Release" });
 		}
 
 		[Test][Description("clide new MyProject -d|--default")][Ignore]

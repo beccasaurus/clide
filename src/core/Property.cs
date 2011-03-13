@@ -47,7 +47,10 @@ namespace Clide {
 		}
 
 		/// <summary>If this property node has a Condition attribute, this is its text</summary>
-		public virtual string Condition { get { return Node.Attr("Condition"); } }
+		public virtual string Condition {
+			get { return Node.Attr("Condition"); }
+			set { Node.Attr("Condition", value); }
+		}
 
 		/// <summary>Remove this property from the Configuration.  Calling Project.Save() will persist this change.</summary>
 		public virtual void Remove() {
