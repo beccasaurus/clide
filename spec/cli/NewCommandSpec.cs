@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using ConsoleRack;
@@ -16,7 +17,41 @@ namespace Clide.Specs {
 
 		[Test][Description("clide new")]
 		public void clide_new() {
-			Clide("new").Text.ShouldEqual("Helpful information about the 'new' command\n");
+			File.Exists(Temp("tmp.csproj")).Should(Be.False);
+
+			Clide("new"); // assumes directory name as the project name
+
+			File.Exists(Temp("tmp.csproj")).Should(Be.True);
+
+			// defaults to an Exe
+			new Project(Temp("tmp.csproj")).OutputType.ShouldEqual("Exe");
+		}
+
+		[Test][Description("clide new --exe")]
+		public void clide_new_exe() {
+			File.Exists(Temp("tmp.csproj")).Should(Be.False);
+
+			Clide("new", "--exe");
+
+			new Project(Temp("tmp.csproj")).OutputType.ShouldEqual("Exe");
+		}
+
+		[Test][Description("clide new --library")]
+		public void clide_new_library() {
+			File.Exists(Temp("tmp.csproj")).Should(Be.False);
+
+			Clide("new", "--library");
+
+			new Project(Temp("tmp.csproj")).OutputType.ShouldEqual("Library");
+		}
+
+		[Test][Description("clide new --winexe")]
+		public void clide_new_winexe() {
+			File.Exists(Temp("tmp.csproj")).Should(Be.False);
+
+			Clide("new", "--winexe");
+
+			new Project(Temp("tmp.csproj")).OutputType.ShouldEqual("WinExe");
 		}
 
 		/// <summary>Does the same thing as -d|--default</summary>

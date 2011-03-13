@@ -18,6 +18,7 @@ namespace Clide.Specs {
 		public void Before() {
 			base.BeforeEach();
 			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
+			File.Copy(Example("NET40", "Mvc3Application1", "Mvc3Application1", "Mvc3Application1.csproj"), Temp("Mvc3Application1.csproj"));
 		}
 
 		[Test]
@@ -91,6 +92,7 @@ namespace Clide.Specs {
 
 		[Test][Ignore]
 		public void can_read_compile_paths() {
+			var project    = new Project(Temp("NET40/Mvc3Application1/Mvc3Application1/Mvc3Application1.csproj"));
 			// var project = new Project(Temp("FluentXml.Specs.csproj"));
 
 			// project.CompilePaths.Count.ShouldEqual(3);
@@ -505,6 +507,45 @@ namespace Clide.Specs {
 				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
 		}
 
+		[Test]
+		public void can_read_include_paths_to_compile() {
+			var project = new Project(Temp("Mvc3Application1.csproj"));
+
+			project.CompilePaths.Count.ShouldEqual(2);
+
+			project.CompilePaths.First().Include.ShouldEqual("Global.asax.cs");
+			project.CompilePaths.First().DependentUpon.ShouldEqual("Global.asax");
+
+			project.CompilePaths.Last().Include.ShouldEqual("Properties\\AssemblyInfo.cs");
+			project.CompilePaths.Last().DependentUpon.Should(Be.Null);
+		}
+
+		[Test]
+		public void can_read_content_paths() {
+			var project = new Project(Temp("Mvc3Application1.csproj"));
+
+			project.Content.Count.ShouldEqual(24);
+
+			project.Content.Select(content => string.Format("{0}{1}", content.Include, content.DependentUpon)).ToArray().ShouldEqual(new string[]{
+				"Global.asax", "Content\\Site.css", "Web.config", "Web.Debug.configWeb.config", "Web.Release.configWeb.config", "Scripts\\jquery-1.4.1.js",
+				"Scripts\\jquery-1.4.1.min.js", "Scripts\\jquery-1.4.1-vsdoc.js", "Scripts\\jquery.unobtrusive-ajax.js", "Scripts\\jquery.unobtrusive-ajax.min.js",
+				"Scripts\\jquery.validate.js", "Scripts\\jquery.validate.min.js", "Scripts\\jquery.validate.unobtrusive.js", "Scripts\\jquery.validate.unobtrusive.min.js", 
+				"Scripts\\jquery.validate-vsdoc.js", "Scripts\\MicrosoftAjax.js", "Scripts\\MicrosoftAjax.debug.js", "Scripts\\MicrosoftMvcAjax.js",
+				"Scripts\\MicrosoftMvcAjax.debug.js", "Scripts\\MicrosoftMvcValidation.js", "Scripts\\MicrosoftMvcValidation.debug.js",
+				"Views\\Web.config", "Views\\_ViewStart.cshtml", "Views\\Shared\\_Layout.cshtml"
+			});
+		}
+
+		[Test]
+		public void can_read_imported_msbuild_targets() {
+			var project = new Project(Temp("Mvc3Application1.csproj"));
+
+			project.TargetImports.Count.ShouldEqual(2);
+
+			project.TargetImports.First().Project.ShouldEqual(@"$(MSBuildBinPath)\Microsoft.CSharp.targets");
+			project.TargetImports.Last().Project.ShouldEqual(@"$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets");
+		}
+
 		[Test][Ignore]
 		public void can_add_include_paths_to_compile() {
 		}
@@ -528,31 +569,6 @@ namespace Clide.Specs {
 
 		[Test][Ignore]
 		public void can_make_a_standard_default_project_with_one_method_call() {
-		}
-
-		[Test][Ignore]
-		public void can_read_low_level_global_property_groups() {
-			// For Clide, we don't REALLY care much about *EVALUATING* project files, because we don't build/run them.
-			//
-			// Really, we just care about making it really easy to EDIT these project files.  So we need to make it 
-			// easy to modify the "typical" Debug/Release/etc property groups
-			//
-			// If necessary, we'll implement the ability to read these variables ... but that might not be necessary.  YAGNI!
-
-			// var project = new Project(Example("NET40", "ConsoleApplication1", "ConsoleApplication1", "ConsoleApplication1.csproj"));
-			// project.PropertyGroups.ShouldEqual(3);
-
-			// // <PropertyGroup>
-			// project.GlobalPropertyGroup.Properties.Count.ShouldEqual(12);
-			// project.GlobalPropertyGroup.Properties.Select(p => p.Name).ToArray().ShouldEqual(new string[] { });
-
-			// // <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-			// project.DebugPropertyGroup.Properties.Count.ShouldEqual(8);
-			// project.DebugPropertyGroup.Properties.Select(p => p.Name).ToArray().ShouldEqual(new string[] { });;
-
-			// // <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-			// project.ReleasePropertyGroup.Properties.Count.ShouldEqual(8);
-			// project.ReleasePropertyGroup.Properties.Select(p => p.Name).ToArray().ShouldEqual(new string[] { });;
 		}
 	}
 }

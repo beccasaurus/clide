@@ -98,24 +98,24 @@ namespace Clide {
 		/// <summary>References to other projects (eg. csproj's)</summary>
 		public virtual ProjectProjectReferences ProjectReferences { get { return new ProjectProjectReferences(this); } }
 
-		/*
-		/// <summary>Explicitly included folders</summary>
-		public virtual ProjectFolders Folders { get { return new ProjectFolders(this); } }
-
 		/// <summary>Source files to compile</summary>
 		public virtual ProjectCompilePaths CompilePaths { get { return new ProjectCompilePaths(this); } }
 
 		/// <summary>Content (to include but not compile)</summary>
 		public virtual ProjectContent Content { get { return new ProjectContent(this); } }
 
-		/// <summary>MSBuild targets (this does NOT look at any imports)</summary>
-		public virtual ProjectTargets Targets { get { return new ProjectTargets(this); } }
-
 		/// <summary>Imports of MSBuild targets</summary>
 		public virtual ProjectTargetImports TargetImports { get { return new ProjectTargetImports(this); } }
 
+		/*
+		/// <summary>MSBuild targets (this does NOT look at any imports)</summary>
+		public virtual ProjectTargets Targets { get { return new ProjectTargets(this); } }
+
 		/// <summary>Resources to embed into this project when compiled</summary>
 		public virtual ProjectEmbeddedResources EmbeddedResources { get { return new ProjectEmbeddedResources(this); } }
+
+		/// <summary>Explicitly included folders</summary>
+		public virtual ProjectFolders Folders { get { return new ProjectFolders(this); } }
 		*/
 
 		/// <summary>This project's configurations</summary>
@@ -134,6 +134,30 @@ namespace Clide {
 
 		/// <summary>Shortcut to getting the "global" configuration's properties</summary>
 		public virtual ConfigurationProperties GlobalProperties { get { return Configurations.Global.Properties; } }
+
+		/// <summary>Shortcut to Global property "OutputType"</summary>
+		public virtual string OutputType {
+			get { return Global["OutputType"];  }
+			set { Global["OutputType"] = value; }
+		}
+
+		/// <summary>Shortcut to Global property "RootNamespace"</summary>
+		public virtual string RootNamespace {
+			get { return Global["RootNamespace"];  }
+			set { Global["RootNamespace"] = value; }
+		}
+
+		/// <summary>Shortcut to Global property "AssemblyName"</summary>
+		public virtual string AssemblyName {
+			get { return Global["AssemblyName"];  }
+			set { Global["AssemblyName"] = value; }
+		}
+
+		/// <summary>Shortcut to Global property "TargetFrameworkVersion"</summary>
+		public virtual string TargetFrameworkVersion {
+			get { return Global["TargetFrameworkVersion"];  }
+			set { Global["TargetFrameworkVersion"] = value; }
+		}
 
 		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>
 		public virtual Project Save() {

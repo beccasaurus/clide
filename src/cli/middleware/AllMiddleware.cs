@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using Mono.Options;
 using ConsoleRack;
@@ -8,6 +9,17 @@ namespace Clide {
 
 	/// <summary>For now, we're putting all middleware in here.  When we have more, we'll organize this.</summary>
 	public static class AllMiddleware {
+
+		[Middleware("Catches Exceptions", First = true)]
+		public static Response CatchExceptions(Request req, Application app) {
+			try {
+				return app.Invoke(req);
+			} catch (Exception ex) {
+				while (ex.InnerException != null && ex is TargetInvocationException)
+					ex = ex.InnerException;
+				return new Response("Oh noes!\n\n{0}\n\n{1}", ex.Message, ex);
+			}
+		}
 
 		[Middleware("Processes and strips our all of our global options, eg. -V/--verbose", First = true)]
 		public static Response ProcessGlobalOptions(Request req, Application app) {
