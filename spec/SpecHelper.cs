@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Clide;
 
 namespace Clide.Specs {
 
@@ -27,11 +28,18 @@ namespace Clide.Specs {
 		public void BeforeEach() {
 			if (Directory.Exists(TempRoot)) Directory.Delete(TempRoot, true);
 			Directory.CreateDirectory(TempRoot);
+			Global.ResetOptions();
+			Global.WorkingDirectory = TempRoot;
 		}
 
-		public string ProjectRoot  { get { return Path.Combine(Directory.GetCurrentDirectory(), "..", ".."); } }
-		public string ExamplesRoot { get { return Path.Combine(ProjectRoot, "spec", "content", "examples");  } }
-		public string TempRoot     { get { return Path.Combine(ProjectRoot, "spec", "content", "tmp");       } }
+		/// <summary>Returns the Response object that calling Clide with these arguments generates</summary>
+		public ConsoleRack.Response Clide(params string[] arguments) {
+			return EntryPoint.Invoke(arguments);
+		}
+
+		public string ProjectRoot  { get { return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..")); } }
+		public string ExamplesRoot { get { return Path.GetFullPath(Path.Combine(ProjectRoot, "spec", "content", "examples"));  } }
+		public string TempRoot     { get { return Path.GetFullPath(Path.Combine(ProjectRoot, "spec", "content", "tmp"));       } }
 
 		public string Example(params string[] parts) {
 			var allParts = new List<string>(parts);

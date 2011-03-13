@@ -10,15 +10,15 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class GeneralCliStuffSpec : Spec {
 
-		[Test][Description("mack")][Ignore]
+		[Test][Description("clide")][Ignore]
 		public void Splash_screen() {
 		}
 
-		[Test][Description("mack help")][Ignore]
+		[Test][Description("clide help")][Ignore]
 		public void Help() {
 		}
 
-		[Test][Description("mack commands")][Ignore]
+		[Test][Description("clide commands")][Ignore]
 		public void Commands() {
 		}
 	}

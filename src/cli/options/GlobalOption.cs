@@ -31,7 +31,7 @@ namespace Clide {
 
 		/// <summary>Gets or sets the actual value.  If EnvironmentVariable is not null, we fall back to this (if it is set)</summary>
 		public virtual object Value {
-			get { return _value ?? ValueFromEnvironmentVariable; }
+			get { return _value ?? ValueFromEnvironmentVariable ?? DefaultValue; }
 			set { _value = value; }
 		}
 
@@ -61,6 +61,11 @@ namespace Clide {
 		public virtual void InvokedWith(string value) {
 			if (Global.Debug)
 				Console.WriteLine("Global Option {0}. Value: '{1}'", Name, value);
+		}
+
+		/// <summary>Returns the Value as a string</summary>
+		public override string ToString() {
+			return (Value == null) ? "" : Value.ToString();
 		}
 
 		/// <summary>Safely parses the Value to a bool</summary>

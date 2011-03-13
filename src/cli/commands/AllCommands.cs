@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Mono.Options;
@@ -17,8 +18,26 @@ namespace Clide {
 		[Command("commands", "List the available commands")]
 		public static Response CommandsCommand(Request req) {
 			var response = new Response();
-			Crack.Commands.ForEach(cmd => response.Append("{0}\t{1}\n", cmd.Name, cmd.Description));
+			Global.Commands.ForEach(cmd => response.Append("{0}\t{1}\n", cmd.Name, cmd.Description));
 			return response;
+		}
+
+		[Command("help", "Provide help on the 'clide' command")]
+		public static Response HelpCommand(Request req) {
+			var args = new List<string>(req.Arguments);
+
+			if (args.Count == 0)
+				return new Response("Generic Help Stuff.");
+
+			var commandName = args.First(); args.RemoveAt(0); // Shift() 
+			var command     = Global.Commands.FirstOrDefault(cmd => cmd.Name == commandName);
+			if (command == null)
+				return new Response("Command not found: {0}", commandName);
+			else {
+				Global.Help = true;
+				req.Arguments = args.ToArray();
+				return command.Invoke(req);
+			}
 		}
 	}
 }

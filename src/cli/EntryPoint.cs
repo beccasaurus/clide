@@ -11,14 +11,19 @@ namespace Clide {
 
 		/// <summary>The main entry point for mack.exe</summary>
 		public static void Main(string[] args) {
-			Crack.Run(args);
+			Invoke(args).Execute();
+		}
+
+		/// <summary>Returns the ConsoleRack.Response that calling our CLI with these arguments results in</summary>
+		public static Response Invoke(string[] args) {
+			return Crack.Invoke(args);
 		}
 
 		[Application]
 		public static Response RunCommands(Request req) {
 			var arguments = new List<string>(req.Arguments);
 			var firstArg  = arguments.First(); arguments.RemoveAt(0);
-			var commands  = Crack.Commands.Match(firstArg);
+			var commands  = Global.Commands.Match(firstArg);
 			req.Arguments = arguments.ToArray();
 
 			if (commands.Count == 0)
