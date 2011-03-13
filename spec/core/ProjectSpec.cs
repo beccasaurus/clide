@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NUnit.Framework;
 using FluentXml;
+using Clide.Extensions;
 
 namespace Clide.Specs {
 
@@ -398,6 +399,65 @@ namespace Clide.Specs {
 				    <Hello>Default Hello</Hello>
 				  </PropertyGroup>
 				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+		}
+
+		[Test]
+		public void can_add_default_global_configuration_properties() {
+			var project = new Project();
+			var global  = project.Configurations.AddGlobalConfiguration();
+			global.Properties.Count.ShouldEqual(0);
+
+			var id = Guid.NewGuid();
+			global.AddDefaultGlobalProperties(id, "4.0", "Library", "FooNamespace", "MyAssembly");
+
+			global.Properties.Select(prop => string.Format("{0} {1} {2}", prop.Name, prop.Text, prop.Condition)).ToArray().ShouldEqual(new string[]{
+				"Platform AnyCPU  '$(Platform)' == '' ",
+				"ProductVersion 8.0.30703 ",
+				"SchemaVersion 2.0 ",
+				"ProjectGuid " + id.ToString().ToUpper().WithCurlies() + " ",
+				"OutputType Library ",
+				"RootNamespace FooNamespace ",
+				"AssemblyName MyAssembly ",
+				"TargetFrameworkVersion 4.0 ",
+				"FileAlignment 512 "
+			});
+		}
+
+		[Test]
+		public void can_add_default_debug_configuration_properties() {
+			var project = new Project();
+			var debug   = project.Configurations.Add("Debug");
+			debug.Properties.Count.ShouldEqual(0);
+
+			debug.AddDefaultDebugProperties();
+
+			debug.Properties.Select(prop => string.Format("{0} {1}", prop.Name, prop.Text)).ToArray().ShouldEqual(new string[]{
+				"DebugSymbols true",
+				"DebugType full",
+				"Optimize false",
+				"OutputPath bin\\Debug\\",
+				"DefineConstants DEBUG;TRACE'",
+				"ErrorReport prompt",
+				"WarningLevel 4"
+			});
+		}
+
+		[Test]
+		public void can_add_default_release_configuration_properties() {
+			var project = new Project();
+			var release   = project.Configurations.Add("Release");
+			release.Properties.Count.ShouldEqual(0);
+
+			release.AddDefaultReleaseProperties();
+
+			release.Properties.Select(prop => string.Format("{0} {1}", prop.Name, prop.Text)).ToArray().ShouldEqual(new string[]{
+				"DebugType pdbonly",
+				"Optimize true",
+				"OutputPath bin\\Release\\",
+				"DefineConstants TRACE",
+				"ErrorReport prompt",
+				"WarningLevel 4"
+			});
 		}
 
 		[Test]

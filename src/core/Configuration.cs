@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FluentXml;
+using Clide.Extensions;
 
 namespace Clide {
 
@@ -76,6 +77,44 @@ namespace Clide {
 		/// <summary>Remove this configuration from the Project.  Calling Project.Save() will persist this change.</summary>
 		public virtual void Remove() {
 			Node.ParentNode.RemoveChild(Node);
+		}
+
+		/// <summary>Adds the properties that the Global configuration usually has</summary>
+		public virtual Configuration AddDefaultGlobalProperties(Guid projectId, string framework, string type, string root, string assembly) {
+			this["Platform"]               = "AnyCPU";
+			this["ProductVersion"]         = "8.0.30703";
+			this["SchemaVersion"]          = "2.0";
+			this["ProjectGuid"]            = projectId.ToString().ToUpper().WithCurlies();
+			this["OutputType"]             = type;
+			this["RootNamespace"]          = root;
+			this["AssemblyName"]           = assembly;
+			this["TargetFrameworkVersion"] = framework;
+			this["FileAlignment"]          = "512";
+			this.GetProperty("Platform").Condition = " '$(Platform)' == '' ";
+			return this;
+		}
+
+		/// <summary>Adds the properties that the Debug configuration usually has</summary>
+		public virtual Configuration AddDefaultDebugProperties() {
+			this["DebugSymbols"]    = "true";
+			this["DebugType"]       = "full";
+			this["Optimize"]        = "false";
+			this["OutputPath"]      = @"bin\Debug\";
+			this["DefineConstants"] = "DEBUG;TRACE'";
+			this["ErrorReport"]     = "prompt";
+			this["WarningLevel"]    = "4";
+			return this;
+		}
+
+		/// <summary>Adds the properties that the Release configuration usually has</summary>
+		public virtual Configuration AddDefaultReleaseProperties() {
+			this["DebugType"]       = "pdbonly";
+			this["Optimize"]        = "true";
+			this["OutputPath"]      = @"bin\Release\";
+			this["DefineConstants"] = "TRACE";
+			this["ErrorReport"]     = "prompt";
+			this["WarningLevel"]    = "4";
+			return this;
 		}
 
 	// private

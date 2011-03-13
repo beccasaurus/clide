@@ -37,34 +37,9 @@ namespace Clide {
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)
 			if (! bare) {
-				var global = project.Configurations.AddGlobalConfiguration();
-				global["Platform"]               = "AnyCPU";
-				global["ProductVersion"]         = "8.0.30703";
-				global["SchemaVersion"]          = "2.0";
-				global["ProjectGuid"]            = Guid.NewGuid().ToString().ToUpper().WithCurlies();
-				global["OutputType"]             = "Library";   // <--- add option
-				global["RootNamespace"]          = projectName; // <--- add option 
-				global["AssemblyName"]           = projectName; // <--- add option 
-				global["TargetFrameworkVersion"] = "4.0";       // <--- add option
-				global["FileAlignment"]          = "512";
-				global.GetProperty("Platform").Condition = " '$(Platform)' == '' ";
-
-				var debug = project.Configurations.Add("Debug");
-				debug["DebugSymbols"]    = "true";
-				debug["DebugType"]       = "full";
-				debug["Optimize"]        = "false";
-				debug["OutputPath"]      = @"bin\Debug\";
-				debug["DefineConstants"] = "DEBUG;TRACE'";
-				debug["ErrorReport"]     = "prompt";
-				debug["WarningLevel"]    = "4";
-
-				var release = project.Configurations.Add("Release");
-				release["DebugType"]       = "pdbonly";
-				release["Optimize"]        = "true";
-				release["OutputPath"]      = @"bin\Release\";
-				release["DefineConstants"] = "TRACE";
-				release["ErrorReport"]     = "prompt";
-				release["WarningLevel"]    = "4";
+				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties(Guid.NewGuid(), "4.0", "Library", projectName, projectName);
+				project.Configurations.Add("Debug").AddDefaultDebugProperties();
+				project.Configurations.Add("Release").AddDefaultReleaseProperties();
 			}
 
 			project.Save();
