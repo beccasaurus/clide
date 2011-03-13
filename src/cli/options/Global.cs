@@ -75,6 +75,30 @@ new GlobalOption('W', "working-dir", "WorkingDirectory", "WORKING_DIR", "Require
 			set { Options["Help"].Value = value;   }
 		}
 
+		/// <summary>Returns whether or not Global is currently set</summary>
+		public static bool UseGlobal {
+			get { return Options["Global"].ToBool(); }
+			set { Options["Global"].Value = value;   }
+		}
+
+		/// <summary>Returns the selected Configuration, eg. Debug or Release</summary>
+		public static string Configuration {
+			get { return Options["Configuration"].ToString(); }
+			set { Options["Configuration"].Value = value;   }
+		}
+
+		/// <summary>Returns the selected Project file</summary>
+		public static string Project {
+			get { return Options["Project"].ToString(); }
+			set { Options["Project"].Value = value;   }
+		}
+
+		/// <summary>Returns the selected Solution file</summary>
+		public static string Solution {
+			get { return Options["Solution"].ToString(); }
+			set { Options["Solution"].Value = value;   }
+		}
+
 		/// <summary>Gets or sets the current WorkingDirectory (defaults to the current directory)</summary>
 		public static string WorkingDirectory {
 			get { return Options["WorkingDirectory"].ToString(); }

@@ -117,6 +117,12 @@ namespace Clide {
 			return builder.ToString();
 		}
 
+		/// <summary>Persists this solution's text (via ToText()) to disk (saves to Path)</summary>
+		public virtual Solution Save() {
+			this.Write(ToText());
+			return this;
+		}
+
 	// private
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"

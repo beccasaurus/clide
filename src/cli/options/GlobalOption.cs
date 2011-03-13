@@ -97,9 +97,13 @@ namespace Clide {
 
 		/// <summary>This method gets called with the command line argument passed to this option (if any) whenever this option is called</summary>
 		public virtual void InvokedWith(string value) {
-			Value = value;
 			if (Global.Debug)
 				Console.WriteLine("Global Option {0}. Value: '{1}'", Name, value);
+
+			if (AcceptsArgument)
+				Value = value;
+			else
+				Value = true; // If this option doesn't accept an argument, then it must be a boolean argument
 		}
 
 		/// <summary>Returns the Value as a string</summary>

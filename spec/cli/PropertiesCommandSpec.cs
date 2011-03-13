@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using ConsoleRack;
@@ -9,20 +10,44 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class PropertiesCommandSpec : Spec {
 
-		[Test][Description("clide properties")][Ignore]
-		public void clide_properties() {
+		[SetUp]
+		public void Before() {
+			base.BeforeEach();
+			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
 		}
 
 		[Test][Description("clide help properties")][Ignore]
 		public void clide_help_properties() {
 		}
 
-		[Test][Description("clide properties -c Release")][Ignore]
-		public void clide_properties_release() {
+		// Defaults to Debug
+		[Test][Description("clide properties")]
+		public void clide_properties() {
+			var output = Clide("properties").Text;
+			output.ShouldContain(@"OutputPath: ..\bin\Debug");
+			output.ShouldNotContain(@"OutputPath: ..\bin\Release");
 		}
 
-		[Test][Description("clide properties -c Global")][Ignore]
+		[Test][Description("clide properties --config Release")]
+		public void clide_properties_release() {
+			var release = Clide("properties", "--config", "Release").Text;
+			release.ShouldContain("Selected configuration: Release");
+			release.ShouldContain(@"OutputPath: ..\bin\Release");
+			release.ShouldNotContain(@"OutputPath: ..\bin\Debug");
+
+			var debug = Clide("properties", "--config", "Debug").Text;
+			debug.ShouldContain("Selected configuration: Debug");
+			debug.ShouldContain(@"OutputPath: ..\bin\Debug");
+			debug.ShouldNotContain(@"OutputPath: ..\bin\Release");
+		}
+
+		[Test][Description("clide properties --global")]
 		public void clide_properties_global() {
+			var global = Clide("properties", "--global").Text;
+			global.ShouldContain("Selected configuration: GLOBAL");
+			global.ShouldNotContain(@"OutputPath");
+			global.ShouldContain("TargetFrameworkVersion: v4.0");
+			global.ShouldContain("OutputType: Library");
 		}
 
 		[Test][Description("clide properties OutputPath")][Ignore]
@@ -33,7 +58,7 @@ namespace Clide.Specs {
 		public void clide_properties_set_property() {
 		}
 
-		[Test][Description("clide properties OutputPath=bin Different=\"Hi\" This=\"that\" -c Release")][Ignore]
+		[Test][Description("clide properties OutputPath=bin Different=\"Hi\" This=\"that\" --config Release")][Ignore]
 		public void clide_properties_setting_many_properties() {
 		}
 

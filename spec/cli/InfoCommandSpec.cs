@@ -23,7 +23,24 @@ namespace Clide.Specs {
 
 			Clide("info").Text.ShouldContain("Project: " + Temp("Bar.csproj")); // <--- alphabetically, the first
 
-			Clide("--debug", "info", "-P", "Foo.csproj").Text.ShouldContain("Project: Foo.csproj"); // override
+			Clide("info", "-P", "Foo.csproj").Text.ShouldContain("Project: Foo.csproj"); // override
+		}
+
+		[Test]
+		public void clide_info_with_solution() {
+			new Solution(Temp("Foo.sln")).Save();
+
+			Clide("info").Text.ShouldContain("Solution: " + Temp("Foo.sln"));
+		}
+
+		[Test]
+		public void clide_info_with_many_solutions() {
+			new Solution(Temp("Foo.sln")).Save();
+			new Solution(Temp("Bar.sln")).Save();
+
+			Clide("info").Text.ShouldContain("Solution: " + Temp("Bar.sln")); // <--- alphabetically, the first
+
+			Clide("info", "-S", "Foo.sln").Text.ShouldContain("Solution: Foo.sln"); // override
 		}
 	}
 }
