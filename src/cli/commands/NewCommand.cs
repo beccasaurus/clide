@@ -11,7 +11,7 @@ namespace Clide {
 	/// <summary>clide new</summary>
 	public class NewCommand {
 
-		[Command("new", "...")]
+		[Command("new", "Create a new project")]
 		public static Response Invoke(Request req) { return new NewCommand(req).Invoke(); }
 
 		public NewCommand(Request req) {
@@ -37,7 +37,7 @@ namespace Clide {
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)
 			if (! bare) {
-				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties(Guid.NewGuid(), "4.0", "Library", projectName, projectName);
+				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties();
 				project.Configurations.Add("Debug").AddDefaultDebugProperties();
 				project.Configurations.Add("Release").AddDefaultReleaseProperties();
 			}

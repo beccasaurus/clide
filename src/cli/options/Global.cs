@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using ConsoleRack;
+using IO.Interfaces;
 
 namespace Clide {
 
@@ -17,16 +19,30 @@ namespace Clide {
 			get {
 				var dir = System.IO.Directory.GetCurrentDirectory();
 
+				// find the first *.*proj file in the WorkingDirectory
+				var project = new Func<object>(() => {
+					var csproj = Global.WorkingDirectory.AsDir().Search("*.*proj").FirstOrDefault();
+					return (csproj == null) ? null : csproj.Path;
+				});
+
+				// find the first *.sln file in the WorkingDirectory
+				var solution = new Func<object>(() => {
+					var sln = Global.WorkingDirectory.AsDir().Search("*.sln").FirstOrDefault();
+					return (sln == null) ? null : sln.Path;
+				});
+
+				// Lack of indentation is indentional, so it's easy to read the full line
 				return new GlobalOptions {
-					new GlobalOption('V', "verbose",     "Verbosity",        "VERBOSE",     false,   "Can be set to true or a level, eg. INFO or WARN"),
-					new GlobalOption('D', "debug",       "Debug",            "DEBUG",       false,   "If set to true, additional debug data may be available"),
-					new GlobalOption('C', "config",      "Configuration",    "CONFIG",      "Debug", "The project Configuration that you want to use"),
-					new GlobalOption('G', "global",      "Global",           "GLOBAL",      false,   "If set to true, this change is applied to all configurations"),
-					new GlobalOption('P', "project",     "Project",          "PROJECT",     null,    "Name of project in solution of path to project file (csproj)"),
-					new GlobalOption('S', "solution",    "Solution",         "SOLUTION",    null,    "Path to the .sln solution file"),
-					new GlobalOption('F', "force",       "Force",            "FORCE",       false,   "Some options support --force to override warnings, etc"),
-					new GlobalOption('H', "help",        "Help",             "HELP",        false,   "If set to true, we want to print out help/usage documentation"),
-					new GlobalOption('W', "working-dir", "WorkingDirectory", "WORKING_DIR", dir,     "Sets the working directory. Defaults to the current directory")
+//              Short  Long           Name               ENV variable   Argument    Default   Description
+new GlobalOption('V', "verbose",     "Verbosity",        "VERBOSE",     "None",     false,    "Can be set to true or a level, eg. INFO or WARN"),
+new GlobalOption('D', "debug",       "Debug",            "DEBUG",       "None",     false,    "If set to true, additional debug data may be available"),
+new GlobalOption('C', "config",      "Configuration",    "CONFIG",      "Required", "Debug",  "The project Configuration that you want to use"),
+new GlobalOption('G', "global",      "Global",           "GLOBAL",      "None",     false,    "If set to true, this change is applied to all configurations"),
+new GlobalOption('P', "project",     "Project",          "PROJECT",     "Required", project,  "Name of project in solution of path to project file (csproj)"),
+new GlobalOption('S', "solution",    "Solution",         "SOLUTION",    "Required", solution, "Path to the .sln solution file"),
+new GlobalOption('F', "force",       "Force",            "FORCE",       "None",     false,    "Some options support --force to override warnings, etc"),
+new GlobalOption('H', "help",        "Help",             "HELP",        "None",     false,    "If set to true, we want to print out help/usage documentation"),
+new GlobalOption('W', "working-dir", "WorkingDirectory", "WORKING_DIR", "Required", dir,      "Sets the working directory. Defaults to the current directory")
 				};
 			}
 		}

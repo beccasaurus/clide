@@ -80,11 +80,18 @@ namespace Clide {
 		}
 
 		/// <summary>Adds the properties that the Global configuration usually has</summary>
-		public virtual Configuration AddDefaultGlobalProperties(Guid projectId, string framework, string type, string root, string assembly) {
+		public virtual Configuration AddDefaultGlobalProperties(
+				Guid id = default(Guid), string framework = "4.0", string type = "Exe", string root = null, string assembly = null) {
+
+			if (id == Guid.Empty)                 id       = Guid.NewGuid();
+			if (root == null && assembly == null) root     = "MyProject";
+			if (root == null)                     root     = assembly;
+			if (assembly == null)                 assembly = root;
+
 			this["Platform"]               = "AnyCPU";
 			this["ProductVersion"]         = "8.0.30703";
 			this["SchemaVersion"]          = "2.0";
-			this["ProjectGuid"]            = projectId.ToString().ToUpper().WithCurlies();
+			this["ProjectGuid"]            = id.ToString().ToUpper().WithCurlies();
 			this["OutputType"]             = type;
 			this["RootNamespace"]          = root;
 			this["AssemblyName"]           = assembly;

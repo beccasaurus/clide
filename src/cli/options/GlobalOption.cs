@@ -12,13 +12,27 @@ namespace Clide {
 		public GlobalOption(){}
 
 		/// <summary>Constructor used in Global.cs to make it easy to define lots of options in a pretty way</summary>
-		public GlobalOption(char shortArgument, string longArgument, string name, string environmentVariable, object defaultValue, string description) {
+		public GlobalOption(char shortArgument, string longArgument, string name, string environmentVariable, string argumentType, object defaultValue, string description) {
 			ShortArgument       = shortArgument;
 			LongArgument        = longArgument;
 			Name                = name;
 			EnvironmentVariable = environmentVariable;
 			DefaultValue        = defaultValue;
 			Description         = description;
+
+			switch (argumentType.ToLower()) {
+				case "none":
+					AcceptsArgument = false;
+					break;
+				case "optional":
+					AcceptsArgument  = true;
+					ArgumentRequired = false;
+					break;
+				case "required":
+					AcceptsArgument  = true;
+					ArgumentRequired = true;
+					break;
+			}
 		}
 
 		object _value;
@@ -29,9 +43,19 @@ namespace Clide {
 		/// <summary>This option's default value, eg. true</summary>
 		public virtual object DefaultValue { get; set; }
 
+		/// <summary>Returns this option's DefaultValue.  If the value is an Action, we invoke it.  Else we return it directly.</summary>
+		public virtual object GetDefaultValue() {
+			if (DefaultValue == null)
+				return null;
+			else if (DefaultValue is Func<object>)
+				return (DefaultValue as Func<object>).Invoke();
+			else
+				return DefaultValue;
+		}
+
 		/// <summary>Gets or sets the actual value.  If EnvironmentVariable is not null, we fall back to this (if it is set)</summary>
 		public virtual object Value {
-			get { return _value ?? ValueFromEnvironmentVariable ?? DefaultValue; }
+			get { return _value ?? ValueFromEnvironmentVariable ?? GetDefaultValue(); }
 			set { _value = value; }
 		}
 
@@ -52,13 +76,28 @@ namespace Clide {
 		/// <summary>Long command line argument that this uses, if any, eg. "debug" (--debug)</summary>
 		public virtual string LongArgument { get; set; }
 
+		/// <summary>Whether or not this option accepts an argument</summary>
+		public virtual bool AcceptsArgument { get; set; }
+
+		/// <summary>Whether or not an argument is required (assuming AcceptsArgument is true)</summary>
+		public virtual bool ArgumentRequired { get; set; }
+
 		/// <summary>Returns the string to use to register this option with Mono.Options</summary>
 		public virtual string MonoOptionsString {
-			get { return string.Format("{0}|{1}:", ShortArgument, LongArgument); }
+			get {
+				if (AcceptsArgument)
+					if (ArgumentRequired)
+						return string.Format("{0}|{1}=", ShortArgument, LongArgument);
+					else
+						return string.Format("{0}|{1}:", ShortArgument, LongArgument);
+				else
+					return string.Format("{0}|{1}", ShortArgument, LongArgument);
+			}
 		}
 
 		/// <summary>This method gets called with the command line argument passed to this option (if any) whenever this option is called</summary>
 		public virtual void InvokedWith(string value) {
+			Value = value;
 			if (Global.Debug)
 				Console.WriteLine("Global Option {0}. Value: '{1}'", Name, value);
 		}

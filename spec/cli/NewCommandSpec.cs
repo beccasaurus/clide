@@ -23,17 +23,17 @@ namespace Clide.Specs {
 		[Test][Description("clide new MyProject")]
 		public void clide_new_Name() {
 			Clide("new", "MyProject").Text.ShouldEqual("Created new project: MyProject\n");
+
 			var project = new Project(Temp("MyProject.csproj"));
-			Console.WriteLine(project.ToXml());
 			project.Configurations.Select(config => config.Name).ToArray().ShouldEqual(new string[]{ null, "Debug", "Release" });
 		}
 
-		[Test][Description("clide new MyProject -d|--default")][Ignore]
-		public void clide_new_Name_default() {
-		}
-
-		[Test][Description("clide new MyProject -b|--bare")][Ignore]
+		[Test][Description("clide new MyProject -b|--bare")]
 		public void clide_new_Name_bare() {
+			Clide("new", "MyProject", "--bare").Text.ShouldEqual("Created new project: MyProject\n");
+
+			var project = new Project(Temp("MyProject.csproj"));
+			project.Configurations.Count.ShouldEqual(0);
 		}
 	}
 }
