@@ -37,6 +37,11 @@ namespace Clide {
 		/// <summary>Returns the Configuration with the given name (or null if it doesn't exist)</summary>
 		public virtual Configuration this[string configurationName] { get { return GetConfiguration(configurationName); } }
 
+		/// <summary>Returns all of the project configurations *except* the Default configuration</summary>
+		public virtual List<Configuration> Custom {
+			get { return GetConfigurations().Where(config => ! config.IsGlobal).ToList(); }
+		}
+
 		/// <summary>Actual method to go and get and return Configurations.</summary>
 		/// <remarks>
 		/// Note, this is not cached!  Hence, why it's a method instead of a property.

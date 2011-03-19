@@ -21,6 +21,7 @@ namespace Clide {
 
 			var sln = new Solution(Path.Combine(Global.WorkingDirectory, solutionName + ".sln"));
 
+			// Extract this to method when we implement 'sln add' so we use the same code
 			if (Global.Project != null) {
 				var project = new Project(Global.Project);
 				if (project.Exists())

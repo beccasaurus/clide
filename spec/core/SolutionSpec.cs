@@ -177,5 +177,52 @@ namespace Clide.Specs {
 		[Test][Ignore]
 		public void can_reload_incase_changes_were_made_on_the_file_system() {
 		}
+
+		// solution.AutoGenerateProjectConfigurationPlatforms
+		[Test]
+		public void can_auto_generate_project_configuration_platforms() {
+			var project = new Project(Example("NET40", "Mvc3Application1", "Mvc3Application1", "Mvc3Application1.csproj"));
+			Console.WriteLine("path: {0}", project.Path);
+
+			var sln = new Solution();
+			sln.Add(project);
+
+			sln.AutoGenerateProjectConfigurationPlatforms = false;
+			sln.ToText().ShouldEqual(@"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Mvc3Application1"", ""CSPROJ"", ""{ABE3332A-1495-4703-A248-7E47B6F871FC}""
+EndProject
+Global
+EndGlobal
+				".TrimLeadingTabs(4).Replace("CSPROJ", project.Path));
+
+			sln.AutoGenerateProjectConfigurationPlatforms = true;
+			sln.ToText().ShouldEqual(@"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Mvc3Application1"", ""CSPROJ"", ""{ABE3332A-1495-4703-A248-7E47B6F871FC}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU 
+		Release|Any CPU = Release|Any CPU 
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU 
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.Build.0 = Debug|Any CPU 
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.ActiveCfg = Release|Any CPU 
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.Build.0 = Release|Any CPU 
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+				".TrimLeadingTabs(4).Replace("CSPROJ", project.Path));
+		}
+
+		[Test][Ignore]
+		public void when_a_solution_has_a_Path_then_relative_paths_to_projects_should_be_used() {
+		}
 	}
 }

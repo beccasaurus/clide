@@ -13,10 +13,14 @@ namespace Clide {
 	public class Solution : IFile {
 
 		/// <summary>Empty constructor for creating a fresh Solution</summary>
-		public Solution() {}
+		public Solution() {
+			AutoGenerateProjectConfigurationPlatforms = true;
+			FormatVersion       = "11.00";
+			VisualStudioVersion = "2010";
+		}
 
 		/// <summary>Create a Solution with the given Path.  If the file is found, we will parse it.</summary>
-		public Solution(string path) {
+		public Solution(string path) : this() {
 			Path = path;
 			Parse();
 		}
@@ -54,6 +58,69 @@ namespace Clide {
 
 		/// <summary>Adds the provided Section and returns this Solution (for a fluent interface)</summary>
 		public virtual Solution Add(Section section) { Sections.Add(section); return this; }
+
+		/// <summary>
+		/// If set to true, we auto-genenerate the 'SolutionConfigurationPlatforms' and 'ProjectConfigurationPlatforms' sections based on this Solution's projects
+		/// </summary>
+		public virtual bool AutoGenerateProjectConfigurationPlatforms { get; set; }
+
+		/// <summary>Returns the section with the provided name if it's defined, or null</summary>
+		public virtual Section GetSection(string name) {
+			return Sections.FirstOrDefault(section => section.Name == name);
+		}
+
+		/// <summary>Returns the SolutionConfigurationPlatforms section if it's defined, or null</summary>
+		public virtual Section SolutionConfigurationPlatforms {
+			get { return GetSection("SolutionConfigurationPlatforms"); }
+		}
+
+		/// <summary>Returns the ProjectConfigurationPlatforms section if it's defined, or null</summary>
+		public virtual Section ProjectConfigurationPlatforms {
+			get { return GetSection("ProjectConfigurationPlatforms"); }
+		}
+
+		/// <summary>This will generate and return a SolutionConfigurationPlatforms Section (based on Projects)</summary>
+		public virtual Section GeneratedSolutionConfigurationPlatforms {
+			get {
+				return new Section {
+					Name        = "SolutionConfigurationPlatforms",
+					PreSolution = true,
+					Text        = "Debug|Any CPU = Debug|Any CPU \n\t\tRelease|Any CPU = Release|Any CPU "
+				};
+			}
+		}
+
+		/// <summary>This will generate and return a ProjectConfigurationPlatforms Section (based on Projects)</summary>
+		public virtual Section GeneratedProjectConfigurationPlatforms {
+			get {
+				var section = new Section {
+					Name         = "ProjectConfigurationPlatforms",
+					PostSolution = true,
+				};
+
+				var lines = new List<string>();
+
+				foreach (var project in Projects) {
+					foreach (var configuration in project.Configurations.Custom) {
+						Console.WriteLine("CONFIG: {0}", configuration);
+						lines.Add(string.Format(
+							"{0}.{1}|Any CPU.ActiveCfg = {1}|Any CPU ",
+							project.Id.ToString().ToUpper().WithCurlies(),
+							configuration.Name
+						));
+						lines.Add(string.Format(
+							"{0}.{1}|Any CPU.Build.0 = {1}|Any CPU ",
+							project.Id.ToString().ToUpper().WithCurlies(),
+							configuration.Name
+						));
+					}
+				}
+
+				section.Text = string.Join("\n\t\t", lines.ToArray());
+
+				return section;
+			}
+		}
 
 		// 
 		// Microsoft Visual Studio Solution File, Format Version 10.00
@@ -98,20 +165,17 @@ namespace Clide {
 			builder.AppendLine();
 			builder.AppendLine("Microsoft Visual Studio Solution File, Format Version {0}", FormatVersion);
 			builder.AppendLine("# Visual Studio {0}", VisualStudioVersion);
-			foreach (var project in Projects) {
-				builder.AppendLine("Project({0}) = {1}, {2}, {3}", 
-						project.ProjectTypeId.QuotedWithCurlies(),
-						project.Name.Quoted(),
-						project.Path.Quoted(),
-						project.Id.QuotedWithCurlies());
-				builder.AppendLine("EndProject");
-			}
+
+			foreach (var project in Projects)
+				AppendProject(builder, project);
+
 			builder.AppendLine("Global");
-			foreach (var section in Sections) {
-				builder.AppendLine("\tGlobalSection({0}) = {1}", section.Name, section.PreSolution ? "preSolution" : "postSolution");
-				if (! string.IsNullOrEmpty(section.Text)) builder.AppendLine("\t\t{0}", section.Text);
-				builder.AppendLine("\tEndGlobalSection");
-			}
+			if (AutoGenerateProjectConfigurationPlatforms && SolutionConfigurationPlatforms == null && Projects.Count > 0)
+				AppendSection(builder, GeneratedSolutionConfigurationPlatforms);
+			if (AutoGenerateProjectConfigurationPlatforms && ProjectConfigurationPlatforms == null && Projects.Count > 0)
+				AppendSection(builder, GeneratedProjectConfigurationPlatforms);
+			foreach (var section in Sections)
+				AppendSection(builder, section);
 			builder.AppendLine("EndGlobal");
 
 			return builder.ToString();
@@ -158,6 +222,21 @@ namespace Clide {
 
 		string GetVisualStudioVersionFromLine(string line) {
 			return _getVisualStudioVersion.Match(line).Groups[1].ToString();
+		}
+
+		void AppendProject(StringBuilder builder, Project project) {
+			builder.AppendLine("Project({0}) = {1}, {2}, {3}", 
+					project.ProjectTypeId.QuotedWithCurlies(),
+					project.Name.Quoted(),
+					project.Path.Quoted(),
+					project.Id.QuotedWithCurlies());
+			builder.AppendLine("EndProject");
+		}
+
+		void AppendSection(StringBuilder builder, Section section) {
+			builder.AppendLine("\tGlobalSection({0}) = {1}", section.Name, section.PreSolution ? "preSolution" : "postSolution");
+			if (! string.IsNullOrEmpty(section.Text)) builder.AppendLine("\t\t{0}", section.Text);
+			builder.AppendLine("\tEndGlobalSection");
 		}
 	}
 }
