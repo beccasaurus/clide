@@ -66,19 +66,13 @@ namespace Clide.Specs {
 		public void clide_sln_with_path() {
 		}
 
-		[Test][Description("clide sln --blank (with project)")]
+		[Test][Description("clide sln --blank (with project)")][Ignore]
 		public void clide_sln_blank() {
-			Clide("new", "AwesomeProject");
-			Clide("sln", "--blank");
-
-			var sln = new Solution(Temp("tmp.sln"));
-
-			sln.Projects.Count.ShouldEqual(0);
-			sln.ToText().ShouldNotContain("AwesomeProject");
 		}
 
-		[Test][Description("clide sln add Foo.csproj")][Ignore]
+		[Test][Description("clide sln add Foo.csproj")]
 		public void clide_sln_add_project() {
+			Clide("new", "AwesomeProject");
 		}
 
 		[Test][Description("clide sln rm Foo.proj")][Ignore]

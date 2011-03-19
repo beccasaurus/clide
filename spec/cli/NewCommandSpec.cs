@@ -70,5 +70,15 @@ namespace Clide.Specs {
 			var project = new Project(Temp("MyProject.csproj"));
 			project.Configurations.Count.ShouldEqual(0);
 		}
+
+		// URHERE - We need to be able to create projects in subdirectories easily
+
+		[Test][Description("clide new Source/Foo")][Ignore]
+		public void clide_new_project_in_subdirectory() {
+		}
+
+		[Test][Description("clide new Source\\Foo\\Bar[.csproj]")][Ignore]
+		public void clide_new_project_in_subdirectory() {
+		}
 	}
 }
