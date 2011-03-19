@@ -102,7 +102,6 @@ namespace Clide {
 
 				foreach (var project in Projects) {
 					foreach (var configuration in project.Configurations.Custom) {
-						Console.WriteLine("CONFIG: {0}", configuration);
 						lines.Add(string.Format(
 							"{0}.{1}|Any CPU.ActiveCfg = {1}|Any CPU ",
 							project.Id.ToString().ToUpper().WithCurlies(),

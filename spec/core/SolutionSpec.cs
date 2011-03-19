@@ -8,6 +8,11 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class SolutionSpec : Spec {
 
+		[SetUp]
+		public void Before() {
+			
+		}
+
 		[Test]
 		public void can_read_the_solution_format_version() {
 			var sln1 = new Solution(Example("NET20", "WebApplication1", "WebApplication1.sln"));
@@ -111,7 +116,7 @@ namespace Clide.Specs {
 
 		[Test]
 		public void can_print_out_the_sln_text_for_a_solution_with_one_project() {
-			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
+			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010", AutoGenerateProjectConfigurationPlatforms = false };
 			sln.Add(new Project { Name = "CoolProject", Path = "src\\CoolProject.csproj", Id = new Guid("5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E") });
 			sln.ToText().ShouldEqual(@"
 				Microsoft Visual Studio Solution File, Format Version 11.00
@@ -182,7 +187,6 @@ namespace Clide.Specs {
 		[Test]
 		public void can_auto_generate_project_configuration_platforms() {
 			var project = new Project(Example("NET40", "Mvc3Application1", "Mvc3Application1", "Mvc3Application1.csproj"));
-			Console.WriteLine("path: {0}", project.Path);
 
 			var sln = new Solution();
 			sln.Add(project);
@@ -213,9 +217,6 @@ Global
 		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.Build.0 = Debug|Any CPU 
 		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.ActiveCfg = Release|Any CPU 
 		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.Build.0 = Release|Any CPU 
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
 				".TrimLeadingTabs(4).Replace("CSPROJ", project.Path));
