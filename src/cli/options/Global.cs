@@ -3,6 +3,7 @@ using System.Linq;
 using ConsoleRack;
 using IO.Interfaces;
 
+// TODO Global.Project and Global.Solution should be OBJECTS!  We can use ProjectPath and SolutionPath for the strings
 namespace Clide {
 
 	/// <summary>Represents abunchof global options and other stuff for clide.exe</summary>

@@ -12,7 +12,7 @@ namespace Clide {
 	/// <summary>Represents a .sln solution file</summary>
 	public class Solution : IFile {
 
-		/// <summary>Empty constructor for creating a fresh Solution</summary>
+		/// <summary>Empty constructor for creating a fresh, blank Solution</summary>
 		public Solution() {
 			AutoGenerateProjectConfigurationPlatforms = true;
 			FormatVersion       = "11.00";
@@ -186,6 +186,12 @@ namespace Clide {
 			return this;
 		}
 
+		/// <summary>Helper for getting a new, blank solution (with some defaults, but no projects)</summary>
+		public static Solution Blank { get { return new Solution(); }}
+
+		/// <summary>Helper for getting a new solution from the provided path</summary>
+		public static Solution FromPath(string path) { return new Solution(path); }
+
 	// private
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
@@ -195,8 +201,12 @@ namespace Clide {
 			var name        = quotedStuff[1];
 			var path        = quotedStuff[2];
 			var guid        = quotedStuff[3].ToGuid();
+			var fullPath    = System.IO.Path.Combine(this.DirName(), path);
 
-			return new Project { Name = name, RelativePath = path, Id = guid, ProjectTypeId = type };
+			if (File.Exists(fullPath))
+				return new Project(fullPath);
+			else
+				return new Project { Name = name, RelativePath = path, Id = guid, ProjectTypeId = type };
 		}
 
 		// GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -224,10 +234,16 @@ namespace Clide {
 		}
 
 		void AppendProject(StringBuilder builder, Project project) {
+			if (project == null || project.Path == null) return;
+
+			var relativeProjectPath = string.IsNullOrEmpty(this.Path)
+				? project.Path
+				: this.DirName().AsDir().Relative(project.Path).TrimStart('/');
+
 			builder.AppendLine("Project({0}) = {1}, {2}, {3}", 
 					project.ProjectTypeId.QuotedWithCurlies(),
 					project.Name.Quoted(),
-					project.Path.Quoted(),
+					relativeProjectPath.Quoted(),
 					project.Id.QuotedWithCurlies());
 			builder.AppendLine("EndProject");
 		}

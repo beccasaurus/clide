@@ -45,8 +45,36 @@ namespace Clide.Specs {
 
 			sln.Projects.Count.ShouldEqual(1);
 
-			Console.WriteLine(sln.ToText());
-			sln.ToText().ShouldContain(string.Format(@"""AwesomeProject"", ""{0}"", ""{1}""", Path.GetFullPath(project.Path), project.Id.ToString().WithCurlies().ToUpper()));
+			sln.ToText().ShouldContain(string.Format(@"""AwesomeProject"", ""AwesomeProject.csproj"", ""{0}""", 
+					project.Id.ToString().WithCurlies().ToUpper()));
+		}
+
+		[Test][Description("clide sln -n Foo (with project)")]
+		public void clide_sln_name_foo_with_project() {
+			Clide("new", "AwesomeProject");
+			Clide("sln", "--name", "WickedAwesome");
+
+			File.Exists(Temp("tmp.sln")).Should(Be.False);
+			File.Exists(Temp("WickedAwesome.sln")).Should(Be.True);
+
+			var text = Solution.FromPath(Temp("WickedAwesome.sln")).ToText();
+			text.ShouldContain("Microsoft Visual Studio Solution File");
+			text.ShouldContain("AwesomeProject");
+		}
+
+		[Test][Description("clide sln --path foo/Bar.sln (with project)")][Ignore]
+		public void clide_sln_with_path() {
+		}
+
+		[Test][Description("clide sln --blank (with project)")]
+		public void clide_sln_blank() {
+			Clide("new", "AwesomeProject");
+			Clide("sln", "--blank");
+
+			var sln = new Solution(Temp("tmp.sln"));
+
+			sln.Projects.Count.ShouldEqual(0);
+			sln.ToText().ShouldNotContain("AwesomeProject");
 		}
 
 		[Test][Description("clide sln add Foo.csproj")][Ignore]
