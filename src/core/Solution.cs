@@ -59,6 +59,9 @@ namespace Clide {
 		/// <summary>Adds the provided Section and returns this Solution (for a fluent interface)</summary>
 		public virtual Solution Add(Section section) { Sections.Add(section); return this; }
 
+		/// <summary>Removes the provided Project</summary>
+		public virtual void Remove(Project project) { Projects.Remove(project); }
+
 		/// <summary>
 		/// If set to true, we auto-genenerate the 'SolutionConfigurationPlatforms' and 'ProjectConfigurationPlatforms' sections based on this Solution's projects
 		/// </summary>
@@ -204,7 +207,7 @@ namespace Clide {
 			var fullPath    = System.IO.Path.Combine(this.DirName(), path);
 
 			if (File.Exists(fullPath))
-				return new Project(fullPath);
+				return new Project(fullPath){ SolutionName = name, RelativePath = path };
 			else
 				return new Project { Name = name, RelativePath = path, Id = guid, ProjectTypeId = type };
 		}

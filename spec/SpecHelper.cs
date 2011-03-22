@@ -32,6 +32,14 @@ namespace Clide.Specs {
 			Global.WorkingDirectory = TempRoot;
 		}
 
+		/// <summary>Lists the files in the current working directory</summary>
+		public void Ls() {
+			foreach (var file in Directory.GetDirectories(Global.WorkingDirectory))
+				Console.WriteLine(file + "/");
+			foreach (var file in Directory.GetFiles(Global.WorkingDirectory))
+				Console.WriteLine(file);
+		}
+
 		/// <summary>Returns the Response object that calling Clide with these arguments generates</summary>
 		public ConsoleRack.Response Clide(params string[] arguments) {
 			return EntryPoint.Invoke(arguments);
