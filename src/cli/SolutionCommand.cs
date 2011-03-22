@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Mono.Options;
 using ConsoleRack;
 using IO.Interfaces;
@@ -35,7 +36,7 @@ namespace Clide {
 		}
 
 		public virtual string SolutionName {
-			get { return _name ?? DirectoryName; }
+			get { return Regex.Replace((_name ?? DirectoryName), @"\.sln$", ""); }
 			set { _name = value; }
 		}
 
@@ -66,9 +67,12 @@ namespace Clide {
 			Request.Arguments = args.ToArray();
 
 			switch (subCommand.ToLower()) {
-				case "add": return AddProject();
-				case "rm":  return RemoveProject();
-				default:    return PrintInfo();
+				case "add":  return AddProject();
+				case "rm":   return RemoveProject();
+				case "info": return PrintInfo();
+				default:
+					SolutionName = subCommand;
+					return CreateNewSolution(); // clide sln Foo <-- try to make a Foo solution
 			}
 		}
 
@@ -142,13 +146,25 @@ namespace Clide {
 			return new Response("Removed {0} from Solution", project.Name);
 		}
 
-		public Response PrintInfo() {
-			return null;
+		public Response PrintInfo(Solution sln = null) {
+			if (sln == null && Global.Solution != null) sln = new Solution(Global.Solution);
+			var response = new Response();
+
+			if (sln.Projects.Count == 0)
+				response.Append("No projects in this Solution\n");
+			else
+				foreach (var project in sln.Projects)
+					response.Append("{0} [{1}]\n", project.SolutionName, project.RelativePath);
+
+			return response;
 		}
 
 		public Response CreateNewSolution() {
-			if (Solution.Exists())
-				return new Response("Project already exists: {0}", SolutionName);
+			if (Solution.Exists()) {
+				var response = PrintInfo(Solution);
+				response.PrependToOutput("Project already exists: {0}\n\n", SolutionName);
+				return response;
+			}
 
 			if (! MakeBlank && ! string.IsNullOrEmpty(Global.Project)) {
 				var project = new Project(Global.Project);

@@ -62,6 +62,15 @@ namespace Clide.Specs {
 			text.ShouldContain("AwesomeProject");
 		}
 
+		[Test][Description("clide sln -n Foo.sln")]
+		public void clide_sln_name_foo_with_sln_extension() {
+			Clide("sln", "--name", "WickedAwesome.sln");
+
+			File.Exists(Temp("WickedAwesome.sln")).Should(Be.True);
+
+			Solution.FromPath(Temp("WickedAwesome.sln")).ToText().ShouldContain("Microsoft Visual Studio Solution File");
+		}
+
 		[Test][Description("clide sln --path foo/Bar.sln (with project)")][Ignore]
 		public void clide_sln_with_path() {
 		}
@@ -133,6 +142,24 @@ namespace Clide.Specs {
 			Clide("sln", "rm", "Bar").Text.ShouldEqual("Removed Bar from Solution\n");
 
 			new Solution(Temp("tmp.sln")).Projects.Should(Be.Empty);
+		}
+
+		[Test][Description("clide sln")]
+		public void clide_sln_exists_prints_info() {
+			Clide("sln").Text.ShouldEqual("Created new solution: tmp\n");
+			Clide("sln").Text.ShouldNotContain("FooBar");
+			Clide("sln").Text.ShouldContain("No projects");
+
+			Clide("new", "FooBar");
+			Clide("sln", "add", "FooBar");
+
+			Clide("sln").Text.ShouldContain("FooBar"); // simply make sure that project names are included in the info
+		}
+
+		[Test][Description("clide sln FooBar (should make/show solution)")]
+		public void clide_sln_foobar() {
+			Clide("sln", "Foo").Text.ShouldEqual("Created new solution: Foo\n");
+			Clide("sln", "Foo").Text.ShouldContain("Project already exists: Foo");
 		}
 	}
 }
