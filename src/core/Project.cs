@@ -76,21 +76,28 @@ namespace Clide {
 		/// </remarks>
 		public virtual string Path { get; set; }
 
-		/// <summary>This project's "Name."  If this project has a Solution, this is set by that.  Else we use the project's AssemblyName.</summary>
+		/// <summary>This project's "Name."  This is really just an alias to the AssemblyName (and SolutionName).</summary>
 		public virtual string Name {
 			get {
-				if (this.Exists())
-					return AssemblyName;
-				else
-					return _name;
+				return (Global == null) ? SolutionName : AssemblyName;
 			}
 			set {
-				if (this.Exists())
-					AssemblyName = value;
-				else
-					_name = value;
+				if (SolutionName == null) SolutionName = value;
+				if (Global       != null) AssemblyName = value;
 			}
 		}
+
+		/// <summary>If this project is referenced in a Solution, this is this project's "Name" in the solution</summary>
+		/// <remarks>
+		/// So a project has a Name *and* a SolutionName?  WTF?
+		///
+		/// Well ... for awhile, we were sharing Project.Name with the name we use in a Solution, but that got icky.
+		///
+		/// It's a much cleaner solution to simply store the custom Solution name for a project in this different property.
+		///
+		/// Typically, you can just use project.Name but, if you need the solution's exact name for this project, use this.
+		/// </remarks>
+		public virtual string SolutionName { get; set; }
 
 		/// <summary>If this Project was loaded by a Solution, this is a reference to that Solution.  May be null.</summary>
 		public virtual Solution Solution { get; set; }
@@ -194,6 +201,7 @@ namespace Clide {
 
 		/// <summary>Persists any changes we've made to the XML Doc (eg. using AddReference) to disk (saves to Path)</summary>
 		public virtual Project Save() {
+			Directory.CreateDirectory(System.IO.Path.GetDirectoryName(this.FullPath())); // make sure the directory exists
 			Doc.SaveToFile(Path);
 			return this;
 		}

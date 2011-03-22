@@ -71,14 +71,24 @@ namespace Clide.Specs {
 			project.Configurations.Count.ShouldEqual(0);
 		}
 
-		// URHERE - We need to be able to create projects in subdirectories easily
-
-		[Test][Description("clide new Source/Foo")][Ignore]
+		[Test][Description("clide new Source/Foo | clide new Source\\Foo\\Bar")]
 		public void clide_new_project_in_subdirectory() {
+			if (Path.DirectorySeparatorChar == '/') {
+				Clide("new", "Source/Foo").Text.ShouldEqual("Created new project: Foo\n");
+				var project = new Project(Temp("Source", "Foo.csproj"));
+				project.Name.ShouldEqual("Foo");
+			} else {
+				Clide("new", "Source\\Foo\\Bar").Text.ShouldEqual("Created new project: Bar\n");
+				var project = new Project(Temp("Source", "Foo", "Bar.csproj"));
+				project.Name.ShouldEqual("Bar");
+			}
 		}
 
-		[Test][Description("clide new Source\\Foo\\Bar[.csproj]")][Ignore]
-		public void clide_new_project_in_subdirectory() {
+		[Test][Description("clide new Source/Hi.csproj")]
+		public void clide_new_project_subdir_and_csproj_extension() {
+			Clide("new", "Source/Hi.csproj").Text.ShouldEqual("Created new project: Hi\n");
+			var project = new Project(Temp("Source", "Hi.csproj"));
+			project.Name.ShouldEqual("Hi");
 		}
 	}
 }

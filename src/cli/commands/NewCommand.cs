@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Mono.Options;
 using ConsoleRack;
 using Clide.Extensions;
@@ -36,8 +37,9 @@ namespace Clide {
 			};
 			var extra = options.Parse(Request.Arguments);
 
-			var projectName = (extra.Count > 0) ? extra.First() : Path.GetFileName(Path.GetFullPath(Global.WorkingDirectory));
-			var project     = new Project(Path.Combine(Global.WorkingDirectory, projectName + ".csproj"));
+			var projectPath = (extra.Count > 0) ? extra.First() : Path.GetFileName(Path.GetFullPath(Global.WorkingDirectory));
+			var projectName = Path.GetFileNameWithoutExtension(projectPath); // take the last *.csproj part of the path and use * as the name
+			var project     = new Project(Path.Combine(Global.WorkingDirectory, Regex.Replace(projectPath, @"\.csproj$", "") + ".csproj"));
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)
 			if (! bare) {
