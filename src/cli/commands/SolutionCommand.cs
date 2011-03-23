@@ -62,8 +62,8 @@ namespace Clide {
 			if (Request.Arguments.Length == 0)
 				return CreateNewSolution();
 
-			var args       = Request.Arguments.ToList();
-			var subCommand = args.First(); args.RemoveAt(0);
+			var args          = Request.Arguments.ToList();
+			var subCommand    = args.First(); args.RemoveAt(0);
 			Request.Arguments = args.ToArray();
 
 			switch (subCommand.ToLower()) {
