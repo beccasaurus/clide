@@ -74,8 +74,19 @@ namespace Clide.Specs {
 			project.References.First().HintPath.Should(Be.Null);
 		}
 
-		[Test][Description("clide references add ../src/Foo.csproj")][Ignore]
+		[Test][Description("clide references add ../src/Foo.csproj")]
 		public void clide_references_add_project() {
+			// Clide("references", "add", Example("FluentXml.Specs.csproj")).Text.ShouldEqual("Added reference FluentXml.Specs to CoolProject\n");
+			var output = Clide("references", "add", Example("FluentXml.Specs.csproj")).Text;
+			Console.WriteLine("output: {0}", output);
+			output.ShouldEqual("Added reference FluentXml.Specs to CoolProject\n");
+
+			project.Reload();
+			project.References.Count.ShouldEqual(0);
+			project.ProjectReferences.Count.ShouldEqual(1);
+			project.ProjectReferences.First().ProjectId.ToString().ShouldEqual("73123bfc-2a8a-4160-80fc-597a2b460c66");
+			project.ProjectReferences.First().ProjectFile.ShouldEqual("FluentXml.Specs.csproj"); // <--- relative!
+			project.ProjectReferences.First().Name.ShouldEqual("? name ?");
 		}
 
 		[Test][Description("clide references rm Foo.dll")][Ignore]

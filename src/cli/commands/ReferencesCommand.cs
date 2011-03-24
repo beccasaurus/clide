@@ -72,6 +72,19 @@ namespace Clide {
 				return;
 			}
 
+			// It's a MSBuild project file?
+			if (reference.ToLower().EndsWith("proj")) {
+				var referencedProject = new Project(reference);
+				var projectDir        = Path.GetFullPath(project.Path).AsFile().DirName();
+				Console.WriteLine("dir: {0}", projectDir.AsDir());
+				Console.WriteLine("reference: {0}", reference);
+				Console.WriteLine("relative ref: {0}", projectDir.AsDir().Relative(reference));
+				var relativePath      = projectDir.AsDir().Relative(reference).TrimStart('/');
+				project.ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
+				response.Append("Added reference {0} to {1}\n", referencedProject.Name, project.Name);
+				return;
+			}
+
 			Assembly assembly;
 
 			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
