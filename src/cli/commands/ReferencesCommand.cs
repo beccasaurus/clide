@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Mono.Options;
@@ -56,12 +57,36 @@ namespace Clide {
 
 			var response = new Response();
 			foreach (var reference in Request.Arguments) {
-				project.References.AddGacReference(reference);
-				response.Append("Added reference {0} to {1}\n", reference, project.Name);
+				AddReference(response, reference, project);
 			}
 
 			project.Save();
 			return response;
+		}
+
+		public virtual void AddReference(Response response, string reference, Project project) {
+			var path = Path.Combine(Global.WorkingDirectory, reference);
+			if (path.AsFile().DoesNotExist()) {
+				project.References.AddGacReference(reference);
+				response.Append("Added reference {0} to {1}\n", reference, project.Name);
+				return;
+			}
+
+			Assembly assembly;
+
+			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
+			try {
+				assembly = Assembly.ReflectionOnlyLoadFrom(path);
+			} catch (Exception ex) {
+				project.References.AddDll(Path.GetFileName(reference), reference);
+				response.Append("Couldn't load assembly: {0}.  Adding anyway.  Error: {1}\n", reference, ex.Message);
+				response.Append("Added reference {0} to {1}\n", reference, project.Name);
+				return;
+			}
+			
+			// The assembly loaded properly
+			project.References.AddDll(assembly.FullName, reference);
+			response.Append("Added reference {0} to {1}\n", assembly.GetName().Name, project.Name);
 		}
 
 		public virtual Response RemoveReferences() {
