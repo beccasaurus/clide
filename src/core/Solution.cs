@@ -88,7 +88,7 @@ namespace Clide {
 				return new Section {
 					Name        = "SolutionConfigurationPlatforms",
 					PreSolution = true,
-					Text        = "Debug|Any CPU = Debug|Any CPU \n\t\tRelease|Any CPU = Release|Any CPU "
+					Text        = string.Format("Debug|Any CPU = Debug|Any CPU {0}\t\tRelease|Any CPU = Release|Any CPU ", Environment.NewLine)
 				};
 			}
 		}
@@ -118,7 +118,8 @@ namespace Clide {
 					}
 				}
 
-				section.Text = string.Join("\n\t\t", lines.ToArray());
+                var joinString = Environment.NewLine + "\t\t";
+				section.Text   = string.Join(joinString, lines.ToArray());
 
 				return section;
 			}
