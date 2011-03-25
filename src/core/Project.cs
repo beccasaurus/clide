@@ -208,7 +208,7 @@ namespace Clide {
 
 		/// <summary>Returns the XML representation of this Project's XmlDocument (which is persists itself to)</summary>
 		public virtual string ToXml() {
-			return Doc.ToXml();
+            return Doc.ToXml().TrimStart((char) 65279); // On Windows, we get a weird little invisible char at the beginning
 		}
 
 		/// <summary>Parse (or re-Parse) this project file (if it exists).</summary>

@@ -368,7 +368,7 @@ namespace Clide.Specs {
 				<?xml version=""1.0"" encoding=""utf-8""?>
 				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "" />
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 
 			project.Configurations.Add("Bar");
 			project.ToXml().ShouldEqual(@"
@@ -376,7 +376,7 @@ namespace Clide.Specs {
 				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
 				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Foo|AnyCPU' "" />
 				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Bar|AnyCPU' "" />
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 
 			project.Config["Foo"]["Hello"] = "there";
 			project.ToXml().ShouldEqual(@"
@@ -386,7 +386,7 @@ namespace Clide.Specs {
 				    <Hello>there</Hello>
 				  </PropertyGroup>
 				  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Bar|AnyCPU' "" />
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 
 			project.Configurations.AddGlobalConfiguration();
 			project.Global["Hello"] = "Default Hello";
@@ -400,7 +400,7 @@ namespace Clide.Specs {
 				  <PropertyGroup>
 				    <Hello>Default Hello</Hello>
 				  </PropertyGroup>
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test]
@@ -473,7 +473,7 @@ namespace Clide.Specs {
 				  <ItemGroup>
 				    <Reference Include=""System"" />
 				  </ItemGroup>
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 
 			project.References.AddDll("Something", "../lib/foo/Something.dll");
 			project.ToXml().ShouldEqual(@"
@@ -486,7 +486,7 @@ namespace Clide.Specs {
 				      <SpecificVersion>False</SpecificVersion>
 				    </Reference>
 				  </ItemGroup>
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test]
@@ -504,7 +504,7 @@ namespace Clide.Specs {
 				      <Name>CoolProject</Name>
 				    </ProjectReference>
 				  </ItemGroup>
-				</Project>".TrimLeadingTabs(4).TrimStart('\n'));
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test]
