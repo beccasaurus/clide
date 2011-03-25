@@ -65,8 +65,9 @@ namespace Clide {
 		public virtual string RelativePath {
 			get { return _relativePath; }
 			set { 
+                Console.WriteLine("Setting relative path to: {0}", value);
 				if (File.Exists(value)) Path = value;
-				_relativePath = NormalizePath(value);
+				_relativePath = NormalizePath(value).TrimStart(@"\/".ToCharArray());
 			}
 		}
 

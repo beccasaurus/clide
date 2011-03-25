@@ -57,9 +57,13 @@ namespace Clide.Specs {
 			File.Exists(Temp("tmp.sln")).Should(Be.False);
 			File.Exists(Temp("WickedAwesome.sln")).Should(Be.True);
 
-			var text = Solution.FromPath(Temp("WickedAwesome.sln")).ToText();
+            var sln = Solution.FromPath(Temp("WickedAwesome.sln"));
+            sln.Projects.Count.ShouldEqual(1);
+            sln.Projects.First().Name.ShouldEqual("AwesomeProject");
+
+			var text = sln.ToText();
 			text.ShouldContain("Microsoft Visual Studio Solution File");
-			text.ShouldContain("AwesomeProject");
+			text.ShouldContain("AwesomeProject"); // <--- should get added by default
 		}
 
 		[Test][Description("clide sln -n Foo.sln")]
@@ -86,7 +90,7 @@ namespace Clide.Specs {
 
 			new Solution(Temp("tmp.sln")).Projects.Should(Be.Empty);
 
-			Clide("sln", "add", "AwesomeProject.csproj").Text.ShouldEqual("Added AwesomeProject to Solution\n");
+			Clide("sln", "add", "AwesomeProject.csproj").Text.ShouldContain("Added AwesomeProject to Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Count.ShouldEqual(1);
 			new Solution(Temp("tmp.sln")).Projects.First().Name.ShouldEqual("AwesomeProject");
@@ -95,11 +99,11 @@ namespace Clide.Specs {
 		[Test][Description("clide sln Dir/SubDir/Foo.csproj")]
 		public void clide_sln_add_project_in_subdirectory() {
 			Clide("sln");
-			Clide("new", "Dir/SubDir/Foo");
+			Clide("new", Rel("Dir/SubDir/Foo"));
 
 			new Solution(Temp("tmp.sln")).Projects.Should(Be.Empty);
 
-			Clide("sln", "add", "Dir/SubDir/Foo.csproj").Text.ShouldEqual("Added Foo to Solution\n");
+			Clide("sln", "add", Rel("Dir/SubDir/Foo.csproj")).Text.ShouldContain("Added Foo to Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Count.ShouldEqual(1);
 			new Solution(Temp("tmp.sln")).Projects.First().Name.ShouldEqual("Foo");
@@ -109,18 +113,18 @@ namespace Clide.Specs {
 		[Test][Description("clide sln rm Foo.csproj")]
 		public void clide_sln_remove_project() {
 			Clide("sln");
-			Clide("new", "Dir/SubDir/Foo");
+			Clide("new", Rel("Dir/SubDir/Foo"));
 			Clide("new", "Bar");
-			Clide("sln", "add", "Dir/SubDir/Foo.csproj").Text.ShouldEqual("Added Foo to Solution\n");
-			Clide("sln", "add", "Bar.csproj"           ).Text.ShouldEqual("Added Bar to Solution\n");
+			Clide("sln", "add", Rel("Dir/SubDir/Foo.csproj")).Text.ShouldContain("Added Foo to Solution");
+			Clide("sln", "add", "Bar.csproj"           ).Text.ShouldContain("Added Bar to Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ "Foo", "Bar" });
 
-			Clide("sln", "rm", "Bar.csproj").Text.ShouldEqual("Removed Bar from Solution\n");
+			Clide("sln", "rm", "Bar.csproj").Text.ShouldContain("Removed Bar from Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ "Foo" });
 
-			Clide("sln", "rm", "Dir/SubDir/Foo.csproj").Text.ShouldEqual("Removed Foo from Solution\n");
+			Clide("sln", "rm", Rel("Dir/SubDir/Foo.csproj")).Text.ShouldContain("Removed Foo from Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Should(Be.Empty);
 		}
@@ -130,23 +134,23 @@ namespace Clide.Specs {
 			Clide("sln");
 			Clide("new", "Dir/SubDir/Foo");
 			Clide("new", "Bar");
-			Clide("sln", "add", "Dir/SubDir/Foo.csproj").Text.ShouldEqual("Added Foo to Solution\n");
-			Clide("sln", "add", "Bar.csproj"           ).Text.ShouldEqual("Added Bar to Solution\n");
+			Clide("sln", "add", "Dir/SubDir/Foo.csproj").Text.ShouldContain("Added Foo to Solution");
+			Clide("sln", "add", "Bar.csproj"           ).Text.ShouldContain("Added Bar to Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ "Foo", "Bar" });
 
-			Clide("sln", "rm", "Foo").Text.ShouldEqual("Removed Foo from Solution\n");
+			Clide("sln", "rm", "Foo").Text.ShouldContain("Removed Foo from Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Select(p => p.Name).ToArray().ShouldEqual(new string[]{ "Bar" });
 
-			Clide("sln", "rm", "Bar").Text.ShouldEqual("Removed Bar from Solution\n");
+			Clide("sln", "rm", "Bar").Text.ShouldContain("Removed Bar from Solution");
 
 			new Solution(Temp("tmp.sln")).Projects.Should(Be.Empty);
 		}
 
 		[Test][Description("clide sln")]
 		public void clide_sln_exists_prints_info() {
-			Clide("sln").Text.ShouldEqual("Created new solution: tmp\n");
+			Clide("sln").Text.ShouldContain("Created new solution: tmp");
 			Clide("sln").Text.ShouldNotContain("FooBar");
 			Clide("sln").Text.ShouldContain("No projects");
 
@@ -158,7 +162,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide sln FooBar (should make/show solution)")]
 		public void clide_sln_foobar() {
-			Clide("sln", "Foo").Text.ShouldEqual("Created new solution: Foo\n");
+			Clide("sln", "Foo").Text.ShouldContain("Created new solution: Foo");
 			Clide("sln", "Foo").Text.ShouldContain("Project already exists: Foo");
 		}
 	}

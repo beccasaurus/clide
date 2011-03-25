@@ -12,7 +12,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide help new")]
 		public void clide_help_new() {
-			Clide("help", "new").Text.ShouldEqual("Helpful information about the 'new' command\n");
+			Clide("help", "new").Text.ShouldContain("Helpful information about the 'new' command");
 		}
 
 		[Test][Description("clide new")]
@@ -57,7 +57,7 @@ namespace Clide.Specs {
 		/// <summary>Does the same thing as -d|--default</summary>
 		[Test][Description("clide new MyProject")]
 		public void clide_new_Name() {
-			Clide("new", "MyProject").Text.ShouldEqual("Created new project: MyProject\n");
+			Clide("new", "MyProject").Text.ShouldContain("Created new project: MyProject");
 
 			var project = new Project(Temp("MyProject.csproj"));
 			project.Configurations.Select(config => config.Name).ToArray().ShouldEqual(new string[]{ null, "Debug", "Release" });
@@ -65,7 +65,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide new MyProject -b|--bare")]
 		public void clide_new_Name_bare() {
-			Clide("new", "MyProject", "--bare").Text.ShouldEqual("Created new project: MyProject\n");
+			Clide("new", "MyProject", "--bare").Text.ShouldContain("Created new project: MyProject");
 
 			var project = new Project(Temp("MyProject.csproj"));
 			project.Configurations.Count.ShouldEqual(0);
@@ -74,11 +74,11 @@ namespace Clide.Specs {
 		[Test][Description("clide new Source/Foo | clide new Source\\Foo\\Bar")]
 		public void clide_new_project_in_subdirectory() {
 			if (Path.DirectorySeparatorChar == '/') {
-				Clide("new", "Source/Foo").Text.ShouldEqual("Created new project: Foo\n");
+				Clide("new", "Source/Foo").Text.ShouldContain("Created new project: Foo");
 				var project = new Project(Temp("Source", "Foo.csproj"));
 				project.Name.ShouldEqual("Foo");
 			} else {
-				Clide("new", "Source\\Foo\\Bar").Text.ShouldEqual("Created new project: Bar\n");
+				Clide("new", "Source\\Foo\\Bar").Text.ShouldContain("Created new project: Bar");
 				var project = new Project(Temp("Source", "Foo", "Bar.csproj"));
 				project.Name.ShouldEqual("Bar");
 			}
@@ -86,7 +86,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide new Source/Hi.csproj")]
 		public void clide_new_project_subdir_and_csproj_extension() {
-			Clide("new", "Source/Hi.csproj").Text.ShouldEqual("Created new project: Hi\n");
+			Clide("new", "Source/Hi.csproj").Text.ShouldContain("Created new project: Hi");
 			var project = new Project(Temp("Source", "Hi.csproj"));
 			project.Name.ShouldEqual("Hi");
 		}

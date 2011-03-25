@@ -76,30 +76,38 @@ namespace Clide {
 			if (reference.ToLower().EndsWith("proj")) {
 				var referencedProject = new Project(reference);
 				var projectDir        = Path.GetFullPath(project.Path).AsFile().DirName();
-				Console.WriteLine("dir: {0}", projectDir.AsDir());
-				Console.WriteLine("reference: {0}", reference);
-				Console.WriteLine("relative ref: {0}", projectDir.AsDir().Relative(reference));
-				var relativePath      = projectDir.AsDir().Relative(reference).TrimStart('/');
+                // URHERE - this won't go up dirs and make a path like ..\..\foo ... i think?
+				Console.WriteLine("dir: {0}", projectDir);
+				// Console.WriteLine("reference: {0}", reference);
+				// Console.WriteLine("relative ref: {0}", projectDir.AsDir().Relative(reference));
+				var relativePath      = projectDir.AsDir().Relative(reference).TrimStart('/').TrimStart('\\');
+                Console.WriteLine("relative: {0}", relativePath);
 				project.ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
 				response.Append("Added reference {0} to {1}\n", referencedProject.Name, project.Name);
 				return;
 			}
 
 			Assembly assembly;
+            string shortName = reference;
+            string fullName  = reference;
 
 			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
 			try {
-				assembly = Assembly.ReflectionOnlyLoadFrom(path);
+				assembly  = Assembly.ReflectionOnlyLoadFrom(path);
+                fullName  = assembly.FullName;
+                shortName = assembly.GetName().Name;
 			} catch (Exception ex) {
 				project.References.AddDll(Path.GetFileName(reference), reference);
 				response.Append("Couldn't load assembly: {0}.  Adding anyway.  Error: {1}\n", reference, ex.Message);
 				response.Append("Added reference {0} to {1}\n", reference, project.Name);
 				return;
-			}
+			} finally {
+                // Need to unload ... to do this, we need another app domain ...
+            }
 			
 			// The assembly loaded properly
-			project.References.AddDll(assembly.FullName, reference);
-			response.Append("Added reference {0} to {1}\n", assembly.GetName().Name, project.Name);
+			project.References.AddDll(fullName, reference);
+			response.Append("Added reference {0} to {1}\n", shortName, project.Name);
 		}
 
 		public virtual Response RemoveReferences() {

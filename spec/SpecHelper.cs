@@ -60,5 +60,13 @@ namespace Clide.Specs {
 			allParts.Insert(0, TempRoot);
 			return Path.GetFullPath(Path.Combine(allParts.ToArray()));
 		}
+
+        /// <summary>This takes a relative path like "Foo/Bar" and will replace the slashes with Windows ones, if on Windows</summary>
+        public virtual string Rel(string path) {
+            if (Environment.OSVersion.ToString().Contains("Windows"))
+                return path.Replace("/", "\\");
+            else
+                return path; // assume that we use Unix paths everywhere
+        }
 	}
 }

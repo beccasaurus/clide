@@ -140,7 +140,9 @@ namespace Clide {
 
 			if (this.DoesNotExist()) return this;
 
-			foreach (var line in this.Lines())
+			foreach (var rawLine in this.Lines()) {
+                var line = rawLine.Trim("\r\n".ToCharArray());
+                Console.WriteLine("line: {0}", line);
 				if (line.StartsWith("Microsoft Visual Studio Solution File"))
 					FormatVersion = GetFormatVersionFromLine(line);
 				else if (line.StartsWith("# Visual Studio"))
@@ -154,6 +156,7 @@ namespace Clide {
 					var section   = Sections.Last();
 					section.Text += string.IsNullOrEmpty(section.Text) ? clean : "\n" + clean;
 				}
+            }
 
 			return this;
 		}
@@ -200,6 +203,7 @@ namespace Clide {
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
 		Project ProjectFromLine(string line) {
+            Console.WriteLine("ProjectFromLine: {0}", line);
 			var quotedStuff = GetStuffInQuotes(line);
 			var type        = quotedStuff[0].ToGuid();
 			var name        = quotedStuff[1];
@@ -242,7 +246,7 @@ namespace Clide {
 
 			var relativeProjectPath = string.IsNullOrEmpty(this.Path)
 				? project.Path
-				: this.DirName().AsDir().Relative(project.Path).TrimStart('/');
+				: this.DirName().AsDir().Relative(project.Path).TrimStart(@"\/".ToCharArray());
 
 			builder.AppendLine("Project({0}) = {1}, {2}, {3}", 
 					project.ProjectTypeId.QuotedWithCurlies(),
