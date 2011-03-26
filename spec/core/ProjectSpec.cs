@@ -595,8 +595,29 @@ namespace Clide.Specs {
 		public void can_add_and_edit_compile_paths_to_exclude() {
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_include_paths_to_include_as_content() {
+			var project = new Project();
+
+			project.Content.Add(include: @"foo\bar.txt");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Content Include=""foo\bar.txt"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
+
+			// It should normalize Unix -> Windows paths
+			project.Content.Add(include: @"foo/hi.txt");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Content Include=""foo\bar.txt"" />
+				    <Content Include=""foo\hi.txt"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test][Ignore]

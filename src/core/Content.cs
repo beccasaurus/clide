@@ -24,19 +24,19 @@ namespace Clide {
 		/// <summary>This Content's Include attribute</summary>
 		public virtual string Include {
 			get { return Node.Attr("Include"); }
-			set { Node.Attr("Include", value); }
+			set { Node.Attr("Include", Project.NormalizePath(value)); }
 		}
 
 		/// <summary>This Content's Exclude attribute</summary>
 		public virtual string Exclude {
 			get { return Node.Attr("Exclude"); }
-			set { Node.Attr("Exclude", value); }
+			set { Node.Attr("Exclude", Project.NormalizePath(value)); }
 		}
 
 		/// <summary>A file that this Content is DependentUpon</summary>
 		public virtual string DependentUpon {
 			get { return Node.Node("DependentUpon").Text(); }
-			set { Node.NodeOrNew("DependentUpon").Text(value);   }
+			set { Node.NodeOrNew("DependentUpon").Text(Project.NormalizePath(value));   }
 		}
 
 		/// <summary>Remove this Content from the Project.  Calling Project.Save() will persist this change.</summary>
