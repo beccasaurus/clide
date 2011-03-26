@@ -24,19 +24,25 @@ namespace Clide {
 		/// <summary>This CompilePath's Include attribute</summary>
 		public virtual string Include {
 			get { return Node.Attr("Include"); }
-			set { Node.Attr("Include", value); }
+			set { Node.Attr("Include", Project.NormalizePath(value)); }
 		}
 
 		/// <summary>This CompilePath's Exclude attribute</summary>
 		public virtual string Exclude {
 			get { return Node.Attr("Exclude"); }
-			set { Node.Attr("Exclude", value); }
+			set { Node.Attr("Exclude", Project.NormalizePath(value)); }
 		}
 
 		/// <summary>A file that this CompilePath is DependentUpon</summary>
 		public virtual string DependentUpon {
 			get { return Node.Node("DependentUpon").Text(); }
-			set { Node.NodeOrNew("DependentUpon").Text(value);   }
+			set { Node.NodeOrNew("DependentUpon").Text(Project.NormalizePath(value));   }
+		}
+
+		/// <summary>A file that this CompilePath is DependentUpon</summary>
+		public virtual string Link {
+			get { return Node.Node("Link").Text(); }
+			set { Node.NodeOrNew("Link").Text(Project.NormalizePath(value));   }
 		}
 
 		/// <summary>Remove this CompilePath from the Project.  Calling Project.Save() will persist this change.</summary>

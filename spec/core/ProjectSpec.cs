@@ -545,8 +545,45 @@ namespace Clide.Specs {
 			project.TargetImports.Last().Project.ShouldEqual(@"$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_include_paths_to_compile() {
+			var project = new Project();
+
+			project.CompilePaths.Add(include: @"foo\bar.cs");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Compile Include=""foo\bar.cs"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
+
+			// It should normalize Unix -> Windows paths
+			project.CompilePaths.Add(include: @"foo/hi.cs");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Compile Include=""foo\bar.cs"" />
+				    <Compile Include=""foo\hi.cs"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
+		}
+
+		[Test]
+		public void can_add_include_paths_to_compile_with_link() {
+			var project = new Project();
+
+			project.CompilePaths.Add(include: @"foo\bar.cs", link: "external\\foo");
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <Compile Include=""foo\bar.cs"">
+				      <Link>external\foo</Link>
+				    </Compile>
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		/*

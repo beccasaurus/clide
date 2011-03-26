@@ -53,12 +53,13 @@ namespace Clide {
 		}
 
 		/// <summary>Adds and returns a CompilePath</summary>
-		public virtual CompilePath Add(string include = null, string exclude = null) {
-			if (include == null && exclude == null) return null;
+		public virtual CompilePath Add(string include = null, string exclude = null, string link = null) {
+			if (include == null && exclude == null && link == null) return null;
 
 			var compile = new CompilePath(this, CompilePathsItemGroup.NewNode("Compile"));
 			if (include != null) compile.Include = include;
 			if (exclude != null) compile.Exclude = exclude;
+			if (link    != null) compile.Link    = link;
 			return compile;
 		}
 	}
