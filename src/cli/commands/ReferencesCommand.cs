@@ -64,53 +64,55 @@ namespace Clide {
 			return response;
 		}
 
+        // TODO - move out of here
+        [Serializable]
         public class AssemblyInfo {
             public virtual string Name     { get; set; }
             public virtual string FullName { get; set; }
         }
 
-        /// <summary>Given a path to a DLL, this returns back null if we couldn't load the DLL, else an AssemblyInfo</summary>
-        public static AssemblyInfo GetAssemblyInfo(string path) {
-            Console.WriteLine("Trying to load: {0}", path);
+        // TODO - move out of here
+        public class RemoteAppDomainThingy : MarshalByRefObject {
+            public virtual AssemblyInfo GetInfoForAssembly(string assemblyPath) {
+                Assembly assembly = null;
 
-            if (! File.Exists(path)) return null;
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (o,e) => {
+                    Console.WriteLine("(ReflectionOnly) Trying to load: {0}", e.Name);
+                    return null;
+                };
 
-            // Setup the new AppDomain
-            var appDomainName = string.Format("{0}-DomainForFile-{1}", DateTime.Now.Ticks, Path.GetFileNameWithoutExtension(path));
-            var domainSetup   = new AppDomainSetup { ApplicationName = appDomainName, ApplicationBase = Directory.GetCurrentDirectory() };
-            var appDomain     = AppDomain.CreateDomain(appDomainName, null, domainSetup);
+                try {
+                    assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
+                } catch (FileNotFoundException) {
+                    // Continue loading, even if we couldn't find a referenced assembly
+                } catch (BadImageFormatException) {
+                    return null; // Not a valid Assembly?
+                }
 
-            // Grrr ... see: http://www.codeproject.com/Articles/42312/Loading-Assemblies-in-Separate-Directories-Into-a-.aspx?msg=3468132&display=Mobile
-            // We need to clean this up and do it "properly" ...
-
-            /*
-            appDomain.ReflectionOnlyAssemblyResolve
-
-            // We don't need to resolve dependencies - we're just loading the assembly to get it's name
-            AppDomain.CurrentDomain.AssemblyResolve += (o,e) => {
-                return appDomain.Load(e.Name);
-
-                Console.WriteLine("Trying to load dependency: {0}", e.Name);
-                // return e.Name.Contains("clide") ? appDomain.Load(File.ReadAllBytes(Assembly.GetExecutingAssembly().Location))) : null;
-                // if (e.Name.Contains("clide")) {
-                //     Console.WriteLine("Trying to load Clide");
-                //     return Assembly.GetExecutingAssembly();
-                // } else {
-                //     Console.WriteLine("Hmm ... trying to load something else ... {0}", e.Name);
-                // }
-                return null;
-            };
-             * */
-
-            try {
-                var assembly = appDomain.Load(File.ReadAllBytes(path));
                 return new AssemblyInfo {
                     Name     = assembly.GetName().Name,
                     FullName = assembly.FullName
                 };
-            } catch (Exception ex) {
-                Console.WriteLine("BOOM!  {0}", ex);
-                return null;
+            }
+        }
+
+        // TODO - move out of here
+        /// <summary>Given a path to a DLL, this returns back null if we couldn't load the DLL, else an AssemblyInfo</summary>
+        public static AssemblyInfo GetAssemblyInfo(string path) {
+            if (! File.Exists(path)) return null;
+
+            Console.WriteLine("Creating new AppDomain to load {0}", path);
+            var appDomain = AppDomain.CreateDomain(
+                friendlyName: string.Format("{0}-DomainFor-{1}", DateTime.Now.Ticks, Path.GetFileName(path)),
+                securityInfo: AppDomain.CurrentDomain.Evidence,
+                info:         AppDomain.CurrentDomain.SetupInformation
+            );
+
+            try {
+                // Get a reference to a AssemblyInfo object (loaded in our other AppDomain) ... it will do the work for us ...
+                var remoteType     = typeof(RemoteAppDomainThingy);
+                var remoteInstance = appDomain.CreateInstanceFrom(assemblyFile: remoteType.Assembly.Location, typeName: remoteType.FullName).Unwrap() as RemoteAppDomainThingy;
+                return remoteInstance.GetInfoForAssembly(path);
             } finally {
                 AppDomain.Unload(appDomain);
             }
