@@ -43,7 +43,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide references add Foo.dll")]
 		public void clide_references_add_assembly() {
-			Clide("references", "add", "lib" + Slash + "Foo.dll").Text.ShouldEqual("Added reference Foo to CoolProject\n");
+			Clide("references", "add", "lib" + Slash + "Foo.dll").Text.ShouldContain("Added reference Foo to CoolProject");
 
 			project.Reload();
 			project.References.Count.ShouldEqual(1);

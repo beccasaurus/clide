@@ -38,7 +38,6 @@ namespace Clide.Specs {
 				{ "foo",          "foo"           },
 				{ "foo/bar",      "foo\\bar"      },
 				{ "Hello World",  "Hello World"   },
-				{ "/hello",       "\\hello"       },
 				{ "hi / there",   "hi \\ there"   },
 				{ "src\\foo/bar", "src\\foo\\bar" }
 			};

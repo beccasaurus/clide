@@ -64,6 +64,58 @@ namespace Clide {
 			return response;
 		}
 
+        public class AssemblyInfo {
+            public virtual string Name     { get; set; }
+            public virtual string FullName { get; set; }
+        }
+
+        /// <summary>Given a path to a DLL, this returns back null if we couldn't load the DLL, else an AssemblyInfo</summary>
+        public static AssemblyInfo GetAssemblyInfo(string path) {
+            Console.WriteLine("Trying to load: {0}", path);
+
+            if (! File.Exists(path)) return null;
+
+            // Setup the new AppDomain
+            var appDomainName = string.Format("{0}-DomainForFile-{1}", DateTime.Now.Ticks, Path.GetFileNameWithoutExtension(path));
+            var domainSetup   = new AppDomainSetup { ApplicationName = appDomainName, ApplicationBase = Directory.GetCurrentDirectory() };
+            var appDomain     = AppDomain.CreateDomain(appDomainName, null, domainSetup);
+
+            // Grrr ... see: http://www.codeproject.com/Articles/42312/Loading-Assemblies-in-Separate-Directories-Into-a-.aspx?msg=3468132&display=Mobile
+            // We need to clean this up and do it "properly" ...
+
+            /*
+            appDomain.ReflectionOnlyAssemblyResolve
+
+            // We don't need to resolve dependencies - we're just loading the assembly to get it's name
+            AppDomain.CurrentDomain.AssemblyResolve += (o,e) => {
+                return appDomain.Load(e.Name);
+
+                Console.WriteLine("Trying to load dependency: {0}", e.Name);
+                // return e.Name.Contains("clide") ? appDomain.Load(File.ReadAllBytes(Assembly.GetExecutingAssembly().Location))) : null;
+                // if (e.Name.Contains("clide")) {
+                //     Console.WriteLine("Trying to load Clide");
+                //     return Assembly.GetExecutingAssembly();
+                // } else {
+                //     Console.WriteLine("Hmm ... trying to load something else ... {0}", e.Name);
+                // }
+                return null;
+            };
+             * */
+
+            try {
+                var assembly = appDomain.Load(File.ReadAllBytes(path));
+                return new AssemblyInfo {
+                    Name     = assembly.GetName().Name,
+                    FullName = assembly.FullName
+                };
+            } catch (Exception ex) {
+                Console.WriteLine("BOOM!  {0}", ex);
+                return null;
+            } finally {
+                AppDomain.Unload(appDomain);
+            }
+        }
+
 		public virtual void AddReference(Response response, string reference, Project project) {
 			var path = Path.Combine(Global.WorkingDirectory, reference);
 			if (path.AsFile().DoesNotExist()) {
@@ -87,27 +139,19 @@ namespace Clide {
 				return;
 			}
 
-			Assembly assembly;
-            string shortName = reference;
-            string fullName  = reference;
+			AssemblyInfo assemblyInfo;
 
 			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
-			try {
-				assembly  = Assembly.ReflectionOnlyLoadFrom(path);
-                fullName  = assembly.FullName;
-                shortName = assembly.GetName().Name;
-			} catch (Exception ex) {
+            assemblyInfo = GetAssemblyInfo(path);
+
+			if (assemblyInfo == null) {
 				project.References.AddDll(Path.GetFileName(reference), reference);
-				response.Append("Couldn't load assembly: {0}.  Adding anyway.  Error: {1}\n", reference, ex.Message);
-				response.Append("Added reference {0} to {1}\n", reference, project.Name);
-				return;
-			} finally {
-                // Need to unload ... to do this, we need another app domain ...
+				response.Append("Couldn't load assembly: {0}.  Adding anyway." + Environment.NewLine, reference);
+				response.Append("Added reference {0} to {1}\n", Path.GetFileName(reference), project.Name);
+			} else {
+                project.References.AddDll(assemblyInfo.FullName, reference);
+			    response.Append("Added reference {0} to {1}\n", assemblyInfo.Name, project.Name);
             }
-			
-			// The assembly loaded properly
-			project.References.AddDll(fullName, reference);
-			response.Append("Added reference {0} to {1}\n", shortName, project.Name);
 		}
 
 		public virtual Response RemoveReferences() {
