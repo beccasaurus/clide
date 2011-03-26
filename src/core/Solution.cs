@@ -142,7 +142,6 @@ namespace Clide {
 
 			foreach (var rawLine in this.Lines()) {
                 var line = rawLine.Trim("\r\n".ToCharArray());
-                Console.WriteLine("line: {0}", line);
 				if (line.StartsWith("Microsoft Visual Studio Solution File"))
 					FormatVersion = GetFormatVersionFromLine(line);
 				else if (line.StartsWith("# Visual Studio"))
@@ -203,7 +202,6 @@ namespace Clide {
 
 		// Project("{GUI}") = "MyApp", "MyApp\MyApp.csproj", "{GUID}"
 		Project ProjectFromLine(string line) {
-            Console.WriteLine("ProjectFromLine: {0}", line);
 			var quotedStuff = GetStuffInQuotes(line);
 			var type        = quotedStuff[0].ToGuid();
 			var name        = quotedStuff[1];

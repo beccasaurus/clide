@@ -76,10 +76,8 @@ namespace Clide {
             public virtual AssemblyInfo GetInfoForAssembly(string assemblyPath) {
                 Assembly assembly = null;
 
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (o,e) => {
-                    Console.WriteLine("(ReflectionOnly) Trying to load: {0}", e.Name);
-                    return null;
-                };
+				// Incase we care about loading up dependencies ...
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (o,e) => null;
 
                 try {
                     assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
@@ -101,7 +99,6 @@ namespace Clide {
         public static AssemblyInfo GetAssemblyInfo(string path) {
             if (! File.Exists(path)) return null;
 
-            Console.WriteLine("Creating new AppDomain to load {0}", path);
             var appDomain = AppDomain.CreateDomain(
                 friendlyName: string.Format("{0}-DomainFor-{1}", DateTime.Now.Ticks, Path.GetFileName(path)),
                 securityInfo: AppDomain.CurrentDomain.Evidence,
@@ -130,14 +127,9 @@ namespace Clide {
 			if (reference.ToLower().EndsWith("proj")) {
 				var referencedProject = new Project(reference);
 				var projectDir        = Path.GetFullPath(project.Path).AsFile().DirName();
-                // URHERE - this won't go up dirs and make a path like ..\..\foo ... i think?
-				Console.WriteLine("dir: {0}", projectDir);
-				// Console.WriteLine("reference: {0}", reference);
-				// Console.WriteLine("relative ref: {0}", projectDir.AsDir().Relative(reference));
-				var relativePath      = projectDir.AsDir().Relative(reference).TrimStart('/').TrimStart('\\');
-                Console.WriteLine("relative: {0}", relativePath);
-				project.ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
+				var relativePath      = Project.NormalizePath(projectDir.AsDir().Relative(reference).TrimStart('/').TrimStart('\\'));
 				response.Append("Added reference {0} to {1}\n", referencedProject.Name, project.Name);
+				project.ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
 				return;
 			}
 
