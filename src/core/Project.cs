@@ -126,6 +126,12 @@ namespace Clide {
 			set { ProjectNode.Attr("ToolsVersion", value); }
 		}
 
+		/// <summary>Sets the default attributes on the Project node (DefaultTargets and ToolsVersion)</summary>
+		public virtual void SetDefaultProjectAttributes() {
+			DefaultTargets = "Build";
+			ToolsVersion   = "4.0";
+		}
+
 		/// <summary>Assembly references (from the GAC or a path to a specific DLL)</summary>
 		public virtual ProjectReferences References { get { return new ProjectReferences(this); } }
 
@@ -141,10 +147,15 @@ namespace Clide {
 		/// <summary>Imports of MSBuild targets</summary>
 		public virtual ProjectTargetImports TargetImports { get { return new ProjectTargetImports(this); } }
 
-		/*
-		/// <summary>MSBuild targets (this does NOT look at any imports)</summary>
-		public virtual ProjectTargets Targets { get { return new ProjectTargets(this); } }
+		/// <summary>MSBuild targets (this does NOT look at any imports, just adds the nodes)</summary>
+		public virtual ProjectImports Imports { get { return new ProjectImports(this); } }
 
+		/// <summary>Adds the default MSBuild import that all C# projects use</summary>
+		public virtual Import AddDefaultCSharpImport() {
+			return Imports.Add(@"$(MSBuildBinPath)\Microsoft.CSharp.targets");
+		}
+
+		/*
 		/// <summary>Resources to embed into this project when compiled</summary>
 		public virtual ProjectEmbeddedResources EmbeddedResources { get { return new ProjectEmbeddedResources(this); } }
 

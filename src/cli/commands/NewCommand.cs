@@ -43,6 +43,7 @@ namespace Clide {
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)
 			if (! bare) {
+				project.SetDefaultProjectAttributes();
 				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties(
 					root:     projectName,
 					assembly: projectName,
@@ -50,6 +51,7 @@ namespace Clide {
 				);
 				project.Configurations.Add("Debug").AddDefaultDebugProperties();
 				project.Configurations.Add("Release").AddDefaultReleaseProperties();
+				project.AddDefaultCSharpImport();
 			}
 
 			project.Save();

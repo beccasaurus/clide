@@ -88,6 +88,7 @@ namespace Clide {
 			if (root == null)                     root     = assembly;
 			if (assembly == null)                 assembly = root;
 
+			this["Configuration"]          = "Debug";
 			this["Platform"]               = "AnyCPU";
 			this["ProductVersion"]         = "8.0.30703";
 			this["SchemaVersion"]          = "2.0";
@@ -97,6 +98,7 @@ namespace Clide {
 			this["AssemblyName"]           = assembly;
 			this["TargetFrameworkVersion"] = framework;
 			this["FileAlignment"]          = "512";
+			this.GetProperty("Configuration").Condition = " '$(Configuration)' == '' ";
 			this.GetProperty("Platform").Condition = " '$(Platform)' == '' ";
 			return this;
 		}

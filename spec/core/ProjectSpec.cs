@@ -412,6 +412,7 @@ namespace Clide.Specs {
 			global.AddDefaultGlobalProperties(id, "4.0", "Library", "FooNamespace", "MyAssembly");
 
 			global.Properties.Select(prop => string.Format("{0} {1} {2}", prop.Name, prop.Text, prop.Condition)).ToArray().ShouldEqual(new string[]{
+				"Configuration Debug  '$(Configuration)' == '' ",
 				"Platform AnyCPU  '$(Platform)' == '' ",
 				"ProductVersion 8.0.30703 ",
 				"SchemaVersion 2.0 ",
@@ -422,6 +423,25 @@ namespace Clide.Specs {
 				"TargetFrameworkVersion 4.0 ",
 				"FileAlignment 512 "
 			});
+
+			// This should probably be in it's own [Test] ... snuck it in here:
+			project.SetDefaultProjectAttributes();
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" DefaultTargets=""Build"" ToolsVersion=""4.0"">
+				  <PropertyGroup>
+				    <Configuration Condition="" '$(Configuration)' == '' "">Debug</Configuration>
+				    <Platform Condition="" '$(Platform)' == '' "">AnyCPU</Platform>
+				    <ProductVersion>8.0.30703</ProductVersion>
+				    <SchemaVersion>2.0</SchemaVersion>
+				    <ProjectGuid>{PROJECT_ID}</ProjectGuid>
+				    <OutputType>Library</OutputType>
+				    <RootNamespace>FooNamespace</RootNamespace>
+				    <AssemblyName>MyAssembly</AssemblyName>
+				    <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+				    <FileAlignment>512</FileAlignment>
+				  </PropertyGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline().Replace("PROJECT_ID", id.ToString().ToUpper()));
 		}
 
 		[Test]
@@ -620,8 +640,28 @@ namespace Clide.Specs {
 				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void can_add_msbuild_target_imports() {
+			var project = new Project();
+
+			project.Imports.Count.ShouldEqual(0);
+
+			project.Imports.Add("foo.targets");
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <Import Project=""foo.targets"" />
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
+
+			project.AddDefaultCSharpImport();
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <Import Project=""foo.targets"" />
+				  <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.targets"" />
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test][Ignore]
