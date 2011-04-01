@@ -174,6 +174,21 @@ namespace Clide {
 			return Configurations.PropertiesFor(configurationName);
 		}
 
+		/// <summary>Returns the name of the default configuration (set in the global properties), if any</summary>
+		public virtual string DefaultConfigurationName { 
+			get {
+				if (Global != null && Global.Properties["Configuration"] != null)
+					return Global.Properties["Configuration"];
+				else
+					return null;
+			}
+		}
+
+		/// <summary>Returns the default configuration (via the name set in the global properties), if any</summary>
+		public virtual Configuration DefaultConfiguration { 
+			get { return (DefaultConfigurationName == null) ? null : Config[DefaultConfigurationName]; }
+		}
+
 		/// <summary>Shortcut to getting the "global" configuration</summary>
 		public virtual Configuration Global { get { return Configurations.Global; } }
 
