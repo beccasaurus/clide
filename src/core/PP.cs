@@ -132,7 +132,7 @@ namespace Clide {
 				var foundKey = original.Substring(index, key.Length);
 
 				builder.Replace(foundKey, value); // let the builder replace all instances of the key we found
-				
+
 				// Get the new string and look for another index
 				original = builder.ToString();
 				index    = original.IndexOf(key, comparison);
@@ -155,16 +155,16 @@ namespace Clide {
 		}
 
 		/// <summary>Given an anonymous object, this returns a Dictionary of strings to objects</summary>	
-        public static Dictionary<string, object> ToDictionary(object anonymousType) {
+		public static Dictionary<string, object> ToDictionary(object anonymousType) {
 			if (anonymousType == null)                       return null;
 			if (anonymousType is Dictionary<string, object>) return anonymousType as Dictionary<string, object>;
 
-            var attr = BindingFlags.Public | BindingFlags.Instance;
-            var dict = new Dictionary<string, object>();
-            foreach (var property in anonymousType.GetType().GetProperties(attr))
-                if (property.CanRead)
-                    dict.Add(property.Name, property.GetValue(anonymousType, null));
-            return dict;
-        } 
+			var attr = BindingFlags.Public | BindingFlags.Instance;
+			var dict = new Dictionary<string, object>();
+			foreach (var property in anonymousType.GetType().GetProperties(attr))
+				if (property.CanRead)
+					dict.Add(property.Name, property.GetValue(anonymousType, null));
+			return dict;
+		} 
 	}
 }
