@@ -62,8 +62,67 @@ namespace Clide.Specs {
 			PP.Replace(text, project, config: "Release", includeGlobal: true).ShouldEqual("I Release 4 times faster than AnyCPU! It's $DebugSymbols$");
 		}
 
-		[Test][Ignore]
+		// TODO Should test lots of things ... no output path ... output path as file ... as dir ... split up and make new [Test] for these
+		[Test]
 		public void can_replace_project_properties_in_a_file_given_a_project() {
+			File.Exists(Temp("Foo.cs")).Should(Be.False);
+			File.Exists(Temp("HI")).Should(Be.False);
+			File.Exists(Temp("Foo.HiThere.cs")).Should(Be.False);
+
+			var pp = new PP {
+				WorkingDirectory = Global.WorkingDirectory,
+				Project          = new Project(Temp("FluentXml.Specs.csproj"))
+			};
+
+			// Outputs to the current directory by default
+			pp.ProcessFile(Example("PP", "one-file", "Foo.cs.pp")).ShouldEqual(Temp("Foo.cs"));
+			File.ReadAllText(Temp("Foo.cs")).ShouldEqual(@"
+				// Part of Assembly: FluentXml.Specs
+				namespace FluentXml.Specs {
+					public class Foo {}
+				}
+				".TrimLeadingTabs(4).TrimStartNewline());
+
+			// Can specify an output path
+			pp.ProcessFile(Example("PP", "one-file", "Foo.cs.pp"), outputPath: Temp("HI")).ShouldEqual(Temp("HI"));
+			File.ReadAllText(Temp("HI")).ShouldEqual(@"
+				// Part of Assembly: FluentXml.Specs
+				namespace FluentXml.Specs {
+					public class Foo {}
+				}
+				".TrimLeadingTabs(4).TrimStartNewline());
+
+			// Does replacements in the file name
+			pp.ProcessFile(Example("PP", "one-file-with-tokens-in-name", "Foo.$Neato$.cs.pp"), tokens: new { Neato = "HiThere" }).ShouldEqual(Temp("Foo.HiThere.cs"));
+			File.ReadAllText(Temp("Foo.HiThere.cs")).ShouldEqual(@"
+				// Part of Assembly: FluentXml.Specs
+				// Neato: HiThere
+				// Another: $Another$
+				namespace FluentXml.Specs {
+					public class Foo {}
+				}
+				".TrimLeadingTabs(4).TrimStartNewline());
+
+			// Provide $Another$ too ... provide a Dictionary, just cuz
+			pp.ProcessFile(Example("PP", "one-file-with-tokens-in-name", "Foo.$Neato$.cs.pp"), 
+					tokens: new Dictionary<string,string> { {"Neato","HiThere"}, {"Another", "Totally Awesome"} }).ShouldEqual(Temp("Foo.HiThere.cs"));
+			File.ReadAllText(Temp("Foo.HiThere.cs")).ShouldEqual(@"
+				// Part of Assembly: FluentXml.Specs
+				// Neato: HiThere
+				// Another: Totally Awesome
+				namespace FluentXml.Specs {
+					public class Foo {}
+				}
+				".TrimLeadingTabs(4).TrimStartNewline());
+
+			// Doesn't process non .pp files (just copies them)
+			pp.ProcessFile(Example("PP", "non-pp-file", "Foo.cs")).ShouldEqual(Temp("Foo.cs"));
+			File.ReadAllText(Temp("Foo.cs")).ShouldEqual(@"
+				// Part of Assembly: $AssemblyName$
+				namespace $RootNamespace$ {
+					public class Foo {}
+				}
+				".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test][Ignore]
