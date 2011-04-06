@@ -59,6 +59,17 @@ namespace Clide {
 			return Render(text, ProjectToDictionary(project, config, includeGlobal));
 		}
 
+		/// <summary>Processes the provided directory and its pp files.</summary>
+		public virtual string ProcessDirectory(string path, string outputDir = null, Project project = null, object tokens = null) {
+			if (project == null) project = Project;
+			// TODO DRY (ProcessFile uses the same)
+			var allTokens = (project == null) ? null : ProjectToDictionary(project);
+			if (tokens != null)
+				foreach (var item in ToDictionary(tokens))
+					allTokens[item.Key] = (item.Value == null) ? null : item.Value.ToString();
+			return base.ProcessDirectory(path: path, outputDir: outputDir, tokens: allTokens);
+		}
+
 		/// <summary>Processes the provided pp file.</summary>
 		public virtual string ProcessFile(string path, string outputPath = null, Project project = null, object tokens = null) {
 			if (project == null) project = Project;
@@ -171,6 +182,29 @@ namespace Clide {
 				original = builder.ToString();
 				index    = original.IndexOf(key, comparison);
 			}
+		}
+
+		/// <summary>Processes the given directory (with an optional output path and file extension to check for)</summary>
+		/// <remarks>
+		/// If the output path is null, we output to WorkingDirectory (using the same file name).
+		/// If the fileExtension is null, we use FileExtensionToProcess or we process the file anyway.
+		/// </remarks>
+		public virtual string ProcessDirectory(string path, Dictionary<string,string> tokens, string outputDir = null, string fileExtension = null) {
+			if (! Directory.Exists(path)) throw new DirectoryNotFoundException("Could not find directory to process: " + path);
+			if (outputDir == null)        outputDir = WorkingDirectory;
+
+			// Create the outputDir and all necessary subdirectories (replacing tokens in directory names)
+			Directory.CreateDirectory(outputDir);
+			outputDir = Path.GetFullPath(outputDir);
+			path      = Path.GetFullPath(path);
+
+			foreach (var dir in Directory.GetDirectories(path, "*", SearchOption.AllDirectories)) {
+				var relative = dir.Substring(path.Length).TrimStart(@"\/".ToCharArray());
+				relative     = Replace(relative, tokens);
+				Directory.CreateDirectory(Path.Combine(outputDir, relative));
+			}
+
+			return outputDir;
 		}
 
 		/// <summary>Processes the given file (with an optional output path and file extension to check for)</summary>

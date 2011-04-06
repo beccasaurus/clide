@@ -1,0 +1,1 @@
+// Hello from namespace $rootnamespace$

@@ -11,11 +11,17 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class PPSpec : Spec {
 
+		PP pp;
+
 		[SetUp]
 		public void Before() {
 			base.BeforeEach();
 			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
 			File.Copy(Example("NET40", "Mvc3Application1", "Mvc3Application1", "Mvc3Application1.csproj"), Temp("Mvc3Application1.csproj"));
+			pp = new PP {
+				WorkingDirectory = Global.WorkingDirectory,
+				Project          = new Project(Temp("FluentXml.Specs.csproj"))
+			};
 		}
 
 		[Test]
@@ -62,38 +68,43 @@ namespace Clide.Specs {
 			PP.Replace(text, project, config: "Release", includeGlobal: true).ShouldEqual("I Release 4 times faster than AnyCPU! It's $DebugSymbols$");
 		}
 
-		// TODO Should test lots of things ... no output path ... output path as file ... as dir ... split up and make new [Test] for these
 		[Test]
-		public void can_replace_project_properties_in_a_file_given_a_project() {
+		public void outputs_to_the_current_directory_by_default() {
 			File.Exists(Temp("Foo.cs")).Should(Be.False);
-			File.Exists(Temp("HI")).Should(Be.False);
-			File.Exists(Temp("Foo.HiThere.cs")).Should(Be.False);
 
-			var pp = new PP {
-				WorkingDirectory = Global.WorkingDirectory,
-				Project          = new Project(Temp("FluentXml.Specs.csproj"))
-			};
-
-			// Outputs to the current directory by default
 			pp.ProcessFile(Example("PP", "one-file", "Foo.cs.pp")).ShouldEqual(Temp("Foo.cs"));
+
 			File.ReadAllText(Temp("Foo.cs")).ShouldEqual(@"
 				// Part of Assembly: FluentXml.Specs
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
 				".TrimLeadingTabs(4).TrimStartNewline());
+		}
 
-			// Can specify an output path
+		[Test]
+		public void can_specify_an_output_path() {
+			File.Exists(Temp("HI")).Should(Be.False);
+
 			pp.ProcessFile(Example("PP", "one-file", "Foo.cs.pp"), outputPath: Temp("HI")).ShouldEqual(Temp("HI"));
+
 			File.ReadAllText(Temp("HI")).ShouldEqual(@"
 				// Part of Assembly: FluentXml.Specs
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
 				".TrimLeadingTabs(4).TrimStartNewline());
+		}
 
-			// Does replacements in the file name
-			pp.ProcessFile(Example("PP", "one-file-with-tokens-in-name", "Foo.$Neato$.cs.pp"), tokens: new { Neato = "HiThere" }).ShouldEqual(Temp("Foo.HiThere.cs"));
+		[Test]
+		public void does_replacements_in_the_file_name() {
+			File.Exists(Temp("Foo.HiThere.cs")).Should(Be.False);
+
+			pp.ProcessFile(
+				Example("PP", "one-file-with-tokens-in-name", "Foo.$Neato$.cs.pp"), 
+				tokens: new { Neato = "HiThere" }
+			).ShouldEqual(Temp("Foo.HiThere.cs"));
+
 			File.ReadAllText(Temp("Foo.HiThere.cs")).ShouldEqual(@"
 				// Part of Assembly: FluentXml.Specs
 				// Neato: HiThere
@@ -102,10 +113,15 @@ namespace Clide.Specs {
 					public class Foo {}
 				}
 				".TrimLeadingTabs(4).TrimStartNewline());
+		}
 
-			// Provide $Another$ too ... provide a Dictionary, just cuz
+		[Test]
+		public void tokens_can_be_provided_as_a_dictionary() {
+			File.Exists(Temp("Foo.HiThere.cs")).Should(Be.False);
+
 			pp.ProcessFile(Example("PP", "one-file-with-tokens-in-name", "Foo.$Neato$.cs.pp"), 
 					tokens: new Dictionary<string,string> { {"Neato","HiThere"}, {"Another", "Totally Awesome"} }).ShouldEqual(Temp("Foo.HiThere.cs"));
+
 			File.ReadAllText(Temp("Foo.HiThere.cs")).ShouldEqual(@"
 				// Part of Assembly: FluentXml.Specs
 				// Neato: HiThere
@@ -114,9 +130,14 @@ namespace Clide.Specs {
 					public class Foo {}
 				}
 				".TrimLeadingTabs(4).TrimStartNewline());
+		}
 
-			// Doesn't process non .pp files (just copies them)
+		[Test]
+		public void non_pp_files_are_not_processed_but_merely_copied() {
+			File.Exists(Temp("Foo.cs")).Should(Be.False);
+
 			pp.ProcessFile(Example("PP", "non-pp-file", "Foo.cs")).ShouldEqual(Temp("Foo.cs"));
+
 			File.ReadAllText(Temp("Foo.cs")).ShouldEqual(@"
 				// Part of Assembly: $AssemblyName$
 				namespace $RootNamespace$ {
@@ -125,8 +146,26 @@ namespace Clide.Specs {
 				".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
+		[Test]
+		public void empty_directories_are_created() {
+			Directory.Exists(Temp("chunky")).Should(Be.False);
+
+			pp.ProcessDirectory(Example("PP", "empty-dirs"));
+
+			Directory.Exists(Temp("chunky")).Should(Be.True);
+			Directory.Exists(Temp("chunky", "bacon")).Should(Be.True);
+			Directory.Exists(Temp("chunky", "bacon", "and")).Should(Be.True);
+			Directory.Exists(Temp("chunky", "bacon", "and", "foxes")).Should(Be.True);
+			Directory.Exists(Temp("hello")).Should(Be.True);
+			Directory.Exists(Temp("hello", "there")).Should(Be.True);
+		}
+
 		[Test][Ignore]
-		public void can_replace_project_properties_in_all_files_in_a_directory_given_a_project() {
+		public void directory_with_1_file() {
+		}
+
+		[Test][Ignore]
+		public void directory_with_token_in_the_name() {
 		}
 	}
 }
