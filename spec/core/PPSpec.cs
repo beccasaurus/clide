@@ -79,7 +79,7 @@ namespace Clide.Specs {
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
-				".TrimLeadingTabs(4).TrimStartNewline());
+				".TrimLeadingTabs(4, convert: false).TrimStartNewline());
 		}
 
 		[Test]
@@ -93,7 +93,7 @@ namespace Clide.Specs {
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
-				".TrimLeadingTabs(4).TrimStartNewline());
+				".TrimLeadingTabs(4, convert: false).TrimStartNewline());
 		}
 
 		[Test]
@@ -112,7 +112,7 @@ namespace Clide.Specs {
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
-				".TrimLeadingTabs(4).TrimStartNewline());
+				".TrimLeadingTabs(4, convert: false).TrimStartNewline());
 		}
 
 		[Test]
@@ -129,7 +129,7 @@ namespace Clide.Specs {
 				namespace FluentXml.Specs {
 					public class Foo {}
 				}
-				".TrimLeadingTabs(4).TrimStartNewline());
+				".TrimLeadingTabs(4, convert: false).TrimStartNewline());
 		}
 
 		[Test]
@@ -143,7 +143,7 @@ namespace Clide.Specs {
 				namespace $RootNamespace$ {
 					public class Foo {}
 				}
-				".TrimLeadingTabs(4).TrimStartNewline());
+				".TrimLeadingTabs(4, convert: false).TrimStartNewline());
 		}
 
 		[Test]

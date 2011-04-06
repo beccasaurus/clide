@@ -26,13 +26,13 @@ namespace NUnit.Framework {
         /// 
         /// This does way more than just TrimLeadingTabs ... it also converts newlines from unix -> Windows when running on Windows
         /// </remarks>
-		public static string TrimLeadingTabs(this string str, int numberOfTabsToTrim) {
+		public static string TrimLeadingTabs(this string str, int numberOfTabsToTrim, bool convert = true) {
 			var tabs = GetTabs(numberOfTabsToTrim);
 
 			// if a line starts with (^) these tab characters, replace those tabs with ""
 			var trimmed = Regex.Replace(str, @"^" + tabs, string.Empty, RegexOptions.Multiline);
 
-            if (Environment.OSVersion.ToString().Contains("Windows"))
+            if (convert && Environment.OSVersion.ToString().Contains("Windows"))
                 trimmed = trimmed.Replace("\n", "\r\n");
 
             return trimmed;
