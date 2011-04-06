@@ -160,12 +160,27 @@ namespace Clide.Specs {
 			Directory.Exists(Temp("hello", "there")).Should(Be.True);
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void directory_with_1_file() {
+            Directory.Exists(Temp("MyDir")).Should(Be.False);
+
+            pp.ProcessDirectory(Example("PP", "dir-with-1-file"));
+
+            Directory.Exists(Temp("MyDir")).Should(Be.True);
+            File.ReadAllText(Temp("MyDir", "Hello.cs")).ShouldEqual("// Hello from namespace FluentXml.Specs\n");
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void directory_with_token_in_the_name() {
+            Directory.Exists(Temp("foo")).Should(Be.False);
+            Directory.Exists(Temp("FluentXml.Specs")).Should(Be.False);
+
+			pp.ProcessDirectory(Example("PP", "dirs-with-tokens-in-name"), tokens: new { neato = "w00t" });
+
+			Directory.Exists(Temp("foo")).Should(Be.True);
+            Directory.Exists(Temp("foo", "hi.w00t.there")).Should(Be.True);
+            Directory.Exists(Temp("foo", "hi.w00t.there", "hi")).Should(Be.True);
+            Directory.Exists(Temp("FluentXml.Specs")).Should(Be.True);
 		}
 	}
 }

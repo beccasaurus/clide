@@ -198,10 +198,18 @@ namespace Clide {
 			outputDir = Path.GetFullPath(outputDir);
 			path      = Path.GetFullPath(path);
 
+            // Directories
 			foreach (var dir in Directory.GetDirectories(path, "*", SearchOption.AllDirectories)) {
 				var relative = dir.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
 				Directory.CreateDirectory(Path.Combine(outputDir, relative));
+			}
+
+            // Files
+            foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories)) {
+				var relative = file.Substring(path.Length).TrimStart(@"\/".ToCharArray());
+				relative     = Replace(relative, tokens);
+                ProcessFile(path: file, outputPath: Path.Combine(outputDir, relative), tokens: tokens, fileExtension: fileExtension);
 			}
 
 			return outputDir;
