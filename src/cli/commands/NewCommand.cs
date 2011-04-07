@@ -21,10 +21,24 @@ namespace Clide {
 
 		public virtual Request Request { get; set; }
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide new [ProjectName] [options]
+
+  If the ProjectName isn't specified, the folder name of the current directory is used
+
+  Options:
+    -b, --bare       Creates a bare csproj with just a <Project> node
+        --exe        Sets project OutputType to exe
+        --winexe     Sets project OutputType to winexe
+        --library    Sets project OutputType to library
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		/// <summary>Right now, everything is stuffed into this method ... we'll organize into properties and whatnot later ...</summary>
 		public Response Invoke() {
-			if (Global.Help)
-				return new Response("Helpful information about the 'new' command");
+			if (Global.Help) return new Response(HelpText);
 
 			var bare       = false;
 			var outputType = "Exe";

@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using ConsoleRack;
 using IO.Interfaces;
+using Clide.Extensions;
 
 // TODO Global.Project and Global.Solution should be OBJECTS!  We can use ProjectPath and SolutionPath for the strings
 namespace Clide {
@@ -176,5 +178,18 @@ new GlobalOption('T', "templates",   "TemplatesPath",    "CLIDE_TEMPLATES", "Req
 
 		/// <summary>Returns all of Clide's Commands.  Right now, this just defers to Crack.Commands</summary>
 		public static CommandList Commands { get { return Crack.Commands; } }
+
+		/// <summary>Generates option text for all of our common options</summary>
+		public static string CommonOptionsText {
+			get {
+				var builder = new StringBuilder("  Common Options:\n");
+
+				var spaces = Global.Options.Select(option => option.ArgumentsText.Length).Max() + 4;
+				foreach (var option in Global.Options)
+					builder.AppendFormat("    {0}{1}\n", option.ArgumentsText.WithSpaces(spaces), option.Description);
+
+				return builder.ToString();
+			}
+		}
 	}
 }

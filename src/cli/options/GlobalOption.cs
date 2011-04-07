@@ -124,5 +124,18 @@ namespace Clide {
 			else
 				return false;
 		}
+
+		/// <summary>Returns text explaining these arguments (meant to be used by Global.CommonOptionsText), eg. "-v, --version"</summary>
+		public virtual string ArgumentsText {
+			get {
+				if (AcceptsArgument)
+					if (ArgumentRequired)
+						return string.Format("-{0}, --{1} {2}", ShortArgument, LongArgument, EnvironmentVariable);
+					else
+						return string.Format("-{0}, --{1} [{2}]", ShortArgument, LongArgument, EnvironmentVariable);
+				else
+					return string.Format("-{0}, --{1}", ShortArgument, LongArgument);
+			}
+		}
 	}
 }
