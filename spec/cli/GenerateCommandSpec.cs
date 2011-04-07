@@ -56,7 +56,7 @@ namespace Clide.Specs {
 		public void can_specify_a_template_directory_if_name_isnt_found() {
 			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
 			
-			Clide("gen", "basic").Text.ShouldEqual("Template not found: basic\n");
+			Clide("gen", "basic").Text.ShouldContain("Template not found: basic");
 
 			Clide("gen", Example("templates", "basic")).Text.ShouldContain("Usage:\n  clide gen basic Name [Foo=] [Bar=]\n"); // <--- usage was found!
 		}

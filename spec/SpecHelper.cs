@@ -30,6 +30,7 @@ namespace Clide.Specs {
 			Directory.CreateDirectory(TempRoot);
 			Global.ResetOptions();
 			Global.WorkingDirectory = TempRoot;
+            Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist"); // make sure no templates show up by default
 		}
 
 		[TearDown]

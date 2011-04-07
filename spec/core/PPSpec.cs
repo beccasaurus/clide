@@ -22,13 +22,13 @@ namespace Clide.Specs {
 				WorkingDirectory = Global.WorkingDirectory,
 				Project          = new Project(Temp("FluentXml.Specs.csproj"))
 			};
-			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist");	
 		}
 
 		[TearDown]
 		public void After() {
 			base.AfterEach();
-			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist");	
 		}
 
 		[Test]
