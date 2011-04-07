@@ -46,6 +46,7 @@ namespace Clide.Specs {
 			Clide("gen", "basic", "The Project Name", "-o", "Foo");
 
 			Directory.Exists(Temp("Foo")).Should(Be.True);
+            File.Exists(Temp("Foo", ".clide-template")).Should(Be.False); // <-- the .clide-template shouldn't be generated!
 			File.Exists(Temp("Foo", "README.markdown")).Should(Be.True);
 			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# The Project Name is the coolest project\n\nFoo was set to $foo$\n\nBar was set to $bar$\n");
 			File.Exists(Temp("Foo", "Models", "User.cs")).Should(Be.True);

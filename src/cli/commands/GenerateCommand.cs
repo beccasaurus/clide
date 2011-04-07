@@ -86,6 +86,7 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			if (template == null) return new Response("Template not found: {0}", templateName);
 
 			var pp = new PP();
+            pp.Excludes.Add(path => new string[]{ ".clide-template", "_clide-template" }.Contains(Path.GetFileName(path)));
             pp.SkipIfMissingTokens = ! MissingTokensOk;
 			if (! NoProject && ! string.IsNullOrEmpty(Global.Project))
 				pp.Project = new Project(Global.Project);

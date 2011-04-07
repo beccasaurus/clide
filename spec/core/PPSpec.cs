@@ -21,8 +21,9 @@ namespace Clide.Specs {
 			pp = new PP {
 				WorkingDirectory    = Global.WorkingDirectory,
 				Project             = new Project(Temp("FluentXml.Specs.csproj")),
-                SkipIfMissingTokens = false
+                SkipIfMissingTokens = false,
 			};
+            pp.Excludes.Add(path => new string[]{ ".clide-template", "_clide-template" }.Contains(Path.GetFileName(path)));
 			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist");	
 		}
 
@@ -246,6 +247,7 @@ namespace Clide.Specs {
 			pp.ProcessDirectory(path: basic.Path, outputDir: Temp("Foo"), tokens: new { Arg1 = "TheName", Bar = "ThisIsBar", Foo = "This is foo" });
 
 			Directory.Exists(Temp("Foo")).Should(Be.True);
+            File.Exists(Temp("Foo", ".clide-template")).Should(Be.False); // Don't copy the .clide-template file!
 
 			File.Exists(Temp("Foo", "README.markdown")).Should(Be.True);
 			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# TheName is the coolest project\n\nFoo was set to This is foo\n\nBar was set to ThisIsBar\n");

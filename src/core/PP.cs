@@ -91,6 +91,9 @@ namespace Clide {
 	/// <summary>Class for replacing tokens in text</summary>
 	public class Tokenizer {
 
+        /// <summary>SImple delegate for matching on paths.  Given a path, you return a bool for whether that path matches.</summary>
+        public delegate bool MatchPath(string path);
+
 		public static string DefaultLeftDelimiter           = "$";
 		public static string DefaultRightDelimiter          = "$";
         public static string DefaultRegexSafeLeftDelimiter  = "\\$";
@@ -99,12 +102,13 @@ namespace Clide {
         public static bool   DefaultSkipIfMissingTokens     = true;
 
 		public Tokenizer() {
-			LeftDelimiter          = Tokenizer.DefaultLeftDelimiter;
-			RightDelimiter         = Tokenizer.DefaultRightDelimiter;
-			CaseInsensitive        = Tokenizer.DefaultCaseInsensitive;
-            SkipIfMissingTokens    = Tokenizer.DefaultSkipIfMissingTokens;
-            RegexSafeLeftDelimiter = Tokenizer.DefaultRegexSafeLeftDelimiter;
+			LeftDelimiter           = Tokenizer.DefaultLeftDelimiter;
+			RightDelimiter          = Tokenizer.DefaultRightDelimiter;
+			CaseInsensitive         = Tokenizer.DefaultCaseInsensitive;
+            SkipIfMissingTokens     = Tokenizer.DefaultSkipIfMissingTokens;
+            RegexSafeLeftDelimiter  = Tokenizer.DefaultRegexSafeLeftDelimiter;
             RegexSafeRightDelimiter = Tokenizer.DefaultRegexSafeRightDelimiter;
+            Excludes                = new List<MatchPath>();
 		}
 
 		public Tokenizer(string text) : this() {
@@ -113,6 +117,14 @@ namespace Clide {
 
 		string _workingDirectory;
         Regex _tokenFindingRegex;
+
+        /// <summary>A list of lambdas that, if they return false, will exlude the path that we're trying to render</summary>
+        public virtual List<MatchPath> Excludes { get; set; }
+
+        /// <summary>If this returns true, we don't render this file/directory when we ProcessFile/ProcessDirectory.  Uses Excludes.</summary>
+        public virtual bool PathExcluded(string path) {
+            return Excludes.Any(exclude => exclude(path));
+        }
 
 		/// <summary>The string to look for at the left of a token</summary>
 		public virtual string LeftDelimiter { get; set; }
@@ -216,6 +228,7 @@ namespace Clide {
 		/// If the fileExtension is null, we use FileExtensionToProcess or we process the file anyway.
 		/// </remarks>
 		public virtual string ProcessDirectory(string path, Dictionary<string,string> tokens, string outputDir = null, string fileExtension = null) {
+            if (PathExcluded(path))       return null; // Skip this path and return null to indicate that we didn't render it
 			if (! Directory.Exists(path)) throw new DirectoryNotFoundException("Could not find directory to process: " + path);
 			if (outputDir == null)        outputDir = WorkingDirectory;
 
@@ -226,6 +239,7 @@ namespace Clide {
 
             // Directories
 			foreach (var dir in Directory.GetDirectories(path, "*", SearchOption.AllDirectories)) {
+                if (PathExcluded(dir)) continue; // Skip this path
 				var relative = dir.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
                 if (SkipIfMissingTokens && Tokens(relative).Any()) continue; // there are still tokens in the filename ... next!
@@ -234,6 +248,7 @@ namespace Clide {
 
             // Files
             foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories)) {
+                if (PathExcluded(file)) continue; // Skip this path
 				var relative = file.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
                 var output   = Path.Combine(outputDir, relative);
@@ -251,6 +266,7 @@ namespace Clide {
 		/// If the fileExtension is null, we use FileExtensionToProcess or we process the file anyway.
 		/// </remarks>
 		public virtual string ProcessFile(string path, Dictionary<string,string> tokens, string outputPath = null, string fileExtension = null) {
+            if (PathExcluded(path))           return null; // Skip this path and return null to indicate that we didn't render it
 			if (! File.Exists(path))          throw new FileNotFoundException("Could not find file to process", path);
 			if (outputPath == null)           outputPath    = Path.Combine(WorkingDirectory, Path.GetFileName(path));
 			if (Directory.Exists(outputPath)) outputPath    = Path.Combine(outputPath, Path.GetFileName(path));
