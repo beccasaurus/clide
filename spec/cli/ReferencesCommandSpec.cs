@@ -40,6 +40,8 @@ namespace Clide.Specs {
 
 		[Test][Description("clide references")]
 		public void clide_references() {
+            Clide("references").Text.ShouldContain("This project has no references");
+
             Global.WorkingDirectory = ExamplesRoot;
 
             var output = Clide("references").Text;
