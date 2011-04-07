@@ -27,6 +27,24 @@ namespace Clide.Extensions {
 
 		/// <summary>Simple returns the string surrounded by curly braces, surrounded by double quotes</summary>
 		public static string QuotedWithCurlies(this string str) { return str.WithCurlies().Quoted(); }
+
+		/// <summary>Pads the end of the string with (num spaces - str.length) spaces.  Useful for formatting console output.</summary>
+		public static string WithSpaces(this string str, int numSpaces) {
+			return string.Format("{0}{1}", str, str.Spaces(numSpaces));
+		}   
+
+		/// <summary>Gets *just* the spaces for WithSpaces</summary>
+		public static string Spaces(this string str, int numSpaces) {
+			string spaces = ""; 
+			for (int i = 0; i < numSpaces - (str.SafeString()).Length; i++)
+				spaces += " ";
+			return spaces;
+		}
+
+		/// <summary>If the object isn't null, we return ToString(), else we return an empty string</summary>
+		public static string SafeString(this object o) {
+			return (o == null) ? string.Empty : o.ToString();
+		}
 	}
 
 	public static class StringBuilderExtensions {

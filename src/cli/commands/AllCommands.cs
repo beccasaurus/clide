@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Mono.Options;
 using ConsoleRack;
+using Clide.Extensions;
 
 namespace Clide {
 
@@ -12,8 +13,11 @@ namespace Clide {
 
 		[Command("commands", "List the available commands")]
 		public static Response CommandsCommand(Request req) {
-			var response = new Response();
-			Global.Commands.ForEach(cmd => response.Append("{0}\t{1}\n", cmd.Name, cmd.Description));
+			var response = new Response("clide commands:\n");
+			var commands = Global.Commands;
+			var spaces   = commands.Select(c => c.Name.Length).Max() + 4;
+			foreach (var command in commands)
+				response.Append("    {0}{1}\n", command.Name.WithSpaces(spaces), command.Description);
 			return response;
 		}
 
