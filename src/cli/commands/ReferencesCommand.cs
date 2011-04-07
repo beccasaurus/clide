@@ -22,9 +22,27 @@ namespace Clide {
 			Request = request;
 		}
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide references [add|rm] [gac|dll|csproj]
+
+  Examples:
+    clide ref                         Displays all of the GAC/DLL/Project references for the current project
+    clide ref -P src/Foo.csproj       Displays all of the references for the provided project
+    clide ref add lib/Foo.dll         Adds a reference to Foo.dll to the current project (using relative path)
+    clide ref add System.Xml          Adds a reference to the System.Xml assembly in the GAC
+    clide ref add spec/Specs.csproj   Adds a project reference to the Specs.csproj project (using relative path)
+    clide ref rm lib/Foo.dll          Removes reference to Foo.dll to the current project
+    clide ref rm System.Xml           Removes reference to the System.Xml assembly in the GAC
+    clide ref rm spec/Specs.csproj    Removes project reference to the Specs.csproj project (using relative path)
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		public virtual Request Request { get; set; }
 
 		public virtual Response Invoke() {
+			if (Global.Help) return new Response(HelpText);
 			ParseOptions();
 
 			if (Request.Arguments.Length == 0)

@@ -33,8 +33,9 @@ namespace Clide.Specs {
 			Example("Foo.dll").AsFile().Copy(Temp("lib", "Foo.dll"));
 		}
 
-		[Test][Description("clide help references")][Ignore]
+		[Test][Description("clide help references")]
 		public void clide_help_references() {
+			Clide("help", "ref").Text.ShouldContain("Usage: clide references [add|rm] [gac|dll|csproj]");
 		}
 
 		[Test][Description("clide references")][Ignore]
