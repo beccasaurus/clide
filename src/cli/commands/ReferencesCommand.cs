@@ -62,29 +62,29 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 
 		public virtual Response PrintReferences() {
 			var project = new Project(Global.Project);
+
 			if (project.DoesNotExist())
-				return new Response("No project found");
+				return new Response("No project found\n");
+
+            if (project.References.Count == 0 && project.ProjectReferences.Count == 0)
+                return new Response("This project has no references");
 
 			var response = new Response();
-
 			if (project.GacReferences.Any()) {
 				response.Append("[GAC]\n");
 				foreach (var reference in project.GacReferences)
 					response.Append("\t{0}\n", reference.FullName);
 			}
-
 			if (project.DllReferences.Any()) {
 				response.Append("[DLL]\n");
 				foreach (var reference in project.DllReferences)
 					response.Append("\t{0} => {1}\n", reference.FullName, reference.HintPath);
 			}
-
 			if (project.ProjectReferences.Any()) {
 				response.Append("[PROJECT]\n");
 				foreach (var reference in project.ProjectReferences)
 					response.Append("\t{0} => {1}\n", reference.Name, reference.ProjectFile);
 			}
-
 			return response;
 		}
 

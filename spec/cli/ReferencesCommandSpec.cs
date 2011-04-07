@@ -38,8 +38,17 @@ namespace Clide.Specs {
 			Clide("help", "ref").Text.ShouldContain("Usage: clide references [add|rm] [gac|dll|csproj]");
 		}
 
-		[Test][Description("clide references")][Ignore]
+		[Test][Description("clide references")]
 		public void clide_references() {
+            Global.WorkingDirectory = ExamplesRoot;
+
+            var output = Clide("references").Text;
+
+            output.ShouldContain("System.Core"); // GAC
+            output.ShouldContain("nunit.framework, Version=2.5.8.10295"); // DLL name
+            output.ShouldContain(@"..\lib\nunit.framework.dll");          // DLL path
+            output.ShouldContain("FluentXml");                            // Project name
+            output.ShouldContain(@"..\src\FluentXml.csproj");             // Project path
 		}
 
 		[Test][Description("clide references add Foo.dll")]
