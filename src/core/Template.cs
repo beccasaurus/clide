@@ -22,10 +22,22 @@ namespace Clide {
 		public virtual string Path { get; set; }
 
 		/// <summary>Returns the path to this template's .clide-template meta file</summary>
-		public virtual string ClideTemplateFilePath { get { return System.IO.Path.Combine(Path, ".clide-template"); } }
+		public virtual string ClideTemplateFilePath {
+			get { return GetClideTemplateFile(Path); }
+		}
 
 		/// <summary>Returns the text from this template's .clide-template meta file</summary>
-		public virtual string Usage { get { return _usage ?? (_usage = File.ReadAllText(ClideTemplateFilePath)); } }
+		/// <remarks>
+		/// If the ClideTemplateFilePath cannot be found, this returns an empty string.
+		/// This allows you to manually specify that you want to use a directory as a template without making a .clide-template file.
+		/// </remarks>
+		public virtual string Usage {
+			get {
+				if (_usage == null)
+					_usage = File.Exists(ClideTemplateFilePath) ? File.ReadAllText(ClideTemplateFilePath) : string.Empty;
+				return _usage;
+			}
+		}
 
 		/// <summary>Returns this template's "name."  Returns the directory name.</summary>
 		public virtual string Name { get { return this.Name(); } }
@@ -36,7 +48,7 @@ namespace Clide {
 		/// </remarks>
 		public virtual string Description {
 			get {
-				var match = Regex.Match(Usage, @"^Description:\s(.*)", RegexOptions.Multiline);
+				var match = Regex.Match(Usage, @"^Description:[\s\r]*(.*)", RegexOptions.Multiline);
 				return match.Success ? match.Groups[1].ToString().Trim() : null;
 			}
 		}
@@ -72,9 +84,24 @@ namespace Clide {
 			var templates = new List<Template>();
 			if (! Directory.Exists(path)) return templates;
 			foreach (var directory in Directory.GetDirectories(path))
-				if (File.Exists(System.IO.Path.Combine(directory, ".clide-template")))
+				if (IsTemplate(directory))
 					templates.Add(new Template(directory));
 			return templates;
+		}
+
+		/// <summary>Whether or not the given directory appears to be a template (ie. if it has a .clide-template file)</summary>
+		public static bool IsTemplate(string directory) {
+			return ! string.IsNullOrEmpty(GetClideTemplateFile(directory));
+		}
+
+		/// <summary>Returns the full path to the .clide-template or _clide-template file in the given directory (or null)</summary>
+		public static string GetClideTemplateFile(string directory) {
+			if (File.Exists(System.IO.Path.Combine(directory, ".clide-template")))
+				return System.IO.Path.Combine(directory, ".clide-template");
+			else if (File.Exists(System.IO.Path.Combine(directory, "_clide-template")))
+				return System.IO.Path.Combine(directory, "_clide-template");
+			else
+				return null;
 		}
 	}
 }

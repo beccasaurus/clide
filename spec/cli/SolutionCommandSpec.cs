@@ -11,9 +11,9 @@ namespace Clide.Specs {
 	[TestFixture]
 	public class SolutionCommandSpec : Spec {
 
-		[Test][Description("clide help solution")][Ignore]
+		[Test][Description("clide help solution")]
 		public void clide_help_solution() {
-			Clide("help", "solution").Text.ShouldEqual("... ?");
+			Clide("help", "solution").Text.ShouldContain("Usage: clide sln [add|rm|SolutionName] [options]");
 		}
 
 		[Test][Description("clide solution")]

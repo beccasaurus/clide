@@ -12,7 +12,7 @@ namespace Clide.Specs {
 
 		[Test][Description("clide help new")]
 		public void clide_help_new() {
-			Clide("help", "new").Text.ShouldContain("Helpful information about the 'new' command");
+			Clide("help", "new").Text.ShouldContain("Usage: clide new [ProjectName] [options]");
 		}
 
 		[Test][Description("clide new")]

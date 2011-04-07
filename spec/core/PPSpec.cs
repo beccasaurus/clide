@@ -194,10 +194,12 @@ namespace Clide.Specs {
 		public void can_get_clide_template_paths() {
 			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null); // just incase, unset CLIDE_TEMPLATES
 
-			Global.TemplatesPath.ShouldEqual(@".clide\templates;~\.clide\templates");
+			Global.TemplatesPath.ShouldEqual(@".clide\templates;_clide\templates;~\.clide\templates;~\_clide\templates;");
 			Global.TemplateDirectories.ShouldEqual(new List<string>{
 				Temp(".clide", "templates"),
-				Path.Combine(Global.HomeDirectory, ".clide", "templates")
+				Temp("_clide", "templates"),
+				Path.Combine(Global.HomeDirectory, ".clide", "templates"),
+				Path.Combine(Global.HomeDirectory, "_clide", "templates")
 			});
 		}
 
@@ -213,6 +215,24 @@ namespace Clide.Specs {
 			basic.Name.ShouldEqual("basic");
 			basic.Description.ShouldEqual("Create basic something or other");
 			basic.Usage.ShouldEqual("Usage:\n  clide gen basic Name [Foo=] [Bar=]\n\nSome info\n\nDescription:\n    Create basic something or other\n\nMore shit\n");
+		}
+
+		[Test]
+		public void the_clide_template_file_can_start_with_an_underscore_instead_of_a_dot() {
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", Example("templates"));
+
+			var template = Template.Get("windows-support");
+
+			// Make sure we find the file ...
+			template.ClideTemplateFilePath.ShouldEqual(Example("templates", "windows-support", "_clide-template"));
+
+			// The file has \r\n newlines ...
+			template.Usage.ShouldEqual("This file starts with an underscore instead of a dot\r\n\r\nDescription:\r\n  The newline before this is a windows one\r\n\r\nMore stuff ...\r\n");
+
+			template.Name.ShouldEqual("windows-support");
+
+			// The description should be found, even with the \r\n newlines ...
+			template.Description.ShouldEqual("The newline before this is a windows one");
 		}
 
 		[Test]
