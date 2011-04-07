@@ -27,9 +27,10 @@ namespace Clide {
 
 		/// <summary>Returns a Dictionary from the given project's properties that can be used as tokens for string replacement</summary>
 		public virtual Dictionary<string,string> ProjectToDictionary(Project project, string config = null, bool includeGlobal = true) {
-			if (config == null) config = project.DefaultConfigurationName;
-
 			var properties = new Dictionary<string,string>();
+			if (project == null) return properties;
+
+			if (config == null) config = project.DefaultConfigurationName;
 
 			if (includeGlobal && project.Global != null)
 				foreach (var property in project.Global.Properties)
