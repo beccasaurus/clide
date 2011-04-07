@@ -20,6 +20,23 @@ namespace Clide {
 		[Command("solution", "Create/Edit solution files")]
 		public static Response SolutionCmd(Request req) { return new SolutionCommand(req).Invoke(); }
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide sln [add|rm|SolutionName] [options]
+
+  Examples:
+    clide sln                  Creates a new solution (using the current directory name)
+    clide sln Foo              Creates a new Foo.sln (or displays it, if it already exists)
+    clide sln add Foo.csproj   Adds the Foo.csproj project to the current solution
+    clide sln rm Foo.csproj    Removes the Foo.csproj project from the current solution
+
+  Options:
+    -b, --blank       Creates a bare sln file (won't automatically add the current project)
+    -n, --name        Explicitly set the name of the solution file to create (clide sln -n Foo)
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		public SolutionCommand(Request request) {
 			Request = request;
 		}
@@ -57,6 +74,7 @@ namespace Clide {
 		}
 
 		public virtual Response Invoke() {
+			if (Global.Help) return new Response(HelpText);
 			ParseOptions();
 
 			if (Request.Arguments.Length == 0)
