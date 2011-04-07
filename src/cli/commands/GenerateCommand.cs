@@ -33,8 +33,9 @@ Usage: clide generate [Template] [TemplateOptions]
     clide gen Model User Foo=""Bar""   Generates the Model template (Arg1: 'User', Foo: 'Bar')
 
   Options:
-    -o, --output       Specify a directory to output this template into.  Defaults to current directory.
-        --no-project   Do not use the current project's properties when replacing tokens in .pp files
+    -o, --output              Specify a directory to output this template into.  Defaults to current directory.
+        --no-project          Do not use the current project's properties when replacing tokens in .pp files
+        --missing-tokens-ok   Don't skip generation of files/dirs with tokens in their name (which aren't passed)
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
@@ -85,6 +86,7 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			if (template == null) return new Response("Template not found: {0}", templateName);
 
 			var pp = new PP();
+            pp.SkipIfMissingTokens = ! MissingTokensOk;
 			if (! NoProject && ! string.IsNullOrEmpty(Global.Project))
 				pp.Project = new Project(Global.Project);
 
@@ -131,10 +133,14 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		/// <summary>If set to true, we don't use project properties when generating (pp files are still evaluated, but not using the current csproj)</summary>
 		public virtual bool NoProject { get; set; }
 
+        /// <summary>If set to true, we don't skip generation of files/dirs with tokens in their name (which aren't passed)</summary>
+        public virtual bool MissingTokensOk { get; set; }
+
 		public void ParseOptions() {
 			var options = new OptionSet {
-				{ "o|output=",  v => SetOutputDirectory(v) },
-				{ "no-project", v => NoProject       = true }
+				{ "o|output=",         v => SetOutputDirectory(v)  },
+				{ "no-project",        v => NoProject       = true },
+                { "missing-tokens-ok", v => MissingTokensOk = true }
 			};
 			var extra = options.Parse(Request.Arguments);
 			Request.Arguments = extra.ToArray();

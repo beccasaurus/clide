@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Clide {
 
@@ -64,7 +65,7 @@ namespace Clide {
 		public virtual string ProcessDirectory(string path, string outputDir = null, Project project = null, object tokens = null) {
 			if (project == null) project = Project;
 			// TODO DRY (ProcessFile uses the same)
-			var allTokens = (project == null) ? null : ProjectToDictionary(project);
+			var allTokens = (project == null) ? new Dictionary<string,string>() : ProjectToDictionary(project);
 			if (tokens != null)
 				foreach (var item in ToDictionary(tokens))
 					allTokens[item.Key] = (item.Value == null) ? null : item.Value.ToString();
@@ -90,14 +91,20 @@ namespace Clide {
 	/// <summary>Class for replacing tokens in text</summary>
 	public class Tokenizer {
 
-		public static string DefaultLeftDelimiter   = "$";
-		public static string DefaultRightDelimiter  = "$";
-		public static bool   DefaultCaseInsensitive = true;
+		public static string DefaultLeftDelimiter           = "$";
+		public static string DefaultRightDelimiter          = "$";
+        public static string DefaultRegexSafeLeftDelimiter  = "\\$";
+		public static string DefaultRegexSafeRightDelimiter = "\\$";
+		public static bool   DefaultCaseInsensitive         = true;
+        public static bool   DefaultSkipIfMissingTokens     = true;
 
 		public Tokenizer() {
-			LeftDelimiter   = Tokenizer.DefaultLeftDelimiter;
-			RightDelimiter  = Tokenizer.DefaultRightDelimiter;
-			CaseInsensitive = Tokenizer.DefaultCaseInsensitive;
+			LeftDelimiter          = Tokenizer.DefaultLeftDelimiter;
+			RightDelimiter         = Tokenizer.DefaultRightDelimiter;
+			CaseInsensitive        = Tokenizer.DefaultCaseInsensitive;
+            SkipIfMissingTokens    = Tokenizer.DefaultSkipIfMissingTokens;
+            RegexSafeLeftDelimiter = Tokenizer.DefaultRegexSafeLeftDelimiter;
+            RegexSafeRightDelimiter = Tokenizer.DefaultRegexSafeRightDelimiter;
 		}
 
 		public Tokenizer(string text) : this() {
@@ -105,12 +112,25 @@ namespace Clide {
 		}
 
 		string _workingDirectory;
+        Regex _tokenFindingRegex;
 
 		/// <summary>The string to look for at the left of a token</summary>
 		public virtual string LeftDelimiter { get; set; }
 
 		/// <summary>The string to look for at the right of a token</summary>
 		public virtual string RightDelimiter { get; set; }
+
+        /// <summary>A version of the string to look for at the left of a token that has been excaped and can be used in Regex</summary>
+		public virtual string RegexSafeLeftDelimiter { get; set; }
+
+		/// <summary>A version of the string to look for at the right of a token that has been excaped and can be used in Regex</summary>
+		public virtual string RegexSafeRightDelimiter { get; set; }
+
+        /// <summary>The regular expression we use in Tokens() to find tokens.  Default uses RegexSafeLeftDelimiter and RegexSafeRightDelimiter.</summary>
+        public virtual Regex TokenFindingRegex {
+            get { return _tokenFindingRegex ?? (_tokenFindingRegex = new Regex(RegexSafeLeftDelimiter + "([^\\s" + RegexSafeRightDelimiter + "]+)" + RegexSafeRightDelimiter)); }
+            set { _tokenFindingRegex = value; }
+        }
 
 		/// <summary>The text that we want to replace tokens in</summary>
 		public virtual string Text { get; set; }
@@ -123,6 +143,10 @@ namespace Clide {
 
 		/// <summary>Whether or not we should replace tokens case insensitively</summary>
 		public virtual bool CaseInsensitive { get; set; }
+
+        /// <summary>If set to true, ProcessDirectory() will skip files/directories with tokens in the name that aren't found</summary>
+        /// <remarks>Default: true</remarks>
+        public virtual bool SkipIfMissingTokens { get; set; }
 
 		/// <summary>The file extension that we should process.  If this is set, we won't process files without this extension.</summary>
 		public virtual string FileExtensionToProcess { get; set; }
@@ -143,6 +167,7 @@ namespace Clide {
 		/// <summary>Returns the result of replacing the given tokens in the given string</summary>
 		public virtual string Render(string text, Dictionary<string,string> tokens) {
 			var builder = new StringBuilder(text);
+            if (tokens == null) return builder.ToString();
 			foreach (var token in tokens)
 				ReplaceToken(builder, key: token.Key, value: token.Value.ToString());
 			return builder.ToString();
@@ -203,6 +228,7 @@ namespace Clide {
 			foreach (var dir in Directory.GetDirectories(path, "*", SearchOption.AllDirectories)) {
 				var relative = dir.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
+                if (SkipIfMissingTokens && Tokens(relative).Any()) continue; // there are still tokens in the filename ... next!
 				Directory.CreateDirectory(Path.Combine(outputDir, relative));
 			}
 
@@ -210,6 +236,7 @@ namespace Clide {
             foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories)) {
 				var relative = file.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
+                if (SkipIfMissingTokens && Tokens(relative).Any()) continue; // there are still tokens in the filename ... next!
                 ProcessFile(path: file, outputPath: Path.Combine(outputDir, relative), tokens: tokens, fileExtension: fileExtension);
 			}
 
@@ -244,6 +271,21 @@ namespace Clide {
 
 			return outputPath;
 		}
+
+        /// <summary>Returns a list of what we believe to be tokens from the provided text.</summary>
+        /// <remarks>
+        /// NOTE: This does NOT use LeftDelimiter/RightDelimiter.
+        ///       It uses RegexSafeLeftDelimiter/RegexSafeRightDelimiter instead!
+        ///       
+        /// NOTE: This does NOT support any spaces in tokens.  Ideally, tokens should never have spaces in them.
+        /// </remarks>
+        public virtual List<string> Tokens(string text) {
+            var tokens = new List<string>();
+            Console.WriteLine("text:{0} regex:{1} matches:{2}", text, TokenFindingRegex, TokenFindingRegex.Matches(text));
+            foreach (Match match in TokenFindingRegex.Matches(text))
+                tokens.Add(match.Groups[1].ToString());
+            return tokens;
+        }
 
 		/// <summary>Helper method for replacing the given tokens in the given string</summary>
 		public static string Replace(string text, Dictionary<string,object> tokens) {
