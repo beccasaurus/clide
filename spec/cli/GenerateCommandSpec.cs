@@ -29,8 +29,9 @@ namespace Clide.Specs {
 			Clide("gen").Text.ShouldContain("Create basic something or other"); // <-- description
 		}
 
-		[Test][Ignore]
+		[Test]
 		public void clide_help_gen() {
+			Clide("help", "gen").Text.ShouldContain("Usage: clide generate [Template] [TemplateOptions]");
 		}
 
 		[Test][Ignore]

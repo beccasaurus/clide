@@ -22,11 +22,29 @@ namespace Clide {
 			Request = request;
 		}
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide generate [Template] [TemplateOptions]
+
+  Examples:
+    clide gen                        Displays a list of all templates found in CLIDE_TEMPLATES path
+    clide gen Model                  Displays the usage for the Model template (from .clide-template file)
+    clide gen Model User             Generates the Model template (with token $Arg1$ replaced with 'User')
+    clide gen Model User Foo=""Bar""   Generates the Model template (Arg1: 'User', Foo: 'Bar')
+
+  Options:
+    -o, --output       Specify a directory to output this template into.  Defaults to current directory.
+        --no-project   Do not use the current project's properties when replacing tokens in .pp files
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		string _outputDirectory;
 
 		public virtual Request Request { get; set; }
 
 		public virtual Response Invoke() {
+			if (Global.Help) return new Response(HelpText);
 			ParseOptions();
 
 			if (Request.Arguments.Length == 0)

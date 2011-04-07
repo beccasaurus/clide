@@ -48,14 +48,17 @@ CLIDE is a CLI IDE for .NET
     https://github.com/remi/clide".TrimStart('\n'));
 
 			var commandName = args.First(); args.RemoveAt(0); // Shift() 
-			var command     = Global.Commands.FirstOrDefault(cmd => cmd.Name == commandName);
-			if (command == null)
+			var commands    = Global.Commands.Match(commandName);
+			if (commands.Count == 0)
 				return new Response("Command not found: {0}", commandName);
-			else {
+			else if (commands.Count == 1) {
 				Global.Help = true;
 				req.Arguments = args.ToArray();
-				return command.Invoke(req);
+			} else if (commands.Count > 1) {
+				var ambiguous = string.Join(", ", commands.Select(c => c.Name).ToArray());
+				return new Response("{0} is ambiguous with commands: {1}", commandName, ambiguous);
 			}
+			return commands.First().Invoke(req);
 		}
 	}
 }
