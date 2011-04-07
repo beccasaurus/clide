@@ -54,5 +54,13 @@ Run clide help for help documentation".TrimStart('\n'));
 			else
 				return app.Invoke(req);
 		}
+
+		[Middleware("Displays the current Clide version if -v/--version are passed")]
+		public static Response DisplayVersion(Request req, Application app) {
+			if (req.Arguments.Contains("-v") || req.Arguments.Contains("--version"))
+				return new Response("clide " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+			else
+				return app.Invoke(req);
+		}
 	}
 }
