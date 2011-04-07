@@ -50,7 +50,7 @@ namespace Clide {
 
    CLIDE is a CLI IDE for .NET
 
-Run clide help for help documentation");
+Run clide help for help documentation".TrimStart('\n'));
 			else
 				return app.Invoke(req);
 		}

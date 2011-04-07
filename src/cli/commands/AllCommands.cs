@@ -22,7 +22,26 @@ namespace Clide {
 			var args = new List<string>(req.Arguments);
 
 			if (args.Count == 0)
-				return new Response("Generic Help Stuff.");
+				return new Response(@"
+CLIDE is a CLI IDE for .NET
+
+  Usage:
+    clide -h/--help
+    clide -v/--version
+    clide command [arguments...] [options...]
+
+  Examples:
+    clide new ProjectName
+    clide prop RootNamespace=Foo
+    clide ref add ../lib/Foo.dll
+    clide gen
+
+  Further help:
+    clide commands         list all 'clide' commands
+    clide help <COMMAND>   show help on COMMAND
+
+  Further information:
+    https://github.com/remi/clide".TrimStart('\n'));
 
 			var commandName = args.First(); args.RemoveAt(0); // Shift() 
 			var command     = Global.Commands.FirstOrDefault(cmd => cmd.Name == commandName);
