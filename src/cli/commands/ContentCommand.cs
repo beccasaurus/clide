@@ -22,9 +22,25 @@ namespace Clide {
 			Request = request;
 		}
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide content add|rm file1.html file2.txt
+
+  Examples:
+    clide content add file.txt          Adds file.txt as a content file
+    clide content add stuff/*.txt       Adds all .txt files under stuff (adds each individually)
+    clide content add 'stuff/*.txt'     Adds all .txt files under stuff (adds wildcard matcher to txtproj)
+    clide content rm file.txt           Removes file.txt from files
+    clide content rm stuff/*.txt        Removes each of the .txt files under stuff, individually
+    clide content rm 'stuff/*.txt'      Removes this exact wildcard matcher from txtproj
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		public virtual Request Request { get; set; }
 
 		public virtual Response Invoke() {
+			if (Global.Help) return new Response(HelpText);
 			ParseOptions();
 
 			if (Request.Arguments.Length == 0)

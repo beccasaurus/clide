@@ -12,8 +12,16 @@ namespace Clide {
 	/// <summary>clide info</summary>
 	public class InfoCommand {
 
+		public static string HelpText {
+			get { return @"
+Usage: clide info
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		[Command("info", "Prints out info about environment/configuration")]
 		public static Response Invoke(Request req) {
+			if (Global.Help) return new Response(HelpText);
 			var response = new Response();
 
 			// For now, this just prints out all global options ...

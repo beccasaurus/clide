@@ -22,9 +22,25 @@ namespace Clide {
 			Request = request;
 		}
 
+		public virtual string HelpText {
+			get { return @"
+Usage: clide source add|rm file1.cs file2.cs
+
+  Examples:
+    clide source add file.cs          Adds file.cs as a file to compile
+    clide source add src/*.cs         Adds all .cs files under src (adds each individually)
+    clide source add 'src/*.cs'       Adds all .cs files under src (adds wildcard matcher to csproj)
+    clide source rm file.cs           Removes file.cs from files to compile
+    clide source rm src/*.cs          Removes each of the .cs files under src, individually
+    clide source rm 'src/*.cs'        Removes this exact wildcard matcher from csproj
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		public virtual Request Request { get; set; }
 
 		public virtual Response Invoke() {
+			if (Global.Help) return new Response(HelpText);
 			ParseOptions();
 
 			if (Request.Arguments.Length == 0)
