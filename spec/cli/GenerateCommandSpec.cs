@@ -29,13 +29,13 @@ namespace Clide.Specs {
 			Clide("gen").Text.ShouldContain("Create basic something or other"); // <-- description
 		}
 
-		[Test]
+		[Test][Ignore]
 		public void clide_help_gen() {
-			Clide("gen", "basic").Text.ShouldContain("clide gen basic Name [Foo=] [Bar=]"); // <--- prints the usage
 		}
 
 		[Test][Ignore]
 		public void clide_gen_basic() {
+			Clide("gen", "basic").Text.ShouldContain("clide gen basic Name [Foo=] [Bar=]"); // <--- prints the usage
 		}
 
 		[Test]
@@ -49,6 +49,15 @@ namespace Clide.Specs {
 			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# The Project Name is the coolest project\n\nFoo was set to $foo$\n\nBar was set to $bar$\n");
 			File.Exists(Temp("Foo", "Models", "User.cs")).Should(Be.True);
 			File.Exists(Temp("Foo", "Models", "$foo$.cs")).Should(Be.True);
+		}
+
+		[Test]
+		public void can_specify_a_template_directory_if_name_isnt_found() {
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			
+			Clide("gen", "basic").Text.ShouldEqual("Template not found: basic\n");
+
+			Clide("gen", Example("templates", "basic")).Text.ShouldContain("Usage:\n  clide gen basic Name [Foo=] [Bar=]\n"); // <--- usage was found!
 		}
 
 		[Test]

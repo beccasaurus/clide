@@ -57,13 +57,13 @@ namespace Clide {
 		}
 
 		public virtual Response PrintTemplateUsage(string templateName) {
-			var template = Template.Get(templateName);
+			var template = GetTemplate(templateName);
 			if (template == null) return new Response("Template not found: {0}", templateName);
 			return new Response(template.Usage);
 		}
 
 		public virtual Response GenerateTemplate(string templateName, string[] arguments) {
-			var template = Template.Get(templateName);
+			var template = GetTemplate(templateName);
 			if (template == null) return new Response("Template not found: {0}", templateName);
 
 			var pp = new PP();
@@ -120,6 +120,19 @@ namespace Clide {
 			};
 			var extra = options.Parse(Request.Arguments);
 			Request.Arguments = extra.ToArray();
+		}
+
+		public virtual Template GetTemplate(string templateName) {
+			var template = Template.Get(templateName);
+
+			// If we can't find this template by name, see if it's a directory with a .clide-template file in it
+			if (template == null) {
+				var path = Path.IsPathRooted(templateName) ? templateName : Path.Combine(Global.WorkingDirectory, templateName);
+				if (Directory.Exists(path) && File.Exists(Path.Combine(path, ".clide-template")))
+					template = new Template(path);
+			}
+
+			return template;
 		}
 	}
 }
