@@ -135,6 +135,16 @@ namespace Clide {
 		/// <summary>Assembly references (from the GAC or a path to a specific DLL)</summary>
 		public virtual ProjectReferences References { get { return new ProjectReferences(this); } }
 
+		/// <summary>Helper to return all GAC References (no HintPath)</summary>
+		public virtual List<Reference> GacReferences {
+			get { return References.Where(reference => string.IsNullOrEmpty(reference.HintPath)).ToList(); }
+		}
+
+		/// <summary>Helper to return all GAC References (HintPath)</summary>
+		public virtual List<Reference> DllReferences {
+			get { return References.Where(reference => ! string.IsNullOrEmpty(reference.HintPath)).ToList(); }
+		}
+
 		/// <summary>References to other projects (eg. csproj's)</summary>
 		public virtual ProjectProjectReferences ProjectReferences { get { return new ProjectProjectReferences(this); } }
 
