@@ -98,12 +98,14 @@ new GlobalOption('T', "templates",   "TemplatesPath",    "CLIDE_TEMPLATES", "Req
 			set { Options["Configuration"].Value = value;   }
 		}
 
+        // TODO rename to ProjectPath and make Project return a real Project
 		/// <summary>Returns the selected Project file</summary>
 		public static string Project {
 			get { return Options["Project"].ToString(); }
 			set { Options["Project"].Value = value;   }
 		}
 
+        // TODO rename to SolutionPath and make Solution return a real Solution
 		/// <summary>Returns the selected Solution file</summary>
 		public static string Solution {
 			get { return Options["Solution"].ToString(); }
