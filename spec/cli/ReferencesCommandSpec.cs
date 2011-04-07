@@ -109,5 +109,17 @@ namespace Clide.Specs {
 		[Test][Description("clide references rm ../src/Foo.csproj")][Ignore]
 		public void clide_references_rm_project() {
 		}
+
+        [Test][Description("clide references add Foo.dll Bar.dll System.Xml Another.csproj")]
+        public void can_specify_a_list_of_dlls_to_reference() {
+            var output = Clide("references", "add", "System.Foo", "Foo.dll", "FakeAssembly.dll", Example("FluentXml.Specs.csproj"), "System.Bar").Text;
+
+            output.ShouldContain("Added reference System.Foo to CoolProject");
+            output.ShouldContain("Added reference Foo.dll to CoolProject");
+            output.ShouldContain("Couldn't load assembly: FakeAssembly.dll.  Adding anyway.");
+            output.ShouldContain("Added reference FakeAssembly.dll to CoolProject");
+            output.ShouldContain("Added reference FluentXml.Specs to CoolProject");
+            output.ShouldContain("Added reference System.Bar to CoolProject");
+        }
 	}
 }
