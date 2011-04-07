@@ -40,7 +40,17 @@ namespace Clide {
 		[Middleware("If no arguments were passed, display a splash screen")]
 		public static Response SplashScreen(Request req, Application app) {
 			if (req.Arguments.Length == 0)
-				return new Response("Splash!");
+				return new Response(@"
+   _____  _       _      _       
+  / ____|| |     (_)    | |      
+ | |     | |      _   __| |  ___ 
+ | |     | |     | | / _` | / _ \
+ | |____ | |____ | || (_| ||  __/
+  \_____||______||_| \__,_| \___|						
+
+   CLIDE is a CLI IDE for .NET
+
+Run clide help for help documentation");
 			else
 				return app.Invoke(req);
 		}
