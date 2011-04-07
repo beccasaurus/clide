@@ -39,7 +39,7 @@ namespace Clide {
 					return (sln == null) ? null : sln.Path;
 				});
 
-				var templates = @".clide\templates;~\.clide\templates";
+				var templates = @".clide\templates;_clide\templates;~\.clide\templates;~\_clide\templates;";
 
 				// Lack of indentation is indentional, so it's easy to read the full line
 				return new GlobalOptions {
