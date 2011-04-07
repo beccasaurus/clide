@@ -1,5 +1,12 @@
-... nothing to see here (yet) ...
+       _____  _       _      _       
+      / ____|| |     (_)    | |      
+     | |     | |      _   __| |  ___ 
+     | |     | |     | | / _` | / _ \
+     | |____ | |____ | || (_| ||  __/
+      \_____||______||_| \__,_| \___|           
+    
+       CLIDE is a CLI IDE for .NET
+    
+    Run clide help for help documentation
 
-Did you see my Desert Code Camp talk on clide?  Be patient!
-
-CLIDE Screencast Coming Soon (with documentation, etc)
+Screencast and more coming soon!
