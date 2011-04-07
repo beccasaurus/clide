@@ -1,0 +1,9 @@
+Usage:
+  clide gen basic Name [Foo=] [Bar=]
+
+Some info
+
+Description:
+    Create basic something or other
+
+More shit

@@ -32,6 +32,11 @@ namespace Clide.Specs {
 			Global.WorkingDirectory = TempRoot;
 		}
 
+		[TearDown]
+		public void AfterEach() {
+			// nothing yet	
+		}
+
 		/// <summary>Lists the files in the current working directory</summary>
 		public void Ls() {
 			foreach (var file in Directory.GetDirectories(Global.WorkingDirectory))

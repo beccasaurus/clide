@@ -22,6 +22,13 @@ namespace Clide.Specs {
 				WorkingDirectory = Global.WorkingDirectory,
 				Project          = new Project(Temp("FluentXml.Specs.csproj"))
 			};
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+		}
+
+		[TearDown]
+		public void After() {
+			base.AfterEach();
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
 		}
 
 		[Test]
@@ -181,6 +188,52 @@ namespace Clide.Specs {
             Directory.Exists(Temp("foo", "hi.w00t.there")).Should(Be.True);
             Directory.Exists(Temp("foo", "hi.w00t.there", "hi")).Should(Be.True);
             Directory.Exists(Temp("FluentXml.Specs")).Should(Be.True);
+		}
+
+		[Test]
+		public void can_get_clide_template_paths() {
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null); // just incase, unset CLIDE_TEMPLATES
+
+			Global.TemplatesPath.ShouldEqual(@".clide\templates;~\.clide\templates");
+			Global.TemplateDirectories.ShouldEqual(new List<string>{
+				Temp(".clide", "templates"),
+				Path.Combine(Global.HomeDirectory, ".clide", "templates")
+			});
+		}
+
+		[Test]
+		public void can_get_all_clide_templates_in_a_given_directory() {
+			Template.All.Count.ShouldEqual(0);
+
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", Example("templates"));
+
+			Template.All.Count.Should(Be.GreaterThan(0));
+			
+			var basic = Template.Get("basic");
+			basic.Name.ShouldEqual("basic");
+			basic.Description.ShouldEqual("Create basic something or other");
+			basic.Usage.ShouldEqual("Usage:\n  clide gen basic Name [Foo=] [Bar=]\n\nSome info\n\nDescription:\n    Create basic something or other\n\nMore shit\n");
+		}
+
+		[Test]
+		public void can_generate_a_template_directory_using_pp() {
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", Example("templates"));
+			var basic = Template.Get("basic");
+			
+			Directory.Exists(Temp("Foo")).Should(Be.False);
+
+			pp.ProcessDirectory(path: basic.Path, outputDir: Temp("Foo"), tokens: new { Arg1 = "TheName", Bar = "ThisIsBar", Foo = "This is foo" });
+
+			Directory.Exists(Temp("Foo")).Should(Be.True);
+
+			File.Exists(Temp("Foo", "README.markdown")).Should(Be.True);
+			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# TheName is the coolest project\n\nFoo was set to This is foo\n\nBar was set to ThisIsBar\n");
+
+			File.Exists(Temp("Foo", "Models", "User.cs")).Should(Be.True);
+			File.ReadAllText(Temp("Foo", "Models", "User.cs")).ShouldEqual("using System;\n\nnamespace FluentXml.Specs {\n\tpublic class TheName_Thing {\n\t\tpublic void Hi() {\n\t\t\tConsole.WriteLine(\"Foo: This is foo and Bar: ThisIsBar\");\n\t\t}\n\t}\n}\n");
+
+			File.Exists(Temp("Foo", "Models", "This is foo.cs")).Should(Be.True);
+			File.ReadAllText(Temp("Foo", "Models", "This is foo.cs")).ShouldEqual("// hello from the cs file with foo in it\n");
 		}
 	}
 }
