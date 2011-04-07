@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyVersion("0.1.0.1")]
 
 [assembly: AssemblyTitle("Clide")]
 [assembly: AssemblyProduct("Clide")]
