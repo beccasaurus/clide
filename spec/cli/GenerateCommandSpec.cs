@@ -49,14 +49,27 @@ namespace Clide.Specs {
 			File.Exists(Temp("Foo", "README.markdown")).Should(Be.True);
 			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# The Project Name is the coolest project\n\nFoo was set to $foo$\n\nBar was set to $bar$\n");
 			File.Exists(Temp("Foo", "Models", "User.cs")).Should(Be.True);
-			File.Exists(Temp("Foo", "Models", "$foo$.cs")).Should(Be.True);
+			File.Exists(Temp("Foo", "Models", "$foo$.cs")).Should(Be.False); // <--- because there's still a token in it!
 		}
+
+        [Test]
+        public void can_output_files_with_tokens_still_in_the_name() {
+            Directory.Exists(Temp("Foo")).Should(Be.False);
+
+			Clide("gen", "basic", "The Project Name", "-o", "Foo", "--missing-tokens-ok");
+
+			Directory.Exists(Temp("Foo")).Should(Be.True);
+			File.Exists(Temp("Foo", "README.markdown")).Should(Be.True);
+			File.ReadAllText(Temp("Foo", "README.markdown")).ShouldEqual("# The Project Name is the coolest project\n\nFoo was set to $foo$\n\nBar was set to $bar$\n");
+			File.Exists(Temp("Foo", "Models", "User.cs")).Should(Be.True);
+			File.Exists(Temp("Foo", "Models", "$foo$.cs")).Should(Be.True); // <--- got created, even tho there's no token!
+        }
 
 		[Test]
 		public void can_specify_a_template_directory_if_name_isnt_found() {
 			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
 			
-			Clide("gen", "basic").Text.ShouldEqual("Template not found: basic\n");
+			Clide("gen", "basic").Text.ShouldContain("Template not found: basic");
 
 			Clide("gen", Example("templates", "basic")).Text.ShouldContain("Usage:\n  clide gen basic Name [Foo=] [Bar=]\n"); // <--- usage was found!
 		}

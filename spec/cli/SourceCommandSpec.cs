@@ -23,12 +23,21 @@ namespace Clide.Specs {
 			project.CompilePaths.Should(Be.Empty);
 		}
 
-		[Test][Description("clide help source")][Ignore]
+		[Test][Description("clide help source")]
 		public void clide_help_source() {
+            Clide("help", "source").Text.ShouldContain("Usage: clide source add|rm file1.cs file2.cs");
 		}
 
-		[Test][Description("clide source")][Ignore]
+		[Test][Description("clide source")]
 		public void clide_source() {
+            Clide("source").Text.ShouldContain("This project has no source paths");
+
+            Global.WorkingDirectory = ExamplesRoot;
+            var output = Clide("source").Text;
+            
+            output.ShouldContain(@"SpecHelper.cs");
+            output.ShouldContain(@"support\**\*.cs");
+            output.ShouldContain(@"**\*Spec.cs");
 		}
 
 		[Test][Description("clide source add Foo.txt")]

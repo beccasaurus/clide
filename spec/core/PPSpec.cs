@@ -19,16 +19,17 @@ namespace Clide.Specs {
 			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
 			File.Copy(Example("NET40", "Mvc3Application1", "Mvc3Application1", "Mvc3Application1.csproj"), Temp("Mvc3Application1.csproj"));
 			pp = new PP {
-				WorkingDirectory = Global.WorkingDirectory,
-				Project          = new Project(Temp("FluentXml.Specs.csproj"))
+				WorkingDirectory    = Global.WorkingDirectory,
+				Project             = new Project(Temp("FluentXml.Specs.csproj")),
+                SkipIfMissingTokens = false
 			};
-			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist");	
 		}
 
 		[TearDown]
 		public void After() {
 			base.AfterEach();
-			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "no-exist");	
 		}
 
 		[Test]
@@ -255,5 +256,111 @@ namespace Clide.Specs {
 			File.Exists(Temp("Foo", "Models", "This is foo.cs")).Should(Be.True);
 			File.ReadAllText(Temp("Foo", "Models", "This is foo.cs")).ShouldEqual("// hello from the cs file with foo in it\n");
 		}
+
+        [Test]
+        public void can_get_all_tokens_from_a_string() {
+            var pp = new PP();
+            pp.Tokens("Hi $foo$ pers$on$").ShouldEqual(new List<string>{ "foo", "on" });
+            pp.Tokens("Hi $foo$pers$on$").ShouldEqual(new List<string>{ "foo", "on" });
+            pp.Tokens("Hi $foo$pers$on $").ShouldEqual(new List<string>{ "foo" });
+            pp.Tokens("$Hi $foo$pers$on $").ShouldEqual(new List<string>{ "foo" });
+            pp.Tokens("$Hi$foo$pers$on $").ShouldEqual(new List<string>{ "Hi", "pers" });
+            pp.Tokens("$Hi$$foo$$pers$on$").ShouldEqual(new List<string>{ "Hi", "foo", "pers" });
+            pp.Tokens("$Hi$$foo$$pers$$on$").ShouldEqual(new List<string>{ "Hi", "foo", "pers", "on" });
+        }
+
+        [Test]
+        public void when_processing_directory__files_with_tokens_that_dont_get_replaced_are_skipped() {
+            File.Exists(Temp("Foo", "Foo.$Neato$.cs")).Should(Be.False);
+            File.Exists(Temp("Foo", "Foo.HI.cs")).Should(Be.False);
+
+            pp.Project = null;
+            pp.SkipIfMissingTokens = true;
+            pp.ProcessDirectory(
+                path:      Example("PP", "one-file-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new {  } // <--- Neato is NOT defined
+            );
+            
+            // Wasn't created at all
+            File.Exists(Temp("Foo", "Foo.$Neato$.cs")).Should(Be.False);
+            File.Exists(Temp("Foo", "Foo.HI.cs")).Should(Be.False);
+
+            pp.ProcessDirectory(
+                path:      Example("PP", "one-file-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new { Neato = "HI" }
+            );
+
+            File.Exists(Temp("Foo", "Foo.$Neato$.cs")).Should(Be.False);
+            File.Exists(Temp("Foo", "Foo.HI.cs")).Should(Be.True); // <--- Got Created OK
+        }
+
+        // examples\PP\dirs-with-tokens-in-name
+        [Test]
+        public void when_processing_directory__directories_with_tokens_that_dont_get_replaced_are_skipped() {
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.False);
+
+            pp.Project = null;
+            pp.SkipIfMissingTokens = true;
+            pp.ProcessDirectory(
+                path:      Example("PP", "dirs-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new {  } // <--- AssemblyName is NOT defined
+            );
+            
+            // Wasn't created at all
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.False);
+
+            pp.ProcessDirectory(
+                path:      Example("PP", "dirs-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new { AssemblyName = "MyAssembly" }
+            );
+
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.True); // <--- created OK
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.False); // <--- still didn't define neato
+
+            pp.ProcessDirectory(
+                path:      Example("PP", "dirs-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new { AssemblyName = "MyAssembly", neato = "YO" }
+            );
+
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.True); // <--- created OK
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.True); // <--- created OK
+        }
+
+        [Test]
+        public void when_processing_directory__you_can_specify_not_to_skip_paths_with_missing_tokens() {
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.False);
+
+            pp.Project = null;
+            pp.SkipIfMissingTokens = false;
+            pp.ProcessDirectory(
+                path:      Example("PP", "dirs-with-tokens-in-name"),
+                outputDir: Temp("Foo"),
+                tokens:    new {  } // <--- AssemblyName is NOT defined
+            );
+            
+            // Wasn't created at all
+            Directory.Exists(Temp("Foo", "$AssemblyName$")).Should(Be.True); // <--- created with tokens still in name
+            Directory.Exists(Temp("Foo", "MyAssembly")).Should(Be.False);
+            Directory.Exists(Temp("Foo", "foo", "hi.$neato$.there")).Should(Be.True); // <--- created with tokens still in name
+            Directory.Exists(Temp("Foo", "foo", "hi.YO.there")).Should(Be.False);
+        }
 	}
 }
