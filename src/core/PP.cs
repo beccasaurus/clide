@@ -236,8 +236,10 @@ namespace Clide {
             foreach (var file in Directory.GetFiles(path, "*", SearchOption.AllDirectories)) {
 				var relative = file.Substring(path.Length).TrimStart(@"\/".ToCharArray());
 				relative     = Replace(relative, tokens);
-                if (SkipIfMissingTokens && Tokens(relative).Any()) continue; // there are still tokens in the filename ... next!
-                ProcessFile(path: file, outputPath: Path.Combine(outputDir, relative), tokens: tokens, fileExtension: fileExtension);
+                var output   = Path.Combine(outputDir, relative);
+                if (SkipIfMissingTokens && Tokens(relative).Any())     continue; // there are still tokens in the filename ... next!
+                if (! Directory.Exists(Path.GetDirectoryName(output))) continue; // if the directory was skipped, we skip this file too
+                ProcessFile(path: file, outputPath: output, tokens: tokens, fileExtension: fileExtension);
 			}
 
 			return outputDir;
@@ -281,7 +283,6 @@ namespace Clide {
         /// </remarks>
         public virtual List<string> Tokens(string text) {
             var tokens = new List<string>();
-            Console.WriteLine("text:{0} regex:{1} matches:{2}", text, TokenFindingRegex, TokenFindingRegex.Matches(text));
             foreach (Match match in TokenFindingRegex.Matches(text))
                 tokens.Add(match.Groups[1].ToString());
             return tokens;
