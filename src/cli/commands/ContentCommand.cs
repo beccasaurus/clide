@@ -59,7 +59,18 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
 
 		public virtual Response PrintContent() {
-			return new Response("This would print out content");
+			var project = new Project(Global.Project);
+			
+            if (project.DoesNotExist())
+				return new Response("No project found");
+
+            if (project.Content.Count == 0)
+                return new Response("This project has no content");
+
+            var response = new Response();
+            foreach (var content in project.Content)
+                    response.Append("{0}\n", content.Include);
+            return response;
 		}
 
 		public virtual Response AddContent() {

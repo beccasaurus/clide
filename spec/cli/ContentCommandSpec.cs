@@ -23,12 +23,23 @@ namespace Clide.Specs {
 			project.Content.Should(Be.Empty);
 		}
 
-		[Test][Description("clide help content")][Ignore]
+		[Test][Description("clide help content")]
 		public void clide_help_content() {
+            Clide("help", "content").Text.ShouldContain("Usage: clide content add|rm file1.html file2.txt");
 		}
 
-		[Test][Description("clide content")][Ignore]
+		[Test][Description("clide content")]
 		public void clide_content() {
+            Clide("content").Text.ShouldContain("This project has no content");
+
+            Global.WorkingDirectory = Example("NET40", "Mvc3Application1", "Mvc3Application1");
+            var output = Clide("content").Text;
+            
+            output.ShouldContain(@"Global.asax");
+            output.ShouldContain(@"Web.config");
+            output.ShouldContain(@"Content\Site.css");
+            output.ShouldContain(@"Scripts\jquery.validate.unobtrusive.min.js");
+            output.ShouldContain(@"Views\Shared\_Layout.cshtml");
 		}
 
 		[Test][Description("clide content add Foo.txt")]
