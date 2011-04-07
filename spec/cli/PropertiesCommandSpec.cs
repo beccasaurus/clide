@@ -16,8 +16,9 @@ namespace Clide.Specs {
 			File.Copy(Example("FluentXml.Specs.csproj"), Temp("FluentXml.Specs.csproj"));
 		}
 
-		[Test][Description("clide help properties")][Ignore]
+		[Test][Description("clide help properties")]
 		public void clide_help_properties() {
+			Clide("help", "prop").Text.ShouldContain("Usage: clide properties [Name][=Value]");
 		}
 
 		// Defaults to Debug

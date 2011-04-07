@@ -12,8 +12,26 @@ namespace Clide {
 	/// <summary>clide properties</summary>
 	public class PropertiesCommand {
 
+		public static string HelpText {
+			get { return @"
+Usage: clide properties [Name][=Value] [Name2][=Value2] [...]
+
+  Examples:
+    clide prop                         Displays all of the Debug properties for the current project
+    clide prop -P src/Foo.csproj       Displays all of the Debug properties for the provided project
+    clide prop -G                      Displays all of the Global properties for the current project
+    clide prop OutputPath              Displays the value of the OutpathPath Debug property
+    clide prop OutputPath -C Release   Displays the value of the OutpathPath Release property
+    clide prop OutputPath DebugType    Displays the values of the OutputPath and DebugType properties
+    clide prop OutputPath=bin          Sets the value of the OutputPath Debug propety to 'bin'
+    clide prop OutputPath=bin X=Y      Sets the values of the OutputPath and X Debug properties
+
+COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
+		}
+
 		[Command("properties", "Get or set configuration properties")]
 		public static Response Invoke(Request req) {
+			if (Global.Help) return new Response(HelpText);
 			var response = new Response();
 
 			var project = new Project(Global.Project);
