@@ -23,4 +23,8 @@ Global
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = src\Clide.csproj
 	EndGlobalSection
+	GlobalSection(ClideProperties) = preSolution
+		DefaultProject = Clide
+		Something Else = Whatever
+	EndGlobalSection
 EndGlobal
