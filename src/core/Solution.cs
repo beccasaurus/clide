@@ -88,7 +88,7 @@ namespace Clide {
 				return new Section {
 					Name        = "SolutionConfigurationPlatforms",
 					PreSolution = true,
-					Text        = string.Format("Debug|Any CPU = Debug|Any CPU{0}\t\tRelease|Any CPU = Release|Any CPU", Environment.NewLine)
+					Text        = string.Format("\t\tDebug|Any CPU = Debug|Any CPU{0}\t\tRelease|Any CPU = Release|Any CPU", Environment.NewLine)
 				};
 			}
 		}
@@ -119,7 +119,7 @@ namespace Clide {
 				}
 
                 var joinString = Environment.NewLine + "\t\t";
-				section.Text   = string.Join(joinString, lines.ToArray());
+				section.Text   = "\t\t" + string.Join(joinString, lines.ToArray());
 
 				return section;
 			}
@@ -151,7 +151,7 @@ namespace Clide {
 				else if (line.TrimStart().StartsWith("GlobalSection("))
 					Sections.Add(SectionFromLine(line));
 				else if (Sections.Count > 0 && ! string.IsNullOrEmpty(line) && ! line.TrimStart().StartsWith("EndGlobal")) {
-					var clean     = line.TrimStart('\t').TrimEnd('\r').TrimEnd('\n'); //Replace("\r", "").Replace("\n", "");
+					var clean     = line.TrimEnd('\r').TrimEnd('\n');
 					var section   = Sections.Last();
 					section.Text += string.IsNullOrEmpty(section.Text) ? clean : "\n" + clean;
 				}
@@ -174,10 +174,16 @@ namespace Clide {
 			foreach (var project in Projects)
 				AppendProject(builder, project);
 
+			// Delete any existing SolutionConfigurationPlatforms and ProjectConfigurationPlatforms - we'll re-generate them
+			if (AutoGenerateProjectConfigurationPlatforms) {
+				if (ProjectConfigurationPlatforms != null)  Sections.Remove(ProjectConfigurationPlatforms);
+				if (SolutionConfigurationPlatforms != null) Sections.Remove(SolutionConfigurationPlatforms);
+			}
+
 			builder.AppendLine("Global");
-			if (AutoGenerateProjectConfigurationPlatforms && SolutionConfigurationPlatforms == null && Projects.Count > 0)
+			if (AutoGenerateProjectConfigurationPlatforms && Projects.Count > 0)
 				AppendSection(builder, GeneratedSolutionConfigurationPlatforms);
-			if (AutoGenerateProjectConfigurationPlatforms && ProjectConfigurationPlatforms == null && Projects.Count > 0)
+			if (AutoGenerateProjectConfigurationPlatforms && Projects.Count > 0)
 				AppendSection(builder, GeneratedProjectConfigurationPlatforms);
 			foreach (var section in Sections)
 				AppendSection(builder, section);
@@ -256,7 +262,7 @@ namespace Clide {
 
 		void AppendSection(StringBuilder builder, Section section) {
 			builder.AppendLine("\tGlobalSection({0}) = {1}", section.Name, section.PreSolution ? "preSolution" : "postSolution");
-			if (! string.IsNullOrEmpty(section.Text)) builder.AppendLine("\t\t{0}", section.Text);
+			if (! string.IsNullOrEmpty(section.Text)) builder.AppendLine("{0}", section.Text);
 			builder.AppendLine("\tEndGlobalSection");
 		}
 	}

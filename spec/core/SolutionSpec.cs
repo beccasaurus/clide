@@ -10,7 +10,7 @@ namespace Clide.Specs {
 
 		[SetUp]
 		public void Before() {
-			
+			base.BeforeEach();
 		}
 
 		[Test]
@@ -52,19 +52,19 @@ namespace Clide.Specs {
 
 			sln1.Sections[0].Name.ShouldEqual("SolutionConfigurationPlatforms");
 			sln1.Sections[0].PreSolution.Should(Be.True);
-			sln1.Sections[0].Text.ShouldEqual("Debug|Any CPU = Debug|Any CPU\nRelease|Any CPU = Release|Any CPU");
+			sln1.Sections[0].Text.ShouldEqual("\t\tDebug|Any CPU = Debug|Any CPU\n\t\tRelease|Any CPU = Release|Any CPU");
 
 			sln1.Sections[1].Name.ShouldEqual("ProjectConfigurationPlatforms");
 			sln1.Sections[1].PreSolution.Should(Be.False);
 			sln1.Sections[1].Text.ShouldEqual(
-					"{11FC4B99-DB31-4D0C-A472-4F794098F900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU\n" + 
-					"{11FC4B99-DB31-4D0C-A472-4F794098F900}.Debug|Any CPU.Build.0 = Debug|Any CPU\n" + 
-					"{11FC4B99-DB31-4D0C-A472-4F794098F900}.Release|Any CPU.ActiveCfg = Release|Any CPU\n" + 
-					"{11FC4B99-DB31-4D0C-A472-4F794098F900}.Release|Any CPU.Build.0 = Release|Any CPU");
+					"\t\t{11FC4B99-DB31-4D0C-A472-4F794098F900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU\n" + 
+					"\t\t{11FC4B99-DB31-4D0C-A472-4F794098F900}.Debug|Any CPU.Build.0 = Debug|Any CPU\n" + 
+					"\t\t{11FC4B99-DB31-4D0C-A472-4F794098F900}.Release|Any CPU.ActiveCfg = Release|Any CPU\n" + 
+					"\t\t{11FC4B99-DB31-4D0C-A472-4F794098F900}.Release|Any CPU.Build.0 = Release|Any CPU");
 
 			sln1.Sections[2].Name.ShouldEqual("SolutionProperties");
 			sln1.Sections[2].PreSolution.Should(Be.True);
-			sln1.Sections[2].Text.ShouldEqual("HideSolutionNode = FALSE");
+			sln1.Sections[2].Text.ShouldEqual("\t\tHideSolutionNode = FALSE");
 
 			// ---------
 			
@@ -73,19 +73,19 @@ namespace Clide.Specs {
 
 			sln2.Sections[0].Name.ShouldEqual("SolutionConfigurationPlatforms");
 			sln2.Sections[0].PreSolution.Should(Be.True);
-			sln2.Sections[0].Text.ShouldEqual("Debug|x86 = Debug|x86\nRelease|x86 = Release|x86");
+			sln2.Sections[0].Text.ShouldEqual("\t\tDebug|x86 = Debug|x86\n\t\tRelease|x86 = Release|x86");
 
 			sln2.Sections[1].Name.ShouldEqual("ProjectConfigurationPlatforms");
 			sln2.Sections[1].PreSolution.Should(Be.False);
 			sln2.Sections[1].Text.ShouldEqual(
-					"{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Debug|x86.ActiveCfg = Debug|x86\n" +
-					"{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Debug|x86.Build.0 = Debug|x86\n" +
-					"{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Release|x86.ActiveCfg = Release|x86\n" +
-					"{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Release|x86.Build.0 = Release|x86");
+					"\t\t{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Debug|x86.ActiveCfg = Debug|x86\n" +
+					"\t\t{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Debug|x86.Build.0 = Debug|x86\n" +
+					"\t\t{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Release|x86.ActiveCfg = Release|x86\n" +
+					"\t\t{DE8DC42E-C399-4367-8E34-735B7F9AA54C}.Release|x86.Build.0 = Release|x86");
 
 			sln2.Sections[2].Name.ShouldEqual("MonoDevelopProperties");
 			sln2.Sections[2].PreSolution.Should(Be.True);
-			sln2.Sections[2].Text.ShouldEqual(@"StartupItem = CsharpConsoleProject\CsharpConsoleProject.csproj");
+			sln2.Sections[2].Text.ShouldEqual("\t\tStartupItem = CsharpConsoleProject\\CsharpConsoleProject.csproj");
 		}
 
 		[Test]
@@ -102,7 +102,7 @@ namespace Clide.Specs {
 		[Test]
 		public void can_print_out_the_sln_text_for_a_solution_with_one_section() {
 			var sln = new Solution { FormatVersion = "11.00", VisualStudioVersion = "2010" };
-			sln.Add(new Section { Name = "SolutionProperties", PreSolution = true, Text = "HideSolutionNode = FALSE" });
+			sln.Add(new Section { Name = "SolutionProperties", PreSolution = true, Text = "\t\tHideSolutionNode = FALSE" });
 			sln.ToText().ShouldEqual(@"
 				Microsoft Visual Studio Solution File, Format Version 11.00
 				# Visual Studio 2010
@@ -135,6 +135,7 @@ namespace Clide.Specs {
 			sln.Add(new Section { Name = "ProjectConfigurationPlatforms",  PostSolution = true });
 			sln.Add(new Project { Name = "CoolProject", Path = "src\\CoolProject.csproj", Id = new Guid("5791AA11-CBF2-4B79-BCB8-E7C1C7882F3E") });
 			sln.Add(new Project { Name = "FooProject", Path = "src\\FooProject.csproj", Id = new Guid("F68046A5-0C57-4765-B6D8-4F1E1140E991") });
+			sln.AutoGenerateProjectConfigurationPlatforms = false;
 			sln.ToText().ShouldEqual(@"
 				Microsoft Visual Studio Solution File, Format Version 11.00
 				# Visual Studio 2010
@@ -149,34 +150,6 @@ namespace Clide.Specs {
 					EndGlobalSection
 				EndGlobal
 				".TrimLeadingTabs(4));
-		}
-
-		[Test][Ignore]
-		public void can_save_a_new_solution() {
-			var solution = new Solution(Temp("Foo.sln"));
-			File.Exists(Temp("Foo.sln")).Should(Be.False);
-
-			/// ... NOTE: I want to add a blank sln, then add some stuff to it but:
-			///
-			/// 1. I need to make a real blank VS solution and see what's valid
-			/// 2. Until I can read a *proj to get the configurations, i can't write the config part of the sln without just guessing
-		}
-
-		[Test][Ignore]
-		public void can_add_a_project() {
-			var newPath = Temp("Foo.sln");
-			var sln1 = new Solution(Example("NET20", "WebApplication1", "WebApplication1.sln")).Parse();
-			sln1.Projects.Count.ShouldEqual(1);
-
-			sln1.Projects.Add(new Project { Name = "Awesome.Project", Path = "src/Totally Neat/code" });
-
-			File.Exists(newPath).Should(Be.False);
-			// sln1.Save(newPath);
-			// sln1.Path.ShouldEqual(newPath);
-			File.Exists(newPath).Should(Be.True);
-
-			var saved = new Solution(newPath);
-			saved.Projects.Count.ShouldEqual(1);
 		}
 
 		[Test][Ignore]
@@ -223,7 +196,70 @@ EndGlobal
 		}
 
 		[Test][Ignore]
-		public void when_a_solution_has_a_Path_then_relative_paths_to_projects_should_be_used() {
+		public void can_save_blank_solution() {
+		}
+
+		[Test]
+		public void can_add_project() {
+			var solution = new Solution(Temp("Foo.sln"));
+			solution.Add(new Project(Example("NET40", "ConsoleApplication1", "ConsoleApplication1", "ConsoleApplication1.csproj")));
+			solution.Save();
+
+			// Make sure it persists properly and we can re-read it
+			solution = new Solution(Temp("Foo.sln"));
+			solution.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ConsoleApplication1"", ""../examples/NET40/ConsoleApplication1/ConsoleApplication1/ConsoleApplication1.csproj"", ""{5C401261-E42F-4E97-B94C-2E495DF0D26D}""
+				EndProject
+				Global
+					GlobalSection(SolutionConfigurationPlatforms) = preSolution
+						Debug|Any CPU = Debug|Any CPU
+						Release|Any CPU = Release|Any CPU
+					EndGlobalSection
+					GlobalSection(ProjectConfigurationPlatforms) = postSolution
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Release|Any CPU.Build.0 = Release|Any CPU
+					EndGlobalSection
+				EndGlobal
+				".TrimLeadingTabs(4));
+		}
+
+		[Test]
+		public void can_add_2_projects() {
+			var solution = new Solution(Temp("Foo.sln"));
+			solution.Add(new Project(Example("NET40", "ConsoleApplication1", "ConsoleApplication1", "ConsoleApplication1.csproj")));
+			solution.Save();
+
+			// Make sure it persists properly and we can re-read it
+			solution = new Solution(Temp("Foo.sln"));
+			solution.Add(new Project(Example("NET20", "ClassLibrary1", "ClassLibrary1", "ClassLibrary1.csproj")));
+			solution.ToText().ShouldEqual(@"
+				Microsoft Visual Studio Solution File, Format Version 11.00
+				# Visual Studio 2010
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ConsoleApplication1"", ""../examples/NET40/ConsoleApplication1/ConsoleApplication1/ConsoleApplication1.csproj"", ""{5C401261-E42F-4E97-B94C-2E495DF0D26D}""
+				EndProject
+				Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""../examples/NET20/ClassLibrary1/ClassLibrary1/ClassLibrary1.csproj"", ""{0DFFEFFC-B415-4661-A864-99B38C75DE37}""
+				EndProject
+				Global
+					GlobalSection(SolutionConfigurationPlatforms) = preSolution
+						Debug|Any CPU = Debug|Any CPU
+						Release|Any CPU = Release|Any CPU
+					EndGlobalSection
+					GlobalSection(ProjectConfigurationPlatforms) = postSolution
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+						{5C401261-E42F-4E97-B94C-2E495DF0D26D}.Release|Any CPU.Build.0 = Release|Any CPU
+						{0DFFEFFC-B415-4661-A864-99B38C75DE37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+						{0DFFEFFC-B415-4661-A864-99B38C75DE37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+						{0DFFEFFC-B415-4661-A864-99B38C75DE37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+						{0DFFEFFC-B415-4661-A864-99B38C75DE37}.Release|Any CPU.Build.0 = Release|Any CPU
+					EndGlobalSection
+				EndGlobal
+				".TrimLeadingTabs(4));
 		}
 	}
 }

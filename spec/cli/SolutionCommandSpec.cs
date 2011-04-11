@@ -96,6 +96,28 @@ namespace Clide.Specs {
 			new Solution(Temp("tmp.sln")).Projects.First().Name.ShouldEqual("AwesomeProject");
 		}
 
+		[Test]
+		public void clide_sln_add_project_to_existing_solution_with_custom_name() {
+			Clide("sln", "FooTest");
+			File.Exists(Temp("FooTest.sln")).Should(Be.True);
+			File.Exists(Temp("tmp.sln")).Should(Be.False);
+
+			Clide("sln", "add", Example("NET20", "ConsoleApplication1", "ConsoleApplication1", "ConsoleApplication1.csproj")).Text
+				.ShouldContain("Added ConsoleApplication1 to Solution");
+
+			File.Exists(Temp("tmp.sln")).Should(Be.False); // don't create this!  BUGFIX
+			new Solution(Temp("FooTest.sln")).Projects.First().Name.ShouldEqual("ConsoleApplication1");
+
+			// add another!
+			Clide("sln", "add", Example("NET20", "ClassLibrary1", "ClassLibrary1", "ClassLibrary1.csproj")).Text
+				.ShouldContain("Added ClassLibrary1 to Solution");
+
+			var sln = new Solution(Temp("FooTest.sln"));
+			sln.Projects.Count.ShouldEqual(2);
+			sln.Projects.First().Name.ShouldEqual("ConsoleApplication1");
+			sln.Projects.Last().Name.ShouldEqual("ClassLibrary1");
+		}
+
 		[Test][Description("clide sln Dir/SubDir/Foo.csproj")]
 		public void clide_sln_add_project_in_subdirectory() {
 			Clide("sln");
@@ -164,6 +186,17 @@ namespace Clide.Specs {
 		public void clide_sln_foobar() {
 			Clide("sln", "Foo").Text.ShouldContain("Created new solution: Foo");
 			Clide("sln", "Foo").Text.ShouldContain("Project already exists: Foo");
+		}
+
+		[Test][Description("clide sln FooBar --project Foo.csproj -p Dir/Bar.csproj")]
+		public void clide_sln_create_with_projects() {
+			Clide("sln", "--project", Example("FluentXml.Specs.csproj"), "-p", Example("NET35", "ClassLibrary1", "ClassLibrary1", "ClassLibrary1.csproj")).Text
+				.ShouldContain("Created new solution: tmp");
+
+			var solution = new Solution(Temp("tmp.sln"));
+			solution.Projects.Count.ShouldEqual(2);
+			solution.Projects.First().Name.ShouldEqual("FluentXml.Specs");
+			solution.Projects.Last().Name.ShouldEqual("ClassLibrary1");
 		}
 	}
 }

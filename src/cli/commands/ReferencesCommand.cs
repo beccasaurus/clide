@@ -106,88 +106,8 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			return response;
 		}
 
-        // TODO - move out of here
-        [Serializable]
-        public class AssemblyInfo {
-            public virtual string Name     { get; set; }
-            public virtual string FullName { get; set; }
-        }
-
-        // TODO - move out of here
-        public class RemoteAppDomainThingy : MarshalByRefObject {
-            public virtual AssemblyInfo GetInfoForAssembly(string assemblyPath) {
-                Assembly assembly = null;
-
-				// Incase we care about loading up dependencies ...
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (o,e) => null;
-
-                try {
-                    assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
-                } catch (FileNotFoundException) {
-                    // Continue loading, even if we couldn't find a referenced assembly
-                } catch (BadImageFormatException) {
-                    return null; // Not a valid Assembly?
-                }
-
-                return new AssemblyInfo {
-                    Name     = assembly.GetName().Name,
-                    FullName = assembly.FullName
-                };
-            }
-        }
-
-        // TODO - move out of here
-        /// <summary>Given a path to a DLL, this returns back null if we couldn't load the DLL, else an AssemblyInfo</summary>
-        public static AssemblyInfo GetAssemblyInfo(string path) {
-            if (! File.Exists(path)) return null;
-
-            var appDomain = AppDomain.CreateDomain(
-                friendlyName: string.Format("{0}-DomainFor-{1}", DateTime.Now.Ticks, Path.GetFileName(path)),
-                securityInfo: AppDomain.CurrentDomain.Evidence,
-                info:         AppDomain.CurrentDomain.SetupInformation
-            );
-
-            try {
-                // Get a reference to a AssemblyInfo object (loaded in our other AppDomain) ... it will do the work for us ...
-                var remoteType     = typeof(RemoteAppDomainThingy);
-                var remoteInstance = appDomain.CreateInstanceFrom(assemblyFile: remoteType.Assembly.Location, typeName: remoteType.FullName).Unwrap() as RemoteAppDomainThingy;
-                return remoteInstance.GetInfoForAssembly(path);
-            } finally {
-                AppDomain.Unload(appDomain);
-            }
-        }
-
 		public virtual void AddReference(Response response, string reference, Project project) {
-			var path = Path.Combine(Global.WorkingDirectory, reference);
-			if (path.AsFile().DoesNotExist()) {
-				project.References.AddGacReference(reference);
-				response.Append("Added reference {0} to {1}\n", reference, project.Name);
-				return;
-			}
-
-			// It's a MSBuild project file?
-			if (reference.ToLower().EndsWith("proj")) {
-				var referencedProject = new Project(reference);
-				var projectDir        = Path.GetFullPath(project.Path).AsFile().DirName();
-				var relativePath      = Project.NormalizePath(projectDir.AsDir().Relative(reference).TrimStart('/').TrimStart('\\'));
-				response.Append("Added reference {0} to {1}\n", referencedProject.Name, project.Name);
-				project.ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
-				return;
-			}
-
-			AssemblyInfo assemblyInfo;
-
-			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
-            assemblyInfo = GetAssemblyInfo(path);
-
-			if (assemblyInfo == null) {
-				project.References.AddDll(Path.GetFileName(reference), reference);
-				response.Append("Couldn't load assembly: {0}.  Adding anyway." + Environment.NewLine, reference);
-				response.Append("Added reference {0} to {1}\n", Path.GetFileName(reference), project.Name);
-			} else {
-                project.References.AddDll(assemblyInfo.FullName, reference);
-			    response.Append("Added reference {0} to {1}\n", assemblyInfo.Name, project.Name);
-            }
+			project.AddReference(reference, response); // <--- it's not ideal, but a project actually knows how to write to our response for this ...
 		}
 
 		public virtual Response RemoveReferences() {

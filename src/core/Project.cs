@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using IO.Interfaces;
 using FluentXml;
+using ConsoleRack;
 
 namespace Clide {
 
@@ -143,6 +144,43 @@ namespace Clide {
 		/// <summary>Helper to return all GAC References (HintPath)</summary>
 		public virtual List<Reference> DllReferences {
 			get { return References.Where(reference => ! string.IsNullOrEmpty(reference.HintPath)).ToList(); }
+		}
+
+		/// <summary>Given a path to a DLL, csproj, GAC assembly (or whatever), this will add the reference and return back the object</summary>
+		/// <remarks>
+		/// Could return back null (if this failed) or a Reference or a ProjectReference
+		/// 
+		/// BTW: You can pass in a ConsoleRack Response object and we'll write to it ... this isn't ideal ... refactor out of here?
+		/// </remarks>
+		public virtual object AddReference(string reference, Response response = null) {
+			var path = System.IO.Path.Combine(Clide.Global.WorkingDirectory, reference);
+			if (path.AsFile().DoesNotExist()) {
+				if (response != null) response.Append("Added reference {0} to {1}\n", reference, Name);
+				return References.AddGacReference(reference);
+			}
+
+			// It's a MSBuild project file?
+			if (reference.ToLower().EndsWith("proj")) {
+				var referencedProject = new Project(reference);
+				var projectDir        = System.IO.Path.GetFullPath(Path).AsFile().DirName();
+				var relativePath      = Project.NormalizePath(projectDir.AsDir().Relative(reference).TrimStart('/').TrimStart('\\'));
+				if (response != null) response.Append("Added reference {0} to {1}\n", referencedProject.Name, Name);
+				return ProjectReferences.Add(referencedProject.Name, relativePath, referencedProject.Id);
+			}
+
+			AssemblyInfo assemblyInfo;
+
+			// Try to read the assembly info to populate the Reference.FullName (<Reference Include="" />
+            assemblyInfo = RemoteAppDomainProxy.GetAssemblyInfo(path);
+
+			if (assemblyInfo == null) {
+				if (response != null) response.Append("Couldn't load assembly: {0}.  Adding anyway." + Environment.NewLine, reference);
+				if (response != null) response.Append("Added reference {0} to {1}\n", System.IO.Path.GetFileName(reference), Name);
+				return References.AddDll(System.IO.Path.GetFileName(reference), reference);
+			} else {
+			    if (response != null) response.Append("Added reference {0} to {1}\n", assemblyInfo.Name, Name);
+                return References.AddDll(assemblyInfo.FullName, reference);
+            }
 		}
 
 		/// <summary>References to other projects (eg. csproj's)</summary>

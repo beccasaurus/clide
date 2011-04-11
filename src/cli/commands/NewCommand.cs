@@ -16,7 +16,10 @@ namespace Clide {
 		public static Response Invoke(Request req) { return new NewCommand(req).Invoke(); }
 
 		public NewCommand(Request req) {
-			Request = req;
+			Request         = req;
+			SourcesToAdd    = new List<string>();
+			ContentToAdd    = new List<string>();
+			ReferencesToAdd = new List<string>();
 		}
 
 		public virtual Request Request { get; set; }
@@ -32,9 +35,16 @@ Usage: clide new [ProjectName] [options]
         --exe        Sets project OutputType to exe
         --winexe     Sets project OutputType to winexe
         --library    Sets project OutputType to library
+	-s, --source     Define source files (same as clide source add)
+	-c, --content    Define content files (same as clide content add)
+	-r, --reference  Define references (same as clide ref add)
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
+
+		public virtual List<string> SourcesToAdd    { get; set; }
+		public virtual List<string> ContentToAdd    { get; set; }
+		public virtual List<string> ReferencesToAdd { get; set; }
 
 		/// <summary>Right now, everything is stuffed into this method ... we'll organize into properties and whatnot later ...</summary>
 		public Response Invoke() {
@@ -44,10 +54,13 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			var outputType = "Exe";
 
 			var options = new OptionSet {
-				{ "b|bare",  v => bare       = true      },
-				{ "exe",     v => outputType = "Exe"     },
-				{ "winexe",  v => outputType = "WinExe"  },
-				{ "library", v => outputType = "Library" }
+				{ "b|bare",       v => bare       = true      },
+				{ "exe",          v => outputType = "Exe"     },
+				{ "winexe",       v => outputType = "WinExe"  },
+				{ "library",      v => outputType = "Library" },
+				{ "s|source=",    v => SourcesToAdd.Add(v)    },
+				{ "c|content=",   v => ContentToAdd.Add(v)    },
+				{ "r|reference=", v => ReferencesToAdd.Add(v) }
 			};
 			var extra = options.Parse(Request.Arguments);
 
@@ -67,6 +80,10 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 				project.Configurations.Add("Release").AddDefaultReleaseProperties();
 				project.AddDefaultCSharpImport();
 			}
+
+			foreach (var source    in SourcesToAdd)    project.CompilePaths.Add(include: source);
+			foreach (var content   in ContentToAdd)    project.Content.Add(include: content);
+			foreach (var reference in ReferencesToAdd) project.AddReference(reference);
 
 			project.Save();
 

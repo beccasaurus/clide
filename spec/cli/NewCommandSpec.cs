@@ -90,5 +90,43 @@ namespace Clide.Specs {
 			var project = new Project(Temp("Source", "Hi.csproj"));
 			project.Name.ShouldEqual("Hi");
 		}
+
+		[Test][Description("clide new Foo --source Foo.cs")]
+		public void code_new_project_with_source_file() {
+			Clide("new", "Foo", "--source", "Foo.cs");
+			var project = new Project(Temp("Foo.csproj"));
+			project.CompilePaths.Count.ShouldEqual(1);
+			project.CompilePaths.First().Include.ShouldEqual("Foo.cs");
+		}
+
+		[Test][Description("clide new Foo -s Foo.cs -s Bar.cs")]
+		public void code_new_project_with_source_files() {
+			Clide("new", "Foo", "--source", "Foo.cs", "-s", "Bar.cs");
+			var project = new Project(Temp("Foo.csproj"));
+			project.CompilePaths.Count.ShouldEqual(2);
+			project.CompilePaths.First().Include.ShouldEqual("Foo.cs");
+			project.CompilePaths.Last().Include.ShouldEqual("Bar.cs");
+		}
+
+		[Test][Description("clide new Foo --content Foo.txt")]
+		public void code_new_project_with_content_file() {
+			Clide("new", "Foo", "--content", "Foo.txt");
+			var project = new Project(Temp("Foo.csproj"));
+			project.Content.Count.ShouldEqual(1);
+			project.Content.First().Include.ShouldEqual("Foo.txt");
+		}
+
+		[Test][Description("clide new Foo --reference Foo.dll -r System.Xml")]
+		public void code_new_project_with_references() {
+			Clide("new", "Foo", "--reference", Example("Foo.dll"), "-r", "System.Xml", "-r", Example("FluentXml.Specs.csproj"));
+			var project = new Project(Temp("Foo.csproj"));
+			project.References.Count.ShouldEqual(2);
+			project.References.First().Name.ShouldEqual("Foo");
+			project.References.First().FullName.ShouldEqual("Foo, Version=1.2.3.4567, Culture=neutral, PublicKeyToken=null"); // <-- actually reads the DLL
+			project.References.Last().Name.ShouldEqual("System.Xml");
+
+			project.ProjectReferences.Count.ShouldEqual(1);
+			project.ProjectReferences.First().Name.ShouldEqual("FluentXml.Specs");
+		}
 	}
 }

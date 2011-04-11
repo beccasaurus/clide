@@ -33,18 +33,22 @@ Usage: clide sln [add|rm|SolutionName] [options]
   Options:
     -b, --blank       Creates a bare sln file (won't automatically add the current project)
     -n, --name        Explicitly set the name of the solution file to create (clide sln -n Foo)
+	-p, --project     Specify project(s) that you want to automatically be added (when creating)
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
 
 		public SolutionCommand(Request request) {
-			Request = request;
+			Request       = request;
+			ProjectsToAdd = new List<string>();
 		}
 
 		string _name, _solutionPath;
 		Solution _solution;
 
 		public virtual Request Request { get; set; }
+
+		public virtual List<string> ProjectsToAdd { get; set; }
 
 		public virtual bool MakeBlank { get; set; }
 
@@ -53,7 +57,16 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
 
 		public virtual string SolutionName {
-			get { return Regex.Replace((_name ?? DirectoryName), @"\.sln$", ""); }
+			get {
+				string name = null;
+				if (! string.IsNullOrEmpty(_name)) // we explicitly set the name
+					name = _name;
+				else if (! string.IsNullOrEmpty(Global.Solution)) // there's a solution set
+					name = Path.GetFileName(Global.Solution);
+				else
+					name = DirectoryName; // fall back to the name of the directory
+				return Regex.Replace(name, @"\.sln$", "");
+			}
 			set { _name = value; }
 		}
 
@@ -190,6 +203,10 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 					Solution.Add(project);
 			}
 
+			foreach (var project in ProjectsToAdd)
+				if (File.Exists(project))
+					Solution.Projects.Add(new Project(project));
+
 			Solution.Save();
 
 			return new Response("Created new solution: {0}", SolutionName);
@@ -197,8 +214,9 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 
 		public void ParseOptions() {
 			var options = new OptionSet {
-				{ "b|blank", v => MakeBlank = true },
-				{ "n|name=", v => SolutionName = v }
+				{ "b|blank",    v => MakeBlank    = true  },
+				{ "n|name=",    v => SolutionName = v     },
+				{ "p|project=", v => ProjectsToAdd.Add(v) }
 			};
 			var extra = options.Parse(Request.Arguments);
 			Request.Arguments = extra.ToArray();
