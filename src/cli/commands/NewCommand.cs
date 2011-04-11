@@ -65,7 +65,7 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			var extra = options.Parse(Request.Arguments);
 
 			var projectPath = (extra.Count > 0) ? extra.First() : Path.GetFileName(Path.GetFullPath(Global.WorkingDirectory));
-			var projectName = Path.GetFileNameWithoutExtension(projectPath); // take the last *.csproj part of the path and use * as the name
+			var projectName = Regex.Replace(Path.GetFileName(projectPath), @"\.\w\wproj$",  ""); // if it ends with .xxproj, get rid of that part
 			var project     = new Project(Path.Combine(Global.WorkingDirectory, Regex.Replace(projectPath, @"\.csproj$", "") + ".csproj"));
 
 			// Unless you specify --bare, we currently specify all of the usual default options (in code, NOT using a template)

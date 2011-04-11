@@ -128,5 +128,10 @@ namespace Clide.Specs {
 			project.ProjectReferences.Count.ShouldEqual(1);
 			project.ProjectReferences.First().Name.ShouldEqual("FluentXml.Specs");
 		}
+
+		[Test][Description("clide new Foo.Bar.Hi.There")]
+		public void _clide_new_project_with_periods_in_name() {
+			Clide("new", "Foo.Bar.Hi.There").Text.ShouldContain("Created new project: Foo.Bar.Hi.There");
+		}
 	}
 }
