@@ -32,9 +32,9 @@ Usage: clide new [ProjectName] [options]
 
   Options:
     -b, --bare       Creates a bare csproj with just a <Project> node
-        --exe        Sets project OutputType to exe
-        --winexe     Sets project OutputType to winexe
-        --library    Sets project OutputType to library
+    -e, --exe        Sets project OutputType to exe
+    -w, --winexe     Sets project OutputType to winexe
+    -l, --library    Sets project OutputType to library
     -s, --source     Define source files (same as clide source add)
     -c, --content    Define content files (same as clide content add)
     -r, --reference  Define references (same as clide ref add)
@@ -55,9 +55,9 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 
 			var options = new OptionSet {
 				{ "b|bare",       v => bare       = true      },
-				{ "exe",          v => outputType = "Exe"     },
-				{ "winexe",       v => outputType = "WinExe"  },
-				{ "library",      v => outputType = "Library" },
+				{ "e|exe",        v => outputType = "Exe"     },
+				{ "w|winexe",     v => outputType = "WinExe"  },
+				{ "l|library",    v => outputType = "Library" },
 				{ "s|source=",    v => SourcesToAdd.Add(v)    },
 				{ "c|content=",   v => ContentToAdd.Add(v)    },
 				{ "r|reference=", v => ReferencesToAdd.Add(v) }
