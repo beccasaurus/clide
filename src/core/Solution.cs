@@ -88,7 +88,7 @@ namespace Clide {
 				return new Section {
 					Name        = "SolutionConfigurationPlatforms",
 					PreSolution = true,
-					Text        = string.Format("Debug|Any CPU = Debug|Any CPU {0}\t\tRelease|Any CPU = Release|Any CPU ", Environment.NewLine)
+					Text        = string.Format("Debug|Any CPU = Debug|Any CPU{0}\t\tRelease|Any CPU = Release|Any CPU", Environment.NewLine)
 				};
 			}
 		}
@@ -106,12 +106,12 @@ namespace Clide {
 				foreach (var project in Projects) {
 					foreach (var configuration in project.Configurations.Custom) {
 						lines.Add(string.Format(
-							"{0}.{1}|Any CPU.ActiveCfg = {1}|Any CPU ",
+							"{0}.{1}|Any CPU.ActiveCfg = {1}|Any CPU",
 							project.Id.ToString().ToUpper().WithCurlies(),
 							configuration.Name
 						));
 						lines.Add(string.Format(
-							"{0}.{1}|Any CPU.Build.0 = {1}|Any CPU ",
+							"{0}.{1}|Any CPU.Build.0 = {1}|Any CPU",
 							project.Id.ToString().ToUpper().WithCurlies(),
 							configuration.Name
 						));

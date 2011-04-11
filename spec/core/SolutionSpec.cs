@@ -209,14 +209,14 @@ Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Mvc3Application1"", ""CS
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU 
-		Release|Any CPU = Release|Any CPU 
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU 
-		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.Build.0 = Debug|Any CPU 
-		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.ActiveCfg = Release|Any CPU 
-		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.Build.0 = Release|Any CPU 
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABE3332A-1495-4703-A248-7E47B6F871FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
 				".TrimLeadingTabs(4).Replace("CSPROJ", project.Path));
