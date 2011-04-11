@@ -35,9 +35,9 @@ Usage: clide new [ProjectName] [options]
         --exe        Sets project OutputType to exe
         --winexe     Sets project OutputType to winexe
         --library    Sets project OutputType to library
-	-s, --source     Define source files (same as clide source add)
-	-c, --content    Define content files (same as clide content add)
-	-r, --reference  Define references (same as clide ref add)
+    -s, --source     Define source files (same as clide source add)
+    -c, --content    Define content files (same as clide content add)
+    -r, --reference  Define references (same as clide ref add)
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
