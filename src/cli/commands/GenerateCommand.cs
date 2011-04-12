@@ -63,11 +63,14 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			var response = new Response();
 
 			var templates = Template.All.OrderBy(template => template.Name.ToLower()).ToList();
+			var spaces    = templates.Select(t => t.Name.Length).Max() + 4;
 			if (templates.Count == 0)
 				response.Append("No templates found\n");
-			else
+			else {
+				response.Append("Available templates:\n\n");
 				foreach (var template in templates)
-					response.Append("{0}: {1}\n", template.Name, template.Description);
+					response.Append("    {0}{1}\n", template.Name.WithSpaces(spaces), template.Description);
+			}
 
 			//response.Append("\nTo generate a template, put a .clide-template file into the directory you would like to become a template.");
 			//response.Append("\nThen update the CLIDE_TEMPLATES environment variable to include the directory that your directory is in.\n");
