@@ -33,7 +33,7 @@ Usage: clide sln [add|rm|SolutionName] [options]
   Options:
     -b, --blank       Creates a bare sln file (won't automatically add the current project)
     -n, --name        Explicitly set the name of the solution file to create (clide sln -n Foo)
-	-p, --project     Specify project(s) that you want to automatically be added (when creating)
+    -p, --project     Specify project(s) that you want to automatically be added (when creating)
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
