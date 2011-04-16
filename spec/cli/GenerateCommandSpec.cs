@@ -25,7 +25,7 @@ namespace Clide.Specs {
 
 		[Test]
 		public void clide_gen() {
-			Clide("gen").Text.ShouldContain("basic:");
+			Clide("gen").Text.ShouldContain("basic");
 			Clide("gen").Text.ShouldContain("Create basic something or other"); // <-- description
 		}
 

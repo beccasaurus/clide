@@ -53,6 +53,9 @@ namespace Clide {
 		}
 
 		/// <summary>Adds and returns a ProjectReference</summary>
+		/// <remarks>
+		/// This is dumb and will add the EXACT name, path, id that you give it!
+		/// </remarks>
 		public virtual ProjectReference Add(string name, string path, Guid? id) {
 			var reference         = new ProjectReference(this, ProjectReferencesItemGroup.NewNode("ProjectReference"));
 			reference.ProjectFile = path;
