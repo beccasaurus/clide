@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 using System.Collections.Generic;
 using Mono.Options;
 using ConsoleRack;
@@ -58,7 +59,7 @@ Run clide help for help documentation".TrimStart('\n'));
 		[Middleware("Displays the current Clide version if -v/--version are passed")]
 		public static Response DisplayVersion(Request req, Application app) {
 			if (req.Arguments.Contains("-v") || req.Arguments.Contains("--version"))
-				return new Response("clide " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+				return new Response("clide " + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion.ToString());
 			else
 				return app.Invoke(req);
 		}
