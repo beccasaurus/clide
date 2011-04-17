@@ -16,7 +16,7 @@ Install
 
 or
 
-[Download the .exe][exe]
+[Download the .exe](https://github.com/remi/clide/raw/releases/bin/Release/clide.exe)
 
 Screencast
 ----------
