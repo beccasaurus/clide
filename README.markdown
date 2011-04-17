@@ -93,3 +93,8 @@ Running `clide help [some command]` will print out the help documentation for th
         -H, --help                         If set to true, we want to print out help/usage documentation
         -W, --working-dir WORKING_DIR      Sets the working directory. Defaults to the current directory
         -T, --templates CLIDE_TEMPLATES    The PATH used to find directories of clide templates
+
+License
+-------
+
+CLIDE is released under the MIT license.
