@@ -37,6 +37,22 @@ Usage: clide generate [Template] [TemplateOptions]
         --no-project          Do not use the current project's properties when replacing tokens in .pp files
         --missing-tokens-ok   Don't skip generation of files/dirs with tokens in their name (which aren't passed)
 
+  Adding templates:
+    To generate a template, put a .clide-template file into the directory you would like to become a template.
+    Then update the CLIDE_TEMPLATES environment variable to include the directory that your directory is in.
+    By default, we search the current dir and your home dir for a .clide/templates directory with templates.
+
+  Using tokens in templates:
+    When we generate a template, we will replace any Project Properties found in file/directory names:
+      eg. a file named $RootNamespace$.cs will become [your project's namespace].cs
+    If you want us to process these tokens inside of the text of your file, you must add a .pp extension to it.
+    Your template can also accept arbitrary tokens:
+      eg. clide g Tmpl Foo ""Hi There"" will replace instances of $arg1$ with Foo and instances of $arg2$ with ""Hi There""
+      eg. clide g Tmpl Foo This=That will replace instances of $arg1$ with Foo and instances of $This$ with That
+
+  Further help:
+    You can view a sample .clide/templates directory at: https://github.com/remi/clide-templates
+
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
 
@@ -71,9 +87,6 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 				foreach (var template in templates)
 					response.Append("    {0}{1}\n", template.Name.WithSpaces(spaces), template.Description);
 			}
-
-			//response.Append("\nTo generate a template, put a .clide-template file into the directory you would like to become a template.");
-			//response.Append("\nThen update the CLIDE_TEMPLATES environment variable to include the directory that your directory is in.\n");
 
 			return response;
 		}

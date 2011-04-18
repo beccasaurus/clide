@@ -1,3 +1,2 @@
- - If you run 'clide g' and no templates are found, it goes BOOM!
  - 'clide ref rm' just returns "This would remove references"
- - It sure would be nice to be able to specify a different target framework when making a project!
+ - We might want to consider allowing templates to be directories with a README.markdown (to make them pretty on GitHub)
