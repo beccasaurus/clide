@@ -409,7 +409,7 @@ namespace Clide.Specs {
 			global.Properties.Count.ShouldEqual(0);
 
 			var id = Guid.NewGuid();
-			global.AddDefaultGlobalProperties(id, "4.0", "Library", "FooNamespace", "MyAssembly");
+			global.AddDefaultGlobalProperties(id, "4", "Library", "FooNamespace", "MyAssembly");
 
 			global.Properties.Select(prop => string.Format("{0} {1} {2}", prop.Name, prop.Text, prop.Condition)).ToArray().ShouldEqual(new string[]{
 				"Configuration Debug  '$(Configuration)' == '' ",
@@ -420,7 +420,7 @@ namespace Clide.Specs {
 				"OutputType Library ",
 				"RootNamespace FooNamespace ",
 				"AssemblyName MyAssembly ",
-				"TargetFrameworkVersion 4.0 ",
+				"TargetFrameworkVersion v4.0 ",
 				"FileAlignment 512 "
 			});
 
@@ -438,7 +438,7 @@ namespace Clide.Specs {
 				    <OutputType>Library</OutputType>
 				    <RootNamespace>FooNamespace</RootNamespace>
 				    <AssemblyName>MyAssembly</AssemblyName>
-				    <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+				    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
 				    <FileAlignment>512</FileAlignment>
 				  </PropertyGroup>
 				</Project>".TrimLeadingTabs(4).TrimStartNewline().Replace("PROJECT_ID", id.ToString().ToUpper()));
@@ -666,6 +666,23 @@ namespace Clide.Specs {
 
 		[Test][Ignore]
 		public void can_make_a_standard_default_project_with_one_method_call() {
+		}
+
+		[Test]
+		public void can_get_the_string_for_TargetFrameworkVersion_given_simple_version_strings() {
+			foreach(var item in new Dictionary<string,string> {
+				{ "2",    "v2.0" },
+				{ "20",   "v2.0" },
+				{ "v20",  "v2.0" },
+				{ "2.0",  "v2.0" },
+				{ "v2.0", "v2.0" },
+				{ "3",    "v3.0" },
+				{ "35",   "v3.5" },
+				{ "v35",  "v3.5" },
+				{ "3.5",  "v3.5" },
+				{ "v3.5", "v3.5" }
+			})
+				Configuration.TargetFrameworkVersionFromString(item.Key).ShouldEqual(item.Value);
 		}
 	}
 }

@@ -1,4 +1,3 @@
  - If you run 'clide g' and no templates are found, it goes BOOM!
  - 'clide ref rm' just returns "This would remove references"
- - The default TargetFramework version is "4.0" but needs to be "v4.0"
  - It sure would be nice to be able to specify a different target framework when making a project!

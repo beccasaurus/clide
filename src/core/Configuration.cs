@@ -81,12 +81,14 @@ namespace Clide {
 
 		/// <summary>Adds the properties that the Global configuration usually has</summary>
 		public virtual Configuration AddDefaultGlobalProperties(
-				Guid id = default(Guid), string framework = "4.0", string type = "Exe", string root = null, string assembly = null) {
+				Guid id = default(Guid), string framework = null, string type = null, string root = null, string assembly = null) {
 
-			if (id == Guid.Empty)                 id       = Guid.NewGuid();
-			if (root == null && assembly == null) root     = "MyProject";
-			if (root == null)                     root     = assembly;
-			if (assembly == null)                 assembly = root;
+			if (id == Guid.Empty)                 id        = Guid.NewGuid();
+			if (root == null && assembly == null) root      = "MyProject";
+			if (root == null)                     root      = assembly;
+			if (assembly == null)                 assembly  = root;
+			if (framework == null)                framework = "4";
+			if (type == null)                     type      = "Exe";
 
 			this["Configuration"]          = "Debug";
 			this["Platform"]               = "AnyCPU";
@@ -96,7 +98,7 @@ namespace Clide {
 			this["OutputType"]             = type;
 			this["RootNamespace"]          = root;
 			this["AssemblyName"]           = assembly;
-			this["TargetFrameworkVersion"] = framework;
+			this["TargetFrameworkVersion"] = TargetFrameworkVersionFromString(framework);
 			this["FileAlignment"]          = "512";
 			this.GetProperty("Configuration").Condition = " '$(Configuration)' == '' ";
 			this.GetProperty("Platform").Condition = " '$(Platform)' == '' ";
@@ -134,6 +136,16 @@ namespace Clide {
 				return null;
 			else
 				return _getNameAndPlatform.Match(condition);
+		}
+
+		/// <summary>Given a version like "35" or "3.5" or "v3.5", this will return "v3.5" </summary>
+		public static string TargetFrameworkVersionFromString(string version) {
+			var parts = version.ToCharArray().Select(chr => chr.ToString()).Where(str => Regex.IsMatch(str, @"\d")).ToList();
+			if (parts.Count == 0)
+				return "v4.0";
+			if (parts.Count == 1)
+				parts.Add("0");
+			return "v" + string.Join(".", parts.ToArray());
 		}
 	}
 }

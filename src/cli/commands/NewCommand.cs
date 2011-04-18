@@ -38,6 +38,7 @@ Usage: clide new [ProjectName] [options]
     -s, --source     Define source files (same as clide source add)
     -c, --content    Define content files (same as clide content add)
     -r, --reference  Define references (same as clide ref add)
+    -f, --framework  Set the framework version, eg. ""35"" or ""v3.5""
 
 COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		}
@@ -50,8 +51,9 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 		public Response Invoke() {
 			if (Global.Help) return new Response(HelpText);
 
-			var bare       = false;
-			var outputType = "Exe";
+			var    bare             = false;
+			var    outputType       = "Exe";
+			string frameworkVersion = null;
 
 			var options = new OptionSet {
 				{ "b|bare",       v => bare       = true      },
@@ -60,7 +62,8 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 				{ "l|library",    v => outputType = "Library" },
 				{ "s|source=",    v => SourcesToAdd.Add(v)    },
 				{ "c|content=",   v => ContentToAdd.Add(v)    },
-				{ "r|reference=", v => ReferencesToAdd.Add(v) }
+				{ "r|reference=", v => ReferencesToAdd.Add(v) },
+				{ "f|framework=", v => frameworkVersion = v   }
 			};
 			var extra = options.Parse(Request.Arguments);
 
@@ -72,9 +75,10 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			if (! bare) {
 				project.SetDefaultProjectAttributes();
 				project.Configurations.AddGlobalConfiguration().AddDefaultGlobalProperties(
-					root:     projectName,
-					assembly: projectName,
-					type:     outputType		
+					root:      projectName,
+					assembly:  projectName,
+					type:      outputType,
+					framework: frameworkVersion
 				);
 				project.Configurations.Add("Debug").AddDefaultDebugProperties();
 				project.Configurations.Add("Release").AddDefaultReleaseProperties();

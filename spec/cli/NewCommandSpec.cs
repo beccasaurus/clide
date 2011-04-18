@@ -133,5 +133,12 @@ namespace Clide.Specs {
 		public void _clide_new_project_with_periods_in_name() {
 			Clide("new", "Foo.Bar.Hi.There").Text.ShouldContain("Created new project: Foo.Bar.Hi.There");
 		}
+
+		[Test][Description("clide new -f 35")]
+		public void clide_new_with_framework_version() {
+			Clide("new", "Foo", "-f", "35");
+
+			new Project(Temp("Foo.csproj")).Global["TargetFrameworkVersion"].ShouldEqual("v3.5");
+		}
 	}
 }
