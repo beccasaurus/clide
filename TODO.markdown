@@ -1,3 +1,2 @@
  - 'clide ref rm' just returns "This would remove references"
  - We might want to consider allowing templates to be directories with a README.markdown (to make them pretty on GitHub)
- - Adding references adds multiple ItemGroup

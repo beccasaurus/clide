@@ -524,6 +524,30 @@ namespace Clide.Specs {
 				    </ProjectReference>
 				  </ItemGroup>
 				</Project>".TrimLeadingTabs(4).TrimStartNewline());
+
+			// throw some GAC references in here too, just for shits and giggles (and because it helps us recreate a bug!)
+			project.References.AddGacReference("System.Foo");
+			project.References.AddGacReference("System.Bar");
+			project.ProjectReferences.Add("Another.Project", @"..\AnotherProject.csproj", new Guid("12345678-0239-4D86-9093-B46A2075E722"));
+
+			project.ToXml().ShouldEqual(@"
+				<?xml version=""1.0"" encoding=""utf-8""?>
+				<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+				  <ItemGroup>
+				    <ProjectReference Include=""..\src\CoolProject.csproj"">
+				      <Project>{5D8673F4-0239-4D86-9093-B46A2075E722}</Project>
+				      <Name>CoolProject</Name>
+				    </ProjectReference>
+				    <ProjectReference Include=""..\AnotherProject.csproj"">
+				      <Project>{12345678-0239-4D86-9093-B46A2075E722}</Project>
+				      <Name>Another.Project</Name>
+				    </ProjectReference>
+				  </ItemGroup>
+				  <ItemGroup>
+				    <Reference Include=""System.Foo"" />
+				    <Reference Include=""System.Bar"" />
+				  </ItemGroup>
+				</Project>".TrimLeadingTabs(4).TrimStartNewline());
 		}
 
 		[Test]

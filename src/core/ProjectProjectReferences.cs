@@ -46,9 +46,8 @@ namespace Clide {
 				var firstReference = Project.Doc.Node("ItemGroup ProjectReference");
 				if (firstReference != null)
 					return firstReference.ParentNode;
-				else {
+				else
 					return Project.Doc.Node("Project").NewNode("ItemGroup");
-				}
 			}
 		}
 
