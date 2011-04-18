@@ -63,10 +63,10 @@ COMMON".Replace("COMMON", Global.CommonOptionsText).TrimStart('\n'); }
 			var response = new Response();
 
 			var templates = Template.All.OrderBy(template => template.Name.ToLower()).ToList();
-			var spaces    = templates.Select(t => t.Name.Length).Max() + 4;
 			if (templates.Count == 0)
-				response.Append("No templates found\n");
+				response.Append("No available templates\n");
 			else {
+				var spaces = templates.Select(t => t.Name.Length).Max() + 4;
 				response.Append("Available templates:\n\n");
 				foreach (var template in templates)
 					response.Append("    {0}{1}\n", template.Name.WithSpaces(spaces), template.Description);

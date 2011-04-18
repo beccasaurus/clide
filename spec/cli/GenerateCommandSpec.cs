@@ -20,13 +20,19 @@ namespace Clide.Specs {
 		[TearDown]
 		public void After() {
 			base.AfterEach();
-			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);	
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", null);
 		}
 
 		[Test]
 		public void clide_gen() {
 			Clide("gen").Text.ShouldContain("basic");
 			Clide("gen").Text.ShouldContain("Create basic something or other"); // <-- description
+		}
+
+		[Test]
+		public void clide_gen_when_no_templates_are_available() {
+			Environment.SetEnvironmentVariable("CLIDE_TEMPLATES", "/directory/that/doesnt/exist");
+			Clide("gen").Text.ShouldContain("No available templates");
 		}
 
 		[Test]
