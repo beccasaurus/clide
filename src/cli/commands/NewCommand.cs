@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Mono.Options;
+using NDesk.Options;
 using ConsoleRack;
 using Clide.Extensions;
 

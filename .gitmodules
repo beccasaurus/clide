@@ -7,6 +7,3 @@
 [submodule "lib/Crack"]
 	path = lib/Crack
 	url = git://github.com/remi/Crack.git
-[submodule "lib/NDesk.Options"]
-	path = lib/NDesk.Options
-	url = git://git.ndesk.org/pub/scm/ndesk-options

@@ -46,7 +46,7 @@
     <Compile Include="..\lib\FluentXml\src\FluentXml.cs">
 		<Link>External\FluentXml\FluentXml</Link>
 	</Compile>
-    <Compile Include="..\lib\NDesk.Options\src\NDesk.Options\NDesk.Options\Options.cs">
+    <Compile Include="..\lib\NDesk.Options.cs">
 		<Link>External\NDesk.Options\NDesk.Options</Link>
 	</Compile>
   </ItemGroup>

@@ -82,7 +82,7 @@ namespace Clide {
 		/// <summary>Whether or not an argument is required (assuming AcceptsArgument is true)</summary>
 		public virtual bool ArgumentRequired { get; set; }
 
-		/// <summary>Returns the string to use to register this option with Mono.Options</summary>
+		/// <summary>Returns the string to use to register this option with NDesk.Options</summary>
 		public virtual string MonoOptionsString {
 			get {
 				if (AcceptsArgument)
